@@ -1,0 +1,43 @@
+{% extends "base_template.html" %}
+
+{% load widget_tweaks %}
+{% block js %}
+{% load static %}
+    <script type="text/javascript" src="{% static 'javascript/registration_pre_validation.js' %}" defer></script>
+{% endblock %}
+{% block content %}
+    <h1>Register Page</h1>
+    <div class="d-flex justify-content-center">
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Register an account</legend>
+            {% render_field form.username type="text" name="username" maxlength="150" autocapitalize="none" autocomplete="username" placeholder="Username"  id="id_username" class="form-control" %}
+            <div id="userHelp" class="pt-2">
+            {{ form.username.help_text }}
+            {{ form.errors.username }}
+            </div>
+            <br/>
+            {{form.email|add_class:'form-control'|attr:"placeholder: Enter an Email"|attr:"required:true"}}
+            <div class="pt-2">
+            {{ form.email.help_text }}
+            {{ form.errors.email }}
+            </div>
+            <br/>
+            {{form.password1|add_class:'form-control'|attr:"placeholder: Enter password"}}
+            <div id="passwordHelp" class="pt-2">
+            {{form.password1.help_text|safe}}
+            {{form.errors.password1}}
+            </div>
+            <br/>
+            {{form.password2.help_text}}
+            {{form.password2|add_class:'form-control'|attr:"placeholder: Confirm Password"}}
+            <div id="passwordErrorList" class="pt-2 text-danger">
+            {{form.errors.password2}}
+            </div>
+        </fieldset>
+        <button class="btn btn-primary mt-3 mb-3" type="submit">Create account</button>
+    </form>
+</div>
+
+{% endblock content %}

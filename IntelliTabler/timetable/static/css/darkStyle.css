@@ -1,0 +1,45 @@
+
+body * {
+  color: white;
+}
+
+input {
+  color: black;
+}
+
+caption {
+  color: white;
+}
+
+
+td, th {
+  border: 1px solid white;
+  color: white;
+}
+
+
+#modTable td {
+  width: 20%;
+}
+
+.navbar-brand{
+  font-size: xx-large;
+  font-weight: bold;
+}
+.navbar-dark .navbar-nav .nav-link{
+  color: white;
+  font-size: larger;
+}
+
+.showcase-img {
+  filter: invert(1);
+}
+.img-fluid {
+  filter: invert(1);
+}
+.modal-content{
+  background-color: #343a40;
+}
+
+
+

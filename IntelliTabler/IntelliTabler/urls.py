@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include,path
+from timetable.views import dataViews
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('timetable/', include('timetable.urls')),
+    path('', include('timetable.urls')),
 ]

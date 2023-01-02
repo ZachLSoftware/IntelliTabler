@@ -1,0 +1,67 @@
+.form-center
+{
+    margin: auto;
+}
+
+.main-container {
+  position: relative;
+}
+
+.video_list td {
+    padding: 5px 15px;
+  }
+  
+#passwordErrorList ul li {
+  color: #d9534f;
+}
+
+.content ul li h3{
+  display: inline;
+  border-bottom: double;
+  margin-left: 1.5%;
+  
+  }
+  
+  .content ul li video{
+  float: left;
+  border-style: double;
+  padding-bottom:2%;
+  }
+  
+  .content ul li p{
+  margin-left: 20%;
+  }
+  
+  .content ul li p1{
+  margin-left: 20%;
+  
+  }
+  
+  img { max-width: 100%;}
+
+  .showcase-img{
+
+    background-size: 350px auto;
+    background-repeat: no-repeat;
+    height: 350px;
+    width: 350px;
+    
+    
+  }
+
+  h1 {
+    text-align:center;
+  }
+
+  .errorlist{
+    color:red;
+  }
+
+  td, th {
+    text-align: center;
+  }
+
+  td label { 
+    display: block;
+    text-align: center;
+ }
