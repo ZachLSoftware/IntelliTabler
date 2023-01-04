@@ -30,7 +30,9 @@ def addDepartment(request):
 
 def addTeacher(request, department, id=0):
     if request.method=="POST":
+        Teacher.objects.filter(pk=0).delete()
         teacher, created=Teacher.objects.get_or_create(id=request.POST['id'], user=request.user, department_id=department)
+        Teacher.objects.filter(pk=0).delete()
         form = TeacherForm(request.POST, instance=teacher)
         if(form.is_valid()):
             print(teacher)

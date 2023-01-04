@@ -33,10 +33,10 @@ def teacherChange(request):
 def viewObjects(request, type, id=0):
     context={}
     Type = apps.get_model(app_label='timetable', model_name=type)
-    if(id):
+    if id==0:
         id=request.GET.get('id', 0)
-        if(id):
-            objects=Type.objects.filter(user=request.user, department_id=id)
+    if(id):
+        objects=Type.objects.filter(user=request.user, department_id=id)
     else:
         objects=Type.objects.filter(user=request.user)
     context['type']= type
