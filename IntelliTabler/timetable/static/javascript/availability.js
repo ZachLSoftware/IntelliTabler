@@ -1,21 +1,30 @@
 $('.form-check-input').prop('checked', false)
 
 for (const period of list){
-    let id='#'+period
     $('#'+period).prop('checked', true);
-    $('#cell-'+period).addClass('bg-success');
+    $('#'+period).parent().parent().addClass('bg-success');
 }
 
 getHours();
 
+$('.form-check-input').on('click', function(e){
+    e.stopPropagation();
+})
+
 $('.form-check-input').change(function(){
     if(this.checked){
-        $(this).parent().parent().addClass('bg-success')
+        $('#cell-'+this.id).addClass('bg-success')
     }else{
-        $(this).parent().parent().removeClass('bg-success')
+        $('#cell-'+this.id).removeClass('bg-success')
     }
-    getHours();
+
 });
+
+$('.table-cell').click(function(e){
+    let id = '#'+ $(this).attr('id').split("cell-")[1];
+    $(id).click();
+    e.stopPropagation();
+})
 
 $('#selectAll').click(function(){
     $('.form-check-input').prop('checked', true);

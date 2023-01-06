@@ -13,20 +13,4 @@ Nothing found
 {% empty %}
 Nothing found
 {% endfor %}
-<!--
-<script>
-    $(".departmentButtons").on("click", function(){
-    clickedDep=this.id.split('.')[0];
-    console.log(clickedDep);
-    
-    });
-    htmx.on("htmx:beforeSwap", (e) => {
-        if (e.detail.target.id == "addForm" && !e.detail.xhr.response){
-            modal.hide();
-            e.detail.shouldSwap = false;
-            $("#newTeacher").prop("hx-get", "/addTeacher/"+clickedDep);
-        }
-    })
-</script>
--->
 {% endif %}

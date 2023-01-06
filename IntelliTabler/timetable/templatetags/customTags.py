@@ -24,5 +24,5 @@ def getPeriodName(periods, counter):
     return periods[counter][1]
 
 @register.filter
-def getCheckedId(counter, pcounter):
-    return ""+pcounter + "-"+ counter
+def getCheckBoxId(period, pcounter):
+    return str(pcounter) + "-"+ period

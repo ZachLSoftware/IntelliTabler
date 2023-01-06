@@ -90,7 +90,7 @@ def setAvailability(request, teacherid):
     currentQuery=Availability.objects.filter(teacher=teacherid)
     current = []
     for c in currentQuery:
-        current.append(periods.index(c.period)+1)
+        current.append(str(c.week)+"-"+c.period)
 
     #hours=Teacher.objects.values_list('totalHours', flat=True).get(id=teacherid)
     #context['hours']=hours

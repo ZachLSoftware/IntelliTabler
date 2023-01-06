@@ -16,7 +16,7 @@
 <form method="POST" action="{% url 'setAvailability' teacher.id %}" enctype="multipart/form-data">
     {% csrf_token %}
     {% for formset in formsets %}
-    <h1>Week 1</h1>
+    <h1>Week - {{forloop.counter}}</h1>
     <table class="table">
         <thead>
             <tr>
@@ -41,8 +41,8 @@
             {% endwith %}
         </th>
     {% endif %}
-    <td id="cell-{{periods|getPeriodNum:forloop.counter}}" class="table-cell"><label>
-    {% render_field form.checked class="form-check-input" %}
+    <td id="cell-{{periods|getPeriodName:forloop.counter|getCheckBoxId:forloop.parentloop.counter}}" class="table-cell"><label>
+    {% render_field form.checked id=periods|getPeriodName:forloop.counter|getCheckBoxId:forloop.parentloop.counter class="form-check-input" %}
     {% render_field form.period hidden="true" value=periods|getPeriodName:forloop.counter%}
     {% render_field form.week hidden="true" value=forloop.parentloop.counter%}
     {% if form.errors %}
