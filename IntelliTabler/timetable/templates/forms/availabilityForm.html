@@ -42,8 +42,14 @@
         </th>
     {% endif %}
     <td id="cell-{{periods|getPeriodNum:forloop.counter}}" class="table-cell"><label>
-    {% render_field form.checked id=forloop.counter class="form-check-input" %}
-    {% render_field form.period hidden="true" value={{periods|getPeriodName}}%}
+    {% render_field form.checked class="form-check-input" %}
+    {% render_field form.period hidden="true" value=periods|getPeriodName:forloop.counter%}
+    {% render_field form.week hidden="true" value=forloop.parentloop.counter%}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {{ form.errors }}
+    </div>
+{% endif %}
     </label></td>
     {% if forloop.last %}
     </tr>

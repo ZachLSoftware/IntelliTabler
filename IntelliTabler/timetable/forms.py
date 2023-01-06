@@ -37,7 +37,7 @@ class TeacherForm(forms.ModelForm):
         }
 
 class AvailabilityForm(forms.Form):
-    checked = forms.BooleanField()
+    checked = forms.BooleanField(required=False)
     period = forms.CharField()
     week = forms.IntegerField()
 

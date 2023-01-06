@@ -10,9 +10,9 @@ getHours();
 
 $('.form-check-input').change(function(){
     if(this.checked){
-        $('#cell-'+this.id).addClass('bg-success')
+        $(this).parent().parent().addClass('bg-success')
     }else{
-        $('#cell-'+this.id).removeClass('bg-success')
+        $(this).parent().parent().removeClass('bg-success')
     }
     getHours();
 });

@@ -65,14 +65,14 @@ def setAvailability(request, teacherid):
             formset1 = availabilityFormSet(request.POST, prefix="week-"+str(w))
             if formset1.is_valid():
                 i=0
-                Availability.objects.filter(teacher=teacherid).filter(week=1).delete()
+                Availability.objects.filter(teacher=teacherid).filter(week=w+1).delete()
                 for f in formset1:
                     cd = f.cleaned_data
                     checked = cd.get('checked')
                     if(checked):
                         newperiod=Availability()
                         newperiod.period=cd.get('period')
-                        newperiod.week=w
+                        newperiod.week=cd.get('week')
                         newperiod.teacher=Teacher.objects.get(id=teacherid)
                         newperiod.save()
                     i=i+1

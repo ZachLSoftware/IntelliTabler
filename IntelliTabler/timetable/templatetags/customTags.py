@@ -22,3 +22,7 @@ def getPeriodNum(periods, counter):
 def getPeriodName(periods, counter):
     counter=counter-1
     return periods[counter][1]
+
+@register.filter
+def getCheckedId(counter, pcounter):
+    return ""+pcounter + "-"+ counter
