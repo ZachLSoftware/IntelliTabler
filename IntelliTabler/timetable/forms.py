@@ -41,5 +41,15 @@ class AvailabilityForm(forms.Form):
     period = forms.CharField()
     week = forms.IntegerField()
 
+class ModuleGroupForm(forms.ModelForm):
+    class Meta:
+        model=ModuleGroup
+        fields=("name","numPeriods", "numClasses")
+
+class YearForm(forms.ModelForm):
+    class Meta:
+        model=Year
+        fields=("year",)
+
 
 

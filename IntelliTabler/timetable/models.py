@@ -4,6 +4,7 @@ from django_random_id_model import RandomIDModel
 import uuid
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import datetime
 
 
 class User(AbstractUser):
@@ -60,13 +61,35 @@ class Availability(models.Model):
     week = models.IntegerField()
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
-class Module(models.Model):
-    name=models.CharField(max_length=50)
-    numPerWeek=models.IntegerField()
+class Year(models.Model):
+    YEARS=[]
+    for i in range(datetime.datetime.now().year-10, datetime.datetime.now().year+10):
+        YEARS.append((i,i))
+    year=models.IntegerField(('year'), choices=YEARS, default=datetime.datetime.now().year)
+    department=models.ForeignKey(Department, on_delete=models.CASCADE)
 
+class ModuleGroup(models.Model):
+    name=models.CharField(max_length=50)
+    numPeriods=models.IntegerField()
+    numClasses=models.IntegerField()
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
     user=models.ForeignKey(User, on_delete=models.CASCADE)
+    year=models.ForeignKey(Year, on_delete=models.CASCADE)
 
+class Module(models.Model):
+    name=models.CharField(max_length=50)
+    group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
+    groupNum=models.IntegerField()
+    Period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
+    Teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
+
+@receiver(post_save, sender=ModuleGroup)
+def createModules(sender, instance, created, **kwargs):
+    if created:
+        for i in range(1, instance.numPeriods+1):
+            for j in range(1, instance.numClasses+1):
+                Module.objects.create(name=instance.name+"x"+str(j), group=instance, groupNum=i)
+        
 
 class Preference(models.Model):
     class Priority(models.IntegerChoices):

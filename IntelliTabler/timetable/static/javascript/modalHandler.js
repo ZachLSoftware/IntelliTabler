@@ -1,5 +1,5 @@
 const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
-var clickedDep = 0;
+var clicked = 0;
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "addForm") {
@@ -18,14 +18,17 @@ htmx.on("hidden.bs.modal", () => {
     $("#addForm").html("");
 });
 
-$(document).on("click", ".departmentButtons", function(){
-    clickedDep=this.id.split('.')[0];
-    console.log(clickedDep);
-    $("#newTeacher").prop("hx-get", "/addTeacher/"+clickedDep);
+$(document).on("click", ".departmentButtons, .yearButtons", function(){
+    clicked=this.id.split('.')[0];
+    console.log(clicked);
+    if($(this).hasClass('yearButtons')){
+        $("#newModuleGroup").prop("hx-get", "/addModule/"+clicked);
+    }
+    $("#newTeacher").prop("hx-get", "/addTeacher/"+clicked);
     });
 
-function getDep(){
-    return clickedDep;
+function getClicked(){
+    return clicked;
 }
 
 $("#newTeacher").on("click", function(){

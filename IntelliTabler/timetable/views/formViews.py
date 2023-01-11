@@ -102,3 +102,36 @@ def setAvailability(request, teacherid):
     context['periodpw']=ft.numPeriods*5
     #context['formset2']=formset2
     return render(request, 'forms/availabilityForm.html', context)
+
+
+def addModule(request, year):
+    department=Year.objects.get(id=year).department
+    if request.method=='POST':
+        form=ModuleGroupForm(request.POST, request.FILES)
+        if form.is_valid():
+            group=form.save(commit=False)
+            group.year_id=year
+            group.department=department
+            group.user=request.user
+            group.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':'moduleChange'})
+    form=ModuleGroupForm()
+    context={}
+    context['form']=form
+    return render (request, "forms/moduleForm.html", context)
+
+def addYear(request, departmentId):
+    
+    if request.method=='POST':
+        form=YearForm(request.POST, request.FILES)
+        if form.is_valid():
+            year=form.save(commit=False)
+            year.department_id=departmentId
+            year.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':'yearChange'})
+    else:
+        form=YearForm()
+    context={}
+    context['form']=form
+    context['departmentId']=departmentId
+    return render(request, "forms/yearForm.html", context)

@@ -1,0 +1,29 @@
+{% extends "base_template.html" %}
+
+
+
+{% block js %}
+{% load static %}
+
+<script type="text/javascript" src="{% static 'javascript/modalHandler.js' %}" defer></script>
+{% endblock %}
+{% block content %}
+      <!--Sidebar Navigation-->
+<div class="row me-auto vh-100">
+  <div class="col-2 me-auto border-end border-3 vh-100">
+      <div hx-trigger="load, yearChange from:body" hx-get="{%url 'viewModules' 'Year' departmentId %}"  hx-target="this" id="sidebar" class="btn-group-vertical d-flex mt-4"></div>
+    </div>
+
+    <div class="col-2 me-auto vh-100" id="moduleColumn">
+      <div id="listObjects" hx-trigger="moduleChange from:body" hx-get="{%url 'viewModules' 'ModuleGroup' departmentId %}" hx-vals='js:{"id":getClicked()}' hx-disinherit="*" hx-target="this" id="sidebar" class="btn-group-vertical d-flex mt-4"></div>
+      <div id="test"></div>
+    </div>
+  <div id="displayModule" class="col"></div>
+</div>
+
+
+<div id="addFormModal" class="modal fade">
+    <div id="addForm" class="modal-dialog" hx-target="this"></div>
+  </div>
+  
+{% endblock %}

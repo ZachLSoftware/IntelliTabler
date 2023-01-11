@@ -15,7 +15,7 @@
     </div>
 
     <div class="col-2 me-auto vh-100" id="teacherColumn">
-      <div id="listObjects" hx-trigger="teacherChange from:body" hx-get="{%url 'viewObjects' 'Teacher' %}" hx-vals='js:{"id":getDep()}' hx-disinherit="*" hx-target="this" id="sidebar" class="btn-group-vertical d-flex mt-4"></div>
+      <div id="listObjects" hx-trigger="teacherChange from:body" hx-get="{%url 'viewObjects' 'Teacher' %}" hx-vals='js:{"id":getClicked()}' hx-disinherit="*" hx-target="this" id="sidebar" class="btn-group-vertical d-flex mt-4"></div>
       <div id="test"></div>
     </div>
   <div id="displayTeacher" class="col"></div>
