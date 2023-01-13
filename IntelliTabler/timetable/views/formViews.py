@@ -135,3 +135,26 @@ def addYear(request, departmentId):
     context['form']=form
     context['departmentId']=departmentId
     return render(request, "forms/yearForm.html", context)
+
+def assignTeacher(request, departmentId, moduleId):
+    choices=[]
+    teachers=Teacher.objects.filter(department_id=departmentId)
+    for teacher in teachers:
+        choices.append((teacher.id, teacher.name))
+    if request.method=='POST':
+        form=AssignTeacherForm(choices, request.POST, request.FILES)
+        if form.is_valid():
+            test=form.cleaned_data
+            mod= Module.objects.get(id=moduleId)
+            id=form.cleaned_data['teacher']
+            mod.Teacher_id=int(id)
+            mod.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':'modChange'})
+
+            
+        else:
+            return render(request, 'forms/singleChoice.html', {'form':form})
+    form=AssignTeacherForm(choices)
+    context={'form':form}
+    return render(request, 'forms/singleChoice.html', context)
+

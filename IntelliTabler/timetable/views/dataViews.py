@@ -83,6 +83,12 @@ def getTeacher(request, id):
     return render(request, "data/teacherInfo.html", context)
 
 def getModules(request, id):
-    modules=Module.objects.filter(group_id=id)
-    context={"modules": modules}
+    moduleList=Module.objects.filter(group_id=id)
+    context={}
+    modules={}
+    for mod in moduleList:
+        if mod.groupNum not in modules:
+            modules[mod.groupNum]=[]
+        modules[mod.groupNum].append(mod)
+    context["modules"]=modules
     return render(request, "data/modulesInfo.html", context)

@@ -27,5 +27,6 @@ urlpatterns = [
     path('viewModules/<str:type>/<int:departmentId>', dataViews.viewModules, name="viewModules"),
     path('addModule/<int:year>', formViews.addModule, name="addModule"),
     path('addYear/<int:departmentId>', formViews.addYear, name="addYear"),
-    path('getModules/<int:id>', dataViews.getModules, name='getModules')
+    path('getModules/<int:id>', dataViews.getModules, name='getModules'),
+    path('assignTeacher/<int:departmentId>/<int:moduleId>', formViews.assignTeacher, name='assignTeacher'),
 ]

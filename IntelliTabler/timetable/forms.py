@@ -51,5 +51,11 @@ class YearForm(forms.ModelForm):
         model=Year
         fields=("year",)
 
+class AssignTeacherForm(forms.Form):
+    teacher=forms.ChoiceField()
+    
+    def __init__(self, teachers, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['teacher'].choices = teachers
 
 
