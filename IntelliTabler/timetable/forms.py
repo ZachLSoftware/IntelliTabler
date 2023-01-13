@@ -58,4 +58,19 @@ class AssignTeacherForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['teacher'].choices = teachers
 
-
+class AssignPeriodForm(forms.Form):
+    DAYS=(
+        ("Mon", "Mon"),
+        ("Tues", "Tues"),
+        ("Wed", "Wed"),
+        ("Thurs", "Thurs"),
+        ("Fri", "Fri")
+    )
+    week=forms.ChoiceField()
+    day=forms.ChoiceField(choices=DAYS)
+    period=forms.ChoiceField()
+    
+    def __init__(self, weeks, periods, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['week'].choices = weeks
+        self.fields['period'].choices = periods

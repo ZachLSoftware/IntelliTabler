@@ -7,6 +7,10 @@ input {
   color: black;
 }
 
+select {
+  color: black;
+}
+
 caption {
   color: white;
 }

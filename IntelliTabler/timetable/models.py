@@ -80,8 +80,8 @@ class Module(models.Model):
     name=models.CharField(max_length=50)
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
     groupNum=models.IntegerField()
-    Period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
-    Teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
+    period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
+    teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
 
 @receiver(post_save, sender=ModuleGroup)
 def createModules(sender, instance, created, **kwargs):

@@ -18,7 +18,7 @@
       <div id="listObjects" hx-trigger="moduleChange from:body" hx-get="{%url 'viewModules' 'ModuleGroup' departmentId %}" hx-vals='js:{"id":getClicked()}' hx-disinherit="*" hx-target="this" id="sidebar" class="btn-group-vertical d-flex mt-4"></div>
       <div id="test"></div>
     </div>
-  <div id="displayModule" class="col"></div>
+  <div id="displayModule" hx-trigger="moduleDetailsChange from:body" hx-get="{%url 'getModules' %}" hx-vals='js:{"id":getChild()}' class="col"></div>
 </div>
 
 

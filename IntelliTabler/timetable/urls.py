@@ -21,6 +21,7 @@ urlpatterns = [
     path('viewObjects/<str:type>', dataViews.viewObjects, name='viewObjects'),
     path('viewObjects/<str:type>/<int:id>', dataViews.viewObjects, name='viewObjects'),
     path('getTeacher/<int:id>', dataViews.getTeacher, name='getTeacher'),
+    path('getTeacher', dataViews.getTeacher, name='getTeacher'),
     path('setAvailability/<int:teacherid>', formViews.setAvailability, name='setAvailability'),
     path('modules/<int:departmentId>', dataViews.modules, name="modules"),
     path('viewModules/<str:type>/<int:departmentId>/<int:id>', dataViews.viewModules, name="viewModules"),
@@ -28,5 +29,8 @@ urlpatterns = [
     path('addModule/<int:year>', formViews.addModule, name="addModule"),
     path('addYear/<int:departmentId>', formViews.addYear, name="addYear"),
     path('getModules/<int:id>', dataViews.getModules, name='getModules'),
+    path('getModules', dataViews.getModules, name='getModules'),
     path('assignTeacher/<int:departmentId>/<int:moduleId>', formViews.assignTeacher, name='assignTeacher'),
+    path('assignPeriod/<int:department>/<int:group>/<int:groupNum>', formViews.assignPeriod, name='assignPeriod'),
+    path('deleteObject/<str:type>/<str:id>', formViews.deleteObject, name='deleteObject')
 ]

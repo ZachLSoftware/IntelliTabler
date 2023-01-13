@@ -3,12 +3,12 @@
     <th>Period Group {{k}}</th>
     <tr>
         <td>Assigned Period</td>
-        {% if v.1.period is null%}
+        {% if v.0.period is null%}
         <td>None</td>
         {%else%}
-        <td>{{v.1.period.name}}</td>
+        <td>Period: {{v.0.period.name}}, Week: {{v.0.period.week}}, </td>
         {%endif%}
-        <td>Add/Edit Period</td>
+        <td><button class='btn btn-primary' hx-get="{% url 'assignPeriod' v.0.group.department.id v.0.group.id k %}" hx-target="#addForm"> add/edit Period</button></td>
     </tr>
     {% for mod in v %}
     <tr>
@@ -16,7 +16,7 @@
         {% if mod.teacher is null %}
         <td>Teacher: None</td>
         {% else %}
-        <td>Teacher: {{mod.Teacher_id}}</td>
+        <td>Teacher: {{mod.teacher.name}}</td>
         {% endif %}
         <td><button class='btn btn-primary' hx-get="{% url 'assignTeacher' mod.group.department.id mod.id %}" hx-target="#addForm"> add/edit Teacher</button></td>
     </tr>

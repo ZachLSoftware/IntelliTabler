@@ -76,13 +76,20 @@ def modules(request, departmentId):
 
 
 
-def getTeacher(request, id):
-    teacher=Teacher.objects.get(id=id)
+def getTeacher(request, id=0):
+    if id==0:
+        id=request.GET.get('id', 0)
+    try: 
+        teacher=Teacher.objects.get(id=id)
+    except:
+        teacher=None
     context={}
     context["teacher"]=teacher
     return render(request, "data/teacherInfo.html", context)
 
-def getModules(request, id):
+def getModules(request, id=0):
+    if id==0:
+        id=request.GET.get('id', 0)        
     moduleList=Module.objects.filter(group_id=id)
     context={}
     modules={}

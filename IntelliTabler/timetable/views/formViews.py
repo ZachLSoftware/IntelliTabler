@@ -4,6 +4,7 @@ from ..forms import *
 from ..models import *
 from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
+from django.apps import apps
 
 # Create your views here.
 def addDepartment(request):
@@ -41,14 +42,19 @@ def addTeacher(request, department, id=0):
             newTeacher["department"]=Department.objects.get(id=department)
             teacher.save()
             #Teacher.objects.delete(id=0)
+            if(not created):
+                return HttpResponse(status=204, headers={'HX-Trigger':'teacherDetailChange', 'Department':department})
             return HttpResponse(status=204, headers={'HX-Trigger':'teacherChange', 'Department':department})
+            
     else:
         if(id!=0):
             teacher=get_object_or_404(Teacher, pk=id)
             form=TeacherForm(instance=teacher)
         else:     
             form = TeacherForm(initial={"id":0})
-    return render(request, 'forms/teacherForm.html', {"form":form})
+    context={'form':form}
+    context['Operation']="Add or Edit Teacher"
+    return render(request, 'forms/modalForm.html', context)
 
 def setAvailability(request, teacherid):
     context={}
@@ -118,7 +124,8 @@ def addModule(request, year):
     form=ModuleGroupForm()
     context={}
     context['form']=form
-    return render (request, "forms/moduleForm.html", context)
+    context['Operation']="Add Modules"
+    return render (request, "forms/modalForm.html", context)
 
 def addYear(request, departmentId):
     
@@ -134,7 +141,8 @@ def addYear(request, departmentId):
     context={}
     context['form']=form
     context['departmentId']=departmentId
-    return render(request, "forms/yearForm.html", context)
+    context['Operation']="Add Year"
+    return render(request, "forms/modalForm.html", context)
 
 def assignTeacher(request, departmentId, moduleId):
     choices=[]
@@ -147,14 +155,47 @@ def assignTeacher(request, departmentId, moduleId):
             test=form.cleaned_data
             mod= Module.objects.get(id=moduleId)
             id=form.cleaned_data['teacher']
-            mod.Teacher_id=int(id)
+            mod.teacher_id=int(id)
             mod.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'modChange'})
-
-            
-        else:
-            return render(request, 'forms/singleChoice.html', {'form':form})
+            return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
     form=AssignTeacherForm(choices)
     context={'form':form}
-    return render(request, 'forms/singleChoice.html', context)
+    context['Operation']="Assign Teacher"
+    return render(request, 'forms/modalForm.html', context)
+
+def assignPeriod(request, department, group, groupNum):
+    weeks=[]
+    periods=[]
+    format = Format.objects.get(department_id=department)
+    for i in range(1, format.numPeriods+1):
+        periods.append((i,i))
+    for i in range(1, format.numWeeks+1):
+        weeks.append((i,i))
+    if request.method=='POST':
+        form=AssignPeriodForm(weeks,periods,request.POST,request.FILES)
+        if form.is_valid():
+            modules=Module.objects.filter(group_id=group, groupNum=groupNum)
+            for mod in modules:
+                per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
+                mod.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
+                mod.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
+    form=AssignPeriodForm(weeks,periods)
+    context={'form':form}
+    context['Operation']="Assign/Edit Period"
+    return render(request, 'forms/modalForm.html', context)
+
+def deleteObject(reqest, type, id):
+    Type = apps.get_model(app_label='timetable', model_name=type)
+    try:
+        obj = Type.objects.get(id=id).delete()
+    except Type.DoesNotExist:
+        obj=None
+    trigger = type[0].lower()+type[1:]+"Change"
+    events='{\"'+trigger+'\": "Deleted", "objectDeleted": "ObjectDeleted"}'
+    return HttpResponse(status=204, headers={"HX-Trigger": events})
+
+
+    
+
 

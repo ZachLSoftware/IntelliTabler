@@ -1,9 +1,10 @@
+{%if teacher is not None %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="btn-group" role="group">
             <button class="btn btn-primary border" hx-get="{% url 'addTeacher' teacher.department.id teacher.id %}" hx-target="#addForm">Edit Teacher</button>
             <a type="button" class="btn btn-primary border" href="{% url 'setAvailability' teacher.id %}">Set Availability</a>
-            <button class="btn btn-primary border">Delete Teacher</button>
+            <a type="button" class="btn btn-primary border" hx-delete="{% url 'deleteObject' 'Teacher' teacher.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Teacher</a>
         </div>
     </div>
     <div class="container">
@@ -32,3 +33,4 @@
             </div>
         </div>
 </div>
+{% endif %}
