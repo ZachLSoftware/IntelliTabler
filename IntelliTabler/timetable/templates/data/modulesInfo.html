@@ -1,3 +1,9 @@
+{% comment %} <div class="row justify-content-center">
+    <div class="btn-group" role="group">
+        <button class="btn btn-primary border" hx-get="{% url 'addModule' group.year.id group.id %}"  hx-target="#addForm">Edit Module</button>
+        <a type="button" class="btn btn-primary border" hx-delete="{% url 'deleteObject' 'ModuleGroup' group.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Module?</a>
+    </div>
+</div> {% endcomment %}
 {% for k,v in modules.items %}
 <table class="table">
     <th>Period Group {{k}}</th>

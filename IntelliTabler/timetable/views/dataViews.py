@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from ..models import Department, Teacher, Module, ModuleGroup
+from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period
 from django.contrib.auth.decorators import login_required
 from django.apps import apps
 
@@ -46,23 +46,28 @@ def viewObjects(request, type, id=0):
     return render(request, "data/sideBarList.html", context)
 
 @login_required
-def viewModules(request, type, departmentId, id=0):
+def viewModules(request, type, departmentId, yearId=0):
     context={}
     Type = apps.get_model(app_label='timetable', model_name=type)
-    if id==0:
-        id=request.GET.get('id', 0)
-    if(id):
-        objects=Type.objects.filter(user=request.user, year=id)
+    if yearId==0:
+        yearId=request.GET.get('yearId', 0)
+    if(yearId):
+        objects=Type.objects.filter(user=request.user, year=yearId)
     else:
         objects=Type.objects.filter(department_id=departmentId)
     context['type']= type
     context["entities"]=objects
     context["departmentId"]=departmentId
-    context["yearId"]=id
+    context["yearId"]=yearId
     return render(request, "data/modulesList.html", context)
 
-def modules(request, departmentId):
+def modules(request, departmentId=0):
     context={}
+    departments=Department.objects.filter(user=request.user)
+    if(not departmentId):
+        context["departments"]=departments
+        context["departmentId"]=0
+        return render(request, "data/modules.html", context)
     modules=ModuleGroup.objects.filter(department=departmentId)
     years=set()
     for mod in modules:
@@ -72,6 +77,7 @@ def modules(request, departmentId):
         context[mod.year].append(mod)
     context["years"]=years
     context["departmentId"]=departmentId
+    context["departments"]=departments
     return render(request, "data/modules.html", context)
 
 
@@ -83,14 +89,16 @@ def getTeacher(request, id=0):
         teacher=Teacher.objects.get(id=id)
     except:
         teacher=None
+    modules=Module.objects.filter(teacher=teacher)
     context={}
+    context['modules']=modules
     context["teacher"]=teacher
     return render(request, "data/teacherInfo.html", context)
 
-def getModules(request, id=0):
-    if id==0:
-        id=request.GET.get('id', 0)        
-    moduleList=Module.objects.filter(group_id=id)
+def getModules(request, groupId=0):
+    if groupId==0:
+        groupId=request.GET.get('groupId', 0)        
+    moduleList=Module.objects.filter(group_id=groupId)
     context={}
     modules={}
     for mod in moduleList:
@@ -98,4 +106,12 @@ def getModules(request, id=0):
             modules[mod.groupNum]=[]
         modules[mod.groupNum].append(mod)
     context["modules"]=modules
+    context["group"]=moduleList[0].group
     return render(request, "data/modulesInfo.html", context)
+
+def timetableView(request, timetable):
+    table=Timetable.objects.get(id=timetable)
+    teachers=Teacher.objects.filter(department=table.year.department)
+    periods=Period.objects.filter(department=table.year.department)
+    context={'timetable':table, 'teachers':teachers, 'periods':periods}
+    return render(request, 'data/timetable.html', context)

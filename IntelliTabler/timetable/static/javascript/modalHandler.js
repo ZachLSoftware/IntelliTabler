@@ -19,8 +19,8 @@ htmx.on("hidden.bs.modal", () => {
     $("#addForm").html("");
 });
 
-$(document).on("click", ".departmentButtons, .yearButtons, .moduleButtons, .teacherButtons", function(){
-    if($(this).hasClass("moduleButtons") || $(this).hasClass("teacherButtons")){
+$(document).on("click", "parentButtons, .childButtons", function(){
+    if($(this).hasClass("childButtons")){
         clickedChild=this.id.split('.')[0]
         console.log(clickedChild);
     }else{

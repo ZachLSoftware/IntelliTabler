@@ -32,5 +32,24 @@
                 {{teacher.roomNum}}
             </div>
         </div>
+        <div class="row justify-content-center mt-3">
+            <table class="table">
+                <th>Assigned Modules</th>
+                <th>Period</th>
+                {% for mod in modules %}
+                <tr>
+                    <td>{{mod.name}}</td>
+                    {% if mod.period is not None %}
+                    <td>Week: {{mod.period.week}}, Day: {{mod.period.name}}</td>
+                    {% else %}
+                    <td>Not Scheduled</td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td>None assigned</td>
+                </tr>
+                {%endfor%}
+            </table>
 </div>
 {% endif %}

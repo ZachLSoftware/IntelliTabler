@@ -2,6 +2,7 @@ from django import forms
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 class RegistrationForm(UserCreationForm):
     class Meta:
@@ -45,6 +46,22 @@ class ModuleGroupForm(forms.ModelForm):
     class Meta:
         model=ModuleGroup
         fields=("name","numPeriods", "numClasses")
+
+    def __init__(self, *args, **kwargs):
+        self.year = kwargs.pop('year', None)
+        self.department = kwargs.pop('department', None)
+        self.edit = kwargs.pop('edit', False)
+        super(ModuleGroupForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        if not self.edit:
+            cleaned_data=super().clean()
+            name=cleaned_data['name']
+            year=Year.objects.filter(id=self.year)[0]
+            if(ModuleGroup.objects.filter(name=name, year=self.year, department=self.department).exists()):
+                raise ValidationError(
+                    _('Module: %(value)s already exists for year: %(year)s'),
+                    params={'value': name, 'year': year.year})
 
 class YearForm(forms.ModelForm):
     class Meta:

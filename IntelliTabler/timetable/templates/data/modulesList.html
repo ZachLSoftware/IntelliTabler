@@ -2,14 +2,16 @@
 {% if type == "ModuleGroup" %}
 <button id='new{{type}}' class="btn btn-primary border" hx-get="{% url 'addModule' yearId %}" hx-target="#addForm">New {{type}} </button>
 {% for entity in entities %}
-<button id="{{entity.id}}.button"  hx-get="{% url 'getModules' id=entity.id %}" hx-target="#displayModule" class="btn btn-primary border moduleButtons">{{entity.name}}</button>
+<button id="{{entity.id}}.button"  hx-get="{% url 'getModules' groupId=entity.id %}" hx-target="#displayChild" class="btn btn-primary border childButtons moduleButtons">{{entity.name}}</button>
 {% empty %}
 Nothing found
 {% endfor %}
 {% else %}
+{% if departmentId != 0 %}
 <button id='new{{type}}' class="btn btn-primary border" hx-get="{% url 'addYear' departmentId%}" hx-target="#addForm">New {{type}} </button>
+{% endif %}
 {% for entity in entities %}
-<button id="{{entity.id}}.button"  hx-get="{% url 'viewModules' "ModuleGroup" departmentId entity.id  %}" hx-target="#listObjects" class="btn btn-primary yearButtons border">{{entity.year}}</button>
+<button id="{{entity.id}}.button"  hx-get="{% url 'viewModules' 'ModuleGroup' departmentId entity.id  %}" hx-target="#listObjects" class="btn btn-primary parentButtons yearButtons border">{{entity.year}}</button>
 {% empty %}
 Nothing found
 {% endfor %}

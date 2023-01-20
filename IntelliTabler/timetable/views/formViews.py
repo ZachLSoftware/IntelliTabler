@@ -105,15 +105,20 @@ def setAvailability(request, teacherid):
     #context['formset1']=formset1
     context['formsets']=formsets
     context['weeks']=ft.numWeeks
-    context['periodpw']=ft.numPeriods*5
+    context['offset']=ft.numPeriods
     #context['formset2']=formset2
     return render(request, 'forms/availabilityForm.html', context)
 
 
-def addModule(request, year):
+def addModule(request, year, groupId=0):
+    context={}
     department=Year.objects.get(id=year).department
     if request.method=='POST':
-        form=ModuleGroupForm(request.POST, request.FILES)
+        if groupId!=0:
+            group=get_object_or_404(ModuleGroup,pk=groupId)
+            form=ModuleGroupForm(request.POST, request.FILES,year=year, department=department, edit=True, instance=group)
+        else:
+            form=ModuleGroupForm(request.POST, request.FILES,year=year, department=department)
         if form.is_valid():
             group=form.save(commit=False)
             group.year_id=year
@@ -121,10 +126,15 @@ def addModule(request, year):
             group.user=request.user
             group.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'moduleChange'})
-    form=ModuleGroupForm()
-    context={}
+    else:
+        if(groupId!=0):
+            group=get_object_or_404(ModuleGroup,pk=groupId)
+            form=ModuleGroupForm(year=year, department=department, edit=True, instance=group)
+            context['Operation']="Edit Modules"
+        else:
+            form=ModuleGroupForm(year=year, department=department)
+            context['Operation']="Add Modules"
     context['form']=form
-    context['Operation']="Add Modules"
     return render (request, "forms/modalForm.html", context)
 
 def addYear(request, departmentId):
