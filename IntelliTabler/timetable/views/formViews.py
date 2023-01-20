@@ -115,10 +115,10 @@ def addModule(request, year, groupId=0):
     department=Year.objects.get(id=year).department
     if request.method=='POST':
         if groupId!=0:
-            group=get_object_or_404(ModuleGroup,pk=groupId)
-            form=ModuleGroupForm(request.POST, request.FILES,year=year, department=department, edit=True, instance=group)
+            group=get_object_or_404(ModuleParent,pk=groupId)
+            form=ModuleParentForm(request.POST, request.FILES,year=year, department=department, edit=True, instance=group)
         else:
-            form=ModuleGroupForm(request.POST, request.FILES,year=year, department=department)
+            form=ModuleParentForm(request.POST, request.FILES,year=year, department=department)
         if form.is_valid():
             group=form.save(commit=False)
             group.year_id=year
@@ -128,11 +128,11 @@ def addModule(request, year, groupId=0):
             return HttpResponse(status=204, headers={'HX-Trigger':'moduleChange'})
     else:
         if(groupId!=0):
-            group=get_object_or_404(ModuleGroup,pk=groupId)
-            form=ModuleGroupForm(year=year, department=department, edit=True, instance=group)
+            group=get_object_or_404(ModuleParent,pk=groupId)
+            form=ModuleParentForm(year=year, department=department, edit=True, instance=group)
             context['Operation']="Edit Modules"
         else:
-            form=ModuleGroupForm(year=year, department=department)
+            form=ModuleParentForm(year=year, department=department)
             context['Operation']="Add Modules"
     context['form']=form
     return render (request, "forms/modalForm.html", context)
@@ -173,7 +173,7 @@ def assignTeacher(request, departmentId, moduleId):
     context['Operation']="Assign Teacher"
     return render(request, 'forms/modalForm.html', context)
 
-def assignPeriod(request, department, group, groupNum):
+def assignPeriod(request, department, groupId):
     weeks=[]
     periods=[]
     format = Format.objects.get(department_id=department)
@@ -184,16 +184,22 @@ def assignPeriod(request, department, group, groupNum):
     if request.method=='POST':
         form=AssignPeriodForm(weeks,periods,request.POST,request.FILES)
         if form.is_valid():
-            modules=Module.objects.filter(group_id=group, groupNum=groupNum)
-            for mod in modules:
-                per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
-                mod.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
-                mod.save()
+            group=ModuleGroup.objects.get(id=groupId)
+            per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
+            group.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
+            group.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
     form=AssignPeriodForm(weeks,periods)
     context={'form':form}
     context['Operation']="Assign/Edit Period"
     return render(request, 'forms/modalForm.html', context)
+
+def calendarPeriodDrop(request, day, week, groupId):
+    group=ModuleGroup.objects.get(id=groupId)
+    period=Period.objects.get(department=group.parent.department, name=day, week=week)
+    group.period=period
+    group.save()
+    return HttpResponse(status=204)
 
 def deleteObject(reqest, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)

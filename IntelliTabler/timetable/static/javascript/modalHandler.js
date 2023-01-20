@@ -19,7 +19,7 @@ htmx.on("hidden.bs.modal", () => {
     $("#addForm").html("");
 });
 
-$(document).on("click", "parentButtons, .childButtons", function(){
+$(document).on("click", ".parentButtons, .childButtons", function(){
     if($(this).hasClass("childButtons")){
         clickedChild=this.id.split('.')[0]
         console.log(clickedChild);

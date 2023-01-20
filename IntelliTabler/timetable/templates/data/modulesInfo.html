@@ -6,15 +6,15 @@
 </div> {% endcomment %}
 {% for k,v in modules.items %}
 <table class="table">
-    <th>Period Group {{k}}</th>
+    <th>{{k.name}}</th>
     <tr>
         <td>Assigned Period</td>
-        {% if v.0.period is null%}
+        {% if k.period is null%}
         <td>None</td>
         {%else%}
-        <td>Period: {{v.0.period.name}}, Week: {{v.0.period.week}}, </td>
+        <td>Period: {{k.period.name}}, Week: {{k.period.week}}, </td>
         {%endif%}
-        <td><button class='btn btn-primary' hx-get="{% url 'assignPeriod' v.0.group.department.id v.0.group.id k %}" hx-target="#addForm"> add/edit Period</button></td>
+        <td><button class='btn btn-primary' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button></td>
     </tr>
     {% for mod in v %}
     <tr>
@@ -24,7 +24,7 @@
         {% else %}
         <td>Teacher: {{mod.teacher.name}}</td>
         {% endif %}
-        <td><button class='btn btn-primary' hx-get="{% url 'assignTeacher' mod.group.department.id mod.id %}" hx-target="#addForm"> add/edit Teacher</button></td>
+        <td><button class='btn btn-primary' hx-get="{% url 'assignTeacher' mod.group.parent.department.id mod.id %}" hx-target="#addForm"> add/edit Teacher</button></td>
     </tr>
     {% endfor %}
 </table>

@@ -42,23 +42,23 @@ class AvailabilityForm(forms.Form):
     period = forms.CharField()
     week = forms.IntegerField()
 
-class ModuleGroupForm(forms.ModelForm):
+class ModuleParentForm(forms.ModelForm):
     class Meta:
-        model=ModuleGroup
+        model=ModuleParent
         fields=("name","numPeriods", "numClasses")
 
     def __init__(self, *args, **kwargs):
         self.year = kwargs.pop('year', None)
         self.department = kwargs.pop('department', None)
         self.edit = kwargs.pop('edit', False)
-        super(ModuleGroupForm, self).__init__(*args, **kwargs)
+        super(ModuleParentForm, self).__init__(*args, **kwargs)
 
     def clean(self):
         if not self.edit:
             cleaned_data=super().clean()
             name=cleaned_data['name']
             year=Year.objects.filter(id=self.year)[0]
-            if(ModuleGroup.objects.filter(name=name, year=self.year, department=self.department).exists()):
+            if(ModuleParent.objects.filter(name=name, year=self.year, department=self.department).exists()):
                 raise ValidationError(
                     _('Module: %(value)s already exists for year: %(year)s'),
                     params={'value': name, 'year': year.year})

@@ -33,7 +33,9 @@ urlpatterns = [
     path('getModules/<int:groupId>', dataViews.getModules, name='getModules'),
     path('getModules', dataViews.getModules, name='getModules'),
     path('assignTeacher/<int:departmentId>/<int:moduleId>', formViews.assignTeacher, name='assignTeacher'),
-    path('assignPeriod/<int:department>/<int:group>/<int:groupNum>', formViews.assignPeriod, name='assignPeriod'),
+    path('assignPeriod/<int:department>/<int:groupId>', formViews.assignPeriod, name='assignPeriod'),
     path('deleteObject/<str:type>/<str:id>', formViews.deleteObject, name='deleteObject'),
     path('timetable/<int:timetable>', dataViews.timetableView, name="timetableView"),
+    path('calendar/<int:year>', dataViews.calendarView, name="calendarView"),
+    path('calendarPeriodDrop/<str:day>/<int:week>/<int:groupId>', formViews.calendarPeriodDrop, name="calendarPeriodDrop")
 ]

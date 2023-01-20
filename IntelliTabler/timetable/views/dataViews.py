@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period
+from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period, ModuleParent
 from django.contrib.auth.decorators import login_required
 from django.apps import apps
+import json
 
 
 
@@ -68,7 +69,7 @@ def modules(request, departmentId=0):
         context["departments"]=departments
         context["departmentId"]=0
         return render(request, "data/modules.html", context)
-    modules=ModuleGroup.objects.filter(department=departmentId)
+    modules=ModuleParent.objects.filter(department=departmentId)
     years=set()
     for mod in modules:
         years.add(mod.year)
@@ -98,15 +99,15 @@ def getTeacher(request, id=0):
 def getModules(request, groupId=0):
     if groupId==0:
         groupId=request.GET.get('groupId', 0)        
-    moduleList=Module.objects.filter(group_id=groupId)
+    moduleList=Module.objects.filter(group__parent_id=groupId)
     context={}
     modules={}
     for mod in moduleList:
-        if mod.groupNum not in modules:
-            modules[mod.groupNum]=[]
-        modules[mod.groupNum].append(mod)
+        if mod.group not in modules:
+            modules[mod.group]=[]
+        modules[mod.group].append(mod)
     context["modules"]=modules
-    context["group"]=moduleList[0].group
+    context["group"]=moduleList[0].group.parent
     return render(request, "data/modulesInfo.html", context)
 
 def timetableView(request, timetable):
@@ -115,3 +116,27 @@ def timetableView(request, timetable):
     periods=Period.objects.filter(department=table.year.department)
     context={'timetable':table, 'teachers':teachers, 'periods':periods}
     return render(request, 'data/timetable.html', context)
+
+def calendarView(request, year):
+    classes=ModuleGroup.objects.filter(parent__year_id=year)
+    events={}
+    modules=[]
+    for cl in classes:
+        if cl.period:
+            info = {}
+            info["id"]=cl.id
+            info["module"]= {
+                "period": cl.period.name,
+                "week": cl.period.week,
+                "name": cl.name,
+                "parent": cl.parent.id
+            }
+            
+            modules.append(info)
+    events["modules"]=modules
+
+    context={}
+    context['events']=json.dumps(events)
+    context['periods']=5
+    context['weeks']=2
+    return render(request, 'data/calendarView.html', context)

@@ -33,15 +33,16 @@ def createPeriods(sender, instance, created, **kwargs):
         days=["Fri-","Mon-","Tues-","Wed-","Thurs-"]
         totalPeriods=instance.numPeriods*5*instance.numWeeks
         i=1
+        week=1
         for count in range(1, totalPeriods+1):
-            if(count%(instance.numPeriods*5)==0):
-                week=int(count/(instance.numPeriods*5))
-                i=1
-            else:
-                week=int(count/(instance.numPeriods*5))+1
-            
+
+          
             Period.objects.create(name=days[count%5]+str(round(i/5+.4)), dayNum=count, department=instance.department, week=week)
             i+=1
+            if(count%(instance.numPeriods*5)==0):
+                week+=1
+                i=1
+            
         '''
         for i in range(1,instance.numWeeks+1):
             for day in days:
@@ -77,7 +78,7 @@ def actualTimetable(sender, instance, created, **kwargs):
     if created:
         Timetable.objects.create(id=(instance.department.id*instance.year), user=instance.department.user, name=str(instance.year)+" Timetable", year=instance)
 
-class ModuleGroup(models.Model):
+class ModuleParent(models.Model):
     name=models.CharField(max_length=50)
     numPeriods=models.IntegerField()
     numClasses=models.IntegerField()
@@ -85,11 +86,14 @@ class ModuleGroup(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     year=models.ForeignKey(Year, on_delete=models.CASCADE)
 
+class ModuleGroup(models.Model):
+    name=models.CharField(max_length=50)
+    period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
+    parent=models.ForeignKey(ModuleParent, on_delete=models.CASCADE)
+
 class Module(models.Model):
     name=models.CharField(max_length=50)
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
-    groupNum=models.IntegerField()
-    period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
 
 class Timetable(models.Model):
@@ -103,7 +107,7 @@ class TimetableRow(models.Model):
     manualTeacher=models.ForeignKey(Teacher, null=True, blank=True, on_delete=models.SET_NULL)
     manualPeriod=models.ForeignKey(Period, null=True, on_delete=models.SET_NULL)
 
-@receiver(post_save, sender=ModuleGroup)
+@receiver(post_save, sender=ModuleParent)
 def createModules(sender, instance, created, **kwargs):
     if created:
         try:
@@ -111,8 +115,9 @@ def createModules(sender, instance, created, **kwargs):
         except:
             timetable=None
         for i in range(1, instance.numPeriods+1):
+            group = ModuleGroup.objects.create(name=instance.name+" Group " + str(i), parent=instance)
             for j in range(1, instance.numClasses+1):
-                mod = Module.objects.create(name=instance.name+"x"+str(j), group=instance, groupNum=i)
+                mod = Module.objects.create(name=instance.name+"x"+str(j), group=group)
                 if timetable is not None:
                     TimetableRow.objects.create(timetable=timetable, module=mod)
 
