@@ -1,30 +1,13 @@
-{% extends "base_template.html" %}
-
-
-
-{% block js %}
-{% load static %}
-<script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
 <script>
     const periods=parseInt({{periods}});
     const weeks=parseInt({{weeks}});
     const year=parseInt({{year}});
     var events={{events|safe}};
 </script>
+{% load static %}
 <script type="text/javascript" src="{% static 'javascript/modalHandler.js' %}" defer></script>
 <script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script>
-
-
-{% endblock %}
-{% block content %}
-
-<h1 id="title" style="text-align: center"> Calendar </h1>
-<button id="previous" class='fas fa-arrow-alt-circle-left m-4 arrows' style='font-size:36px; float: left;'></button>
-<button id="next" class='fas fa-arrow-alt-circle-right m-4 arrows' style='font-size:36px; float: right;'></button>
-<div id="calendarWrapper">
-</div>
-
+<div id="calendarWrapper"></div>
 <div id="viewDataModal" class="modal fade">
     <div id="module" class="modal-dialog" hx-target="this">
         <div class="modal-content">
@@ -44,4 +27,3 @@
   <div id="addFormModal" class="modal fade">
     <div id="addForm" class="modal-dialog" hx-target="this"></div>
   </div>
-{% endblock %}

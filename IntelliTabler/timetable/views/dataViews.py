@@ -3,6 +3,7 @@ from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period
 from django.contrib.auth.decorators import login_required
 from django.apps import apps
 import json
+from django.http import JsonResponse
 
 
 
@@ -143,4 +144,26 @@ def calendarView(request, year):
     context['events']=json.dumps(events)
     context['periods']=classes[0].parent.department.format.numPeriods
     context['weeks']=classes[0].parent.department.format.numWeeks
+    context['year']=year
     return render(request, 'data/calendarView.html', context)
+
+def getCalendarData(request, year):
+    classes=ModuleGroup.objects.filter(parent__year_id=year)
+    events={}
+    modules=[]
+    for cl in classes:
+        if cl.period:
+            info = {}
+            info["id"]=cl.id
+            info["module"]= {
+                "period": cl.period.name,
+                "week": cl.period.week,
+                "name": cl.name,
+                "parent": cl.parent.id
+            }
+            
+            modules.append(info)
+    events["modules"]=modules
+    context={}
+    context['events']=events
+    return JsonResponse(events)

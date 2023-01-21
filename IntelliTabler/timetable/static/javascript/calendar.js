@@ -1,21 +1,20 @@
 var calendar;
+var selectedCell;
 var numCal=$(".calendars").length;
+let days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
+refresh=false;
+
 for(let week=1; week<=weeks; week++){
     $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="d-none calendars" style="height: 1000px"></div>`)
 }
 $("#calendarWeek-1").removeClass("d-none").addClass("activeCalendar");
 setActive();
 
-
-
-
-let days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
-
 $(".calendars").each(function(index){
     week=this.id.split('-')[1]
-    $(this).append(`<div id="periodColumn-${week}" class="dayHeader border"><h3>Period</h3></div>`)
+    $(this).append(`<div id="periodColumn-${week}" class="dayHeader border periodColumn"><div class="calendarHeader"><h3>Period</h3></div></div>`)
     days.forEach((day) =>{
-        $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><h3>${day}</h3></div>`);
+        $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
         for(let period=1; period<=periods; period++){
             $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell">${day}-${period}<br/></div>`);
             $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
@@ -23,43 +22,38 @@ $(".calendars").each(function(index){
                 $(ui.draggable).css({'top' : 0, 'left' : 0})
                 p=this.id.split('-')
                 var element = htmx.ajax('POST', `/calendarPeriodDrop/${p[0]}-${p[1]}/${p[2]}/${ui.draggable[0].id}`);
-
                 }
             });
         }
-     });
+    });
 
-    for(let period=1; period<=periods; period++){
-        $(`#periodColumn-${week}`).append(`<div id="${period}Row" class="border">Period - ${period}</div>`);
-    }
+        for(let period=1; period<=periods; period++){
+            $(`#periodColumn-${week}`).append(`<div class="border pRow">${period}</div>`);
+        }
 
-})
+    })
+    $(".dayHeader").css("grid-template-rows", `1fr repeat(${periods}, 3fr`);
 
-$(".dayHeader").css("grid-template-rows", `repeat(${periods+1}, 1fr`);
 
-
-events["modules"].forEach((mod)=>{
-    $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.parent}?calendar=1" hx-target="#modalBody" class="event btn btn-info">${mod.module.name}</button>`);
-    $(`#${mod.id}`).draggable({cancel:false,
-                                revert : function(e, ui){
-                                    $(this).data("uiDraggable").originalPosition={
-                                        top: 0,
-                                        left:0
-                                    };
-                                    return !e;
-                                }});
-})
+events["modules"].forEach((mod) => addEvent(mod));
+refreshListeners();
+function addEvent(mod){
+        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.parent}?calendar=1" hx-target="#modalBody" class="event btn btn-info">${mod.module.name}</button>`);
+        $(`#${mod.id}`).draggable({cancel:false,
+                                    revert : function(e, ui){
+                                        $(this).data("uiDraggable").originalPosition={
+                                            top: 0,
+                                            left:0
+                                        };
+                                        return !e;
+                                    }});
+    };
 
 $(".dayCell").on("click", function(e){
-    $(this).addClass("bg-primary");
+    var id=this.id.split('-');
+    htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${year}`, '#addForm');
 })
 
-// $(".event").on("click", function(e){
-//     var test=filterById(events["modules"], this.id);
-//     test=filterById(events["modules"], this.id);
-//     alert(test.module.name);
-//     e.stopPropagation();
-// })
 
 $('#next').click(function(){
     var current=$(".activeCalendar")[0];
@@ -97,19 +91,32 @@ function setActive(){
     }
 }
 
-const modal = new bootstrap.Modal(document.getElementById("viewModuleModal"));
-var clicked = 0;
-var clickedChild=0;
+const dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+
+function refreshListeners(){
+    $(".event").on("click", function(e){
+        clicked=this.id;
+        e.stopPropagation();
+    });
+}
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody") {
-        modal.show();
+        $("#assignPeriod").remove()
+        dataModal.show();
     }
 })
 
 htmx.on("htmx:beforeSwap", (e) => {
     if (e.detail.target.id == "modalBody" && !e.detail.xhr.response){
-        modal.hide();
+        dataModal.hide();
         e.detail.shouldSwap = false;
     }
 })
+
+$(document).on("addEvent", function(e){
+    addEvent(e.detail.modules[0]);
+    htmx.process(htmx.find("#calendarWrapper"));
+    refreshListeners();
+})
+

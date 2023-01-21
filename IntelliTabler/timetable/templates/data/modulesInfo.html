@@ -14,7 +14,7 @@
         {%else%}
         <td>Period: {{k.period.name}}, Week: {{k.period.week}}, </td>
         {%endif%}
-        <td><button class='btn btn-primary' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button></td>
+        <td><button id="assignPeriod" button class='btn btn-primary' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button></td>
     </tr>
     {% for mod in v %}
     <tr>

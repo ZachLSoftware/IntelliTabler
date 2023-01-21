@@ -5,6 +5,7 @@ from ..models import *
 from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.apps import apps
+import json
 
 # Create your views here.
 def addDepartment(request):
@@ -201,7 +202,7 @@ def calendarPeriodDrop(request, day, week, groupId):
     group.save()
     return HttpResponse(status=204)
 
-def deleteObject(reqest, type, id):
+def deleteObject(request, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)
     try:
         obj = Type.objects.get(id=id).delete()
@@ -211,7 +212,36 @@ def deleteObject(reqest, type, id):
     events='{\"'+trigger+'\": "Deleted", "objectDeleted": "ObjectDeleted"}'
     return HttpResponse(status=204, headers={"HX-Trigger": events})
 
-
-    
-
+def addModuleCalendar(request, day, week, year):
+    groups=ModuleGroup.objects.filter(parent__year_id=year, period__isnull=True)
+    choices=[]
+    for group in groups:
+        choices.append((group.id, group.name))
+        
+    if request.method=='POST':
+        form=addEventForm(choices, request.POST,request.FILES)
+        if form.is_valid():
+            mod=ModuleGroup.objects.get(id=form.cleaned_data["group"])
+            department=Year.objects.get(id=year).department
+            period=Period.objects.get(department=department, name=day, week=week)
+            mod.period=period
+            mod.save()
+            events={}
+            modules=[]
+            info = {}
+            info["id"]=mod.id
+            info["module"]= {
+                "period": mod.period.name,
+                "week": mod.period.week,
+                "name": mod.name,
+                "parent": mod.parent.id
+            }
+            modules.append(info)
+            events["addEvent"]={"modules":modules}
+            #events='{"addEvent": {"cellId": \"'+day+'-'+str(week)+'\", "mod":"'+form.cleaned_data["group"]+'"} }'
+            return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(events)})
+    form=addEventForm(choices)
+    context={'form':form}
+    context['Operation']="Assign Module Timeslot"
+    return render(request, 'forms/modalForm.html', context)
 

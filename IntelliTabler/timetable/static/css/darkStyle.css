@@ -45,5 +45,8 @@ td, th {
   background-color: #343a40;
 }
 
+.calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
+  background-color: rgb(3, 39, 107);
+}
 
 

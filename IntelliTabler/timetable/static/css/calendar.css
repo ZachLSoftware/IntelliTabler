@@ -1,9 +1,15 @@
 .calendars {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: 1fr repeat(5, 2fr);
     text-align: center;
     height: 1000px;
-    
+}
+
+.pRow{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
 }
 
 .dayHeader{

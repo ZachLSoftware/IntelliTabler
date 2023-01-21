@@ -91,3 +91,13 @@ class AssignPeriodForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['week'].choices = weeks
         self.fields['period'].choices = periods
+
+class addEventForm(forms.Form):
+    group=forms.ChoiceField()
+
+
+    def __init__(self, groups, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['group'].choices = groups
+
+
