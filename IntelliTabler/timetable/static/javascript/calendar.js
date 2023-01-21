@@ -39,7 +39,7 @@ $(".dayHeader").css("grid-template-rows", `repeat(${periods+1}, 1fr`);
 
 
 events["modules"].forEach((mod)=>{
-    $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.parent}" hx-target="#modalBody" class="event btn btn-info">${mod.module.name}</button>`);
+    $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.parent}?calendar=1" hx-target="#modalBody" class="event btn btn-info">${mod.module.name}</button>`);
     $(`#${mod.id}`).draggable({cancel:false,
                                 revert : function(e, ui){
                                     $(this).data("uiDraggable").originalPosition={
@@ -88,6 +88,8 @@ function setActive(){
     var week=calendar.id.split('-')[1]
     $("#title").text("Calendar Week " + week)
     $(".arrows").css('opacity',1).prop('disabled', false)
+    console.log(week==$(".calendars").length)
+    console.log($(".calendars").length)
     if(week==1){
         $("#previous").css('opacity',0.5).prop('disabled', true)  
     }else if (week==$(".calendars").length){

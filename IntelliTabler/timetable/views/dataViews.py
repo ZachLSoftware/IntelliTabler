@@ -97,9 +97,13 @@ def getTeacher(request, id=0):
     return render(request, "data/teacherInfo.html", context)
 
 def getModules(request, groupId=0):
+    calendar=request.GET.get('calendar',0)
     if groupId==0:
-        groupId=request.GET.get('groupId', 0)        
-    moduleList=Module.objects.filter(group__parent_id=groupId)
+        groupId=request.GET.get('groupId', 0) 
+    if calendar:
+        moduleList=Module.objects.filter(group_id=groupId) 
+    else:      
+        moduleList=Module.objects.filter(group__parent_id=groupId)
     context={}
     modules={}
     for mod in moduleList:
@@ -137,6 +141,6 @@ def calendarView(request, year):
 
     context={}
     context['events']=json.dumps(events)
-    context['periods']=5
-    context['weeks']=2
+    context['periods']=classes[0].parent.department.format.numPeriods
+    context['weeks']=classes[0].parent.department.format.numWeeks
     return render(request, 'data/calendarView.html', context)
