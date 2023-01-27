@@ -16,7 +16,7 @@
             {{teacher.name}}
         </div>
         </div>
-            <div class="row justify-content-center">
+        <div class="row justify-content-center">
         <div class="col-4 border border-end-0">
             hours:
         </div>
@@ -32,24 +32,34 @@
                 {{teacher.roomNum}}
             </div>
         </div>
-        <div class="row justify-content-center mt-3">
+        <div id="assignments" class="row justify-content-center mt-3">
+            <div class="btn-group" role="group">
+            {% for year, mods in modules.items %}
+            <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#table{{year}}" >{{year}}</button>
+            {% endfor %}
+            </div>
+            {% for year, mods in modules.items %}
+            <div id="table{{year}}" class="collapse" data-bs-parent="#assignments">
+            <a type="button" class="btn btn-primary m-2" href="{% url 'calendarView' mods.0.group.parent.year.id teacher.id %}">View Calendar for {{year}}</a>
             <table class="table">
                 <th>Assigned Modules</th>
+                <th>Week</th>
                 <th>Period</th>
-                {% for mod in modules %}
+                {% for mod in mods %}
                 <tr>
                     <td>{{mod.name}}</td>
-                    {% if mod.period is not None %}
-                    <td>Week: {{mod.period.week}}, Day: {{mod.period.name}}</td>
-                    {% else %}
-                    <td>Not Scheduled</td>
-                    {% endif %}
+                    <td>{{mod.group.period.week}}</td>
+                    <td>{{mod.group.period.name}}</td>
                 </tr>
+                
                 {% empty %}
                 <tr>
                     <td>None assigned</td>
                 </tr>
-                {%endfor%}
+                {% endfor %}
             </table>
+        </div>
+                {%endfor%}
+            
 </div>
 {% endif %}

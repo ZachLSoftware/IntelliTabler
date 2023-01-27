@@ -74,6 +74,7 @@ class YearForm(forms.ModelForm):
 
 class AssignTeacherForm(forms.Form):
     teacher=forms.ChoiceField()
+    assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     
     def __init__(self, teachers, *args, **kwargs):
         super().__init__(*args, **kwargs)

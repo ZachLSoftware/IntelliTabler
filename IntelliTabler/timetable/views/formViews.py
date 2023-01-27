@@ -163,11 +163,15 @@ def assignTeacher(request, departmentId, moduleId):
     if request.method=='POST':
         form=AssignTeacherForm(choices, request.POST, request.FILES)
         if form.is_valid():
-            test=form.cleaned_data
-            mod= Module.objects.get(id=moduleId)
-            id=form.cleaned_data['teacher']
-            mod.teacher_id=int(id)
-            mod.save()
+            module= Module.objects.get(id=moduleId)
+            if form.cleaned_data['assignToAll']:
+                modules=Module.objects.filter(group__parent=module.group.parent, name=module.name)
+                for mod in modules:
+                    mod.teacher_id=int(form.cleaned_data['teacher'])
+                    mod.save()
+            else:
+                module.teacher_id=int(form.cleaned_data['teacher'])
+                module.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
     form=AssignTeacherForm(choices)
     context={'form':form}

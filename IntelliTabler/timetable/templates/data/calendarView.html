@@ -12,17 +12,16 @@
     const year=parseInt({{year}});
     var events={{events|safe}};
 </script>
-<script type="text/javascript" src="{% static 'javascript/modalHandler.js' %}" defer></script>
-<script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script> {% endcomment %}
+{% endcomment %}
 
 
 {% endblock %}
 {% block content %}
-
-<h1 id="title" style="text-align: center"> Calendar </h1>
+<h1 style="text-align:center">{{title}}</h1>
+<h1 id="title" style="text-align: center">Calendar </h1>
 <button id="previous" class='fas fa-arrow-alt-circle-left m-4 arrows' style='font-size:36px; float: left;'></button>
 <button id="next" class='fas fa-arrow-alt-circle-right m-4 arrows' style='font-size:36px; float: right;'></button>
-<div id="calendarWrapper" hx-trigger="load" hx-get="/getCalendar/{{year}}" hx-target="this">
+<div id="calendarWrapper" hx-trigger="load" hx-get="/getCalendar/{{year}}/{{teacher}}" hx-target="this">
 </div>
 
 <div id="viewDataModal" class="modal fade">

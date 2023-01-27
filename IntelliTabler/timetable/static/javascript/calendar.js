@@ -10,9 +10,12 @@ $(document).ready(function(){
 
 function createCalendar(){
     for(let week=1; week<=weeks; week++){
-        $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="d-none calendars" style="height: 1000px"></div>`)
+        $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="calendars" style="height: 1000px"></div>`)
     }
-    $("#calendarWeek-1").removeClass("d-none").addClass("activeCalendar");
+    $(".calendars").hide()
+    $("#calendarWeek-1").addClass("activeCalendar");
+    $("#calendarWeek-1").show()
+
     setActive();
 
     $(".calendars").each(function(index){
@@ -50,16 +53,19 @@ function createCalendar(){
 }
 
 function addEvent(mod){
-        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.id}?calendar=1" hx-target="#modalBody" class="event btn m-1">${mod.module.name}</button>`);
+        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1">${mod.module.name}</button>`);
         $(`#${mod.id}`).css('background-color', mod.module.color);
-        $(`#${mod.id}`).draggable({cancel:false,
-                                    revert : function(e, ui){
-                                        $(this).data("uiDraggable").originalPosition={
-                                            top: 0,
-                                            left:0
-                                        };
-                                        return !e;
-                                    }});
+        if(!teacher){
+            
+            $(`#${mod.id}`).draggable({cancel:false,
+                                        revert : function(e, ui){
+                                            $(this).data("uiDraggable").originalPosition={
+                                                top: 0,
+                                                left:0
+                                            };
+                                            return !e;
+                                        }});
+                                    }
     };
 
 
@@ -68,16 +74,20 @@ $('#next').click(function(){
     var current=$(".activeCalendar")[0];
     let nextId=parseInt(calendar.id.split('-')[1])+1;
     var next=$("#calendarWeek-"+nextId);
-    $(current).removeClass("activeCalendar").addClass("d-none");
-    $(next).removeClass("d-none").addClass("activeCalendar");
+    $(current).hide("slide", { direction: "left", duration: 500 });
+    $(next).show("slide", { direction: "right", duration: 500});
+     $(current).removeClass("activeCalendar");
+    $(next).addClass("activeCalendar");
     setActive();
 })
 $('#previous').click(function(){
     var current=$(".activeCalendar")[0];
     let nextId=parseInt(calendar.id.split('-')[1])-1;
     var next=$("#calendarWeek-"+nextId);
-    $(current).removeClass("activeCalendar").addClass("d-none");
-    $(next).removeClass("d-none").addClass("activeCalendar");
+    $(current).hide("slide", { direction: "right" }, 500);
+    $(next).show("slide", { direction: "left" }, 500);
+     $(current).removeClass("activeCalendar");
+    $(next).addClass("activeCalendar");
     setActive();
 })
 
@@ -113,7 +123,9 @@ function refreshListeners(){
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody") {
-        //$("#assignPeriod").remove()
+        if (teacher){
+            $(".editBtnCol").remove()
+        }
         dataModal.show();
     }
 })

@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period, ModuleParent
+from ..models import Department, Teacher, Module, ModuleGroup, Timetable, Period, ModuleParent, Format, Year
 from django.contrib.auth.decorators import login_required
 from django.apps import apps
 import json
@@ -91,7 +91,12 @@ def getTeacher(request, id=0):
         teacher=Teacher.objects.get(id=id)
     except:
         teacher=None
-    modules=Module.objects.filter(teacher=teacher)
+    mods=Module.objects.filter(teacher=teacher)
+    modules={}
+    for mod in mods:
+        if mod.group.parent.year.year not in modules:
+            modules[mod.group.parent.year.year]=[]
+        modules[mod.group.parent.year.year].append(mod)
     context={}
     context['modules']=modules
     context["teacher"]=teacher
@@ -115,44 +120,109 @@ def getModules(request, groupId=0):
     context["group"]=moduleList[0].group.parent
     return render(request, "data/modulesInfo.html", context)
 
-def timetableView(request, timetable):
-    table=Timetable.objects.get(id=timetable)
-    teachers=Teacher.objects.filter(department=table.year.department)
-    periods=Period.objects.filter(department=table.year.department)
-    context={'timetable':table, 'teachers':teachers, 'periods':periods}
-    return render(request, 'data/timetable.html', context)
+def combingView(request, yearId):
+    context={}
+    year=Year.objects.get(id=yearId)
+    teachers=Teacher.objects.filter(department=year.department)
+    periods=Period.objects.filter(department=year.department)
+    classes=Module.objects.filter(group__parent__year=year).order_by('group_id', 'name')
+    unassigned = False
+    modules=[]
+    count={}
+    parents=set()
+    
+    for cl in classes:
+        if cl.group.period:
+            parents.add(cl.group.parent)
+            if cl.teacher:
+                if cl.teacher in count:
+                    count[cl.teacher]+=1
+                else:
+                    count[cl.teacher]=1
+                info = {}
+                info["id"]=cl.id
+                info["module"]= {
+                    "period": cl.group.period.name,
+                    "week": cl.group.period.week,
+                    "session": count[cl.teacher],
+                    "name": cl.name,
+                    "teacher": cl.teacher.id,
+                    "groupid": cl.group.id,
+                    "parent": cl.group.parent.id,
+                    "color": cl.group.parent.color
+                }
+                modules.append(info)
+        else:
+            unassigned=True
+            break
+    
 
-def calendarView(request, year):
-    context={'year':year}
+    
+    context['modules']=json.dumps(modules)
+    context['teachers']=teachers
+    context['periods']=periods
+    context['numPeriods']=len(periods)
+    context['unassigned']=unassigned
+    context['parents']=parents
+    return render(request, 'data/combingView.html', context)
+
+def calendarView(request, year, teacher=0):
+    y=Year.objects.get(id=year)
+    if teacher:
+        title=Teacher.objects.get(id=teacher).name + " - "   + y.department.name + " - "+ str(y.year)
+    else:
+       title = y.department.name + " - " + str(y.year)
+    context={'year':year, 'teacher':teacher, 'title':title}
     return render(request, 'data/calendarView.html', context)
 
-def getCalendar(request, year):
-    classes=ModuleGroup.objects.filter(parent__year_id=year)
+def getCalendar(request, year, teacher=0):
     events={}
     modules=[]
-    for cl in classes:
-        if cl.period:
-            info = {}
-            info["id"]=cl.id
-            info["module"]= {
-                "period": cl.period.name,
-                "week": cl.period.week,
-                "name": cl.name,
-                "parent": cl.parent.id,
-                "color": cl.parent.color
-            }
-            
-            modules.append(info)
-    events["modules"]=modules
-
     context={}
+    if teacher:
+        classes=Module.objects.filter(teacher_id=teacher, group__parent__year_id=year)
+        for cl in classes:
+            if cl.group.period:
+                info = {}
+                info["id"]=cl.id
+                info["module"]= {
+                    "period": cl.group.period.name,
+                    "week": cl.group.period.week,
+                    "name": cl.name,
+                    "groupid": cl.group.id,
+                    "parent": cl.group.parent.id,
+                    "color": cl.group.parent.color
+                }
+                
+                modules.append(info)
+    else:
+        classes=ModuleGroup.objects.filter(parent__year_id=year)
+        for cl in classes:
+            if cl.period:
+                info = {}
+                info["id"]=cl.id
+                info["module"]= {
+                    "period": cl.period.name,
+                    "week": cl.period.week,
+                    "name": cl.name,
+                    "groupid": cl.id,
+                    "parent": cl.parent.id,
+                    "color": cl.parent.color
+                }
+                
+                modules.append(info)
+
+    events["modules"]=modules
+    format=Format.objects.get(department=Year.objects.get(id=year).department)
+    context['periods']=format.numPeriods
+    context['weeks']=format.numWeeks
+
     context['events']=json.dumps(events)
-    context['periods']=classes[0].parent.department.format.numPeriods
-    context['weeks']=classes[0].parent.department.format.numWeeks
     context['year']=year
+    context['teacher']=teacher
     return render(request, 'data/calendarSetVariables.html', context)
 
-def getCalendarData(request, year):
+def getCalendarData(year):
     classes=ModuleGroup.objects.filter(parent__year_id=year)
     events={}
     modules=[]

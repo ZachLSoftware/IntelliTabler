@@ -35,10 +35,11 @@ urlpatterns = [
     path('assignTeacher/<int:departmentId>/<int:moduleId>', formViews.assignTeacher, name='assignTeacher'),
     path('assignPeriod/<int:department>/<int:groupId>', formViews.assignPeriod, name='assignPeriod'),
     path('deleteObject/<str:type>/<str:id>', formViews.deleteObject, name='deleteObject'),
-    path('timetable/<int:timetable>', dataViews.timetableView, name="timetableView"),
+    path('combing/<int:yearId>', dataViews.combingView, name="combingView"),
     path('calendar/<int:year>', dataViews.calendarView, name="calendarView"),
+    path('calendar/<int:year>/<int:teacher>', dataViews.calendarView, name="calendarView"),
     path('calendarPeriodDrop/<str:day>/<int:week>/<int:groupId>', formViews.calendarPeriodDrop, name="calendarPeriodDrop"),
     path('getCalendarData/<int:year>', dataViews.getCalendarData, name='getCalendarData'),
     path('addModuleCalendar/<str:day>/<int:week>/<int:year>', formViews.addModuleCalendar, name='addModuleCalendar' ),
-    path('getCalendar/<int:year>', dataViews.getCalendar, name="getCalendar"),
+    path('getCalendar/<int:year>/<int:teacher>', dataViews.getCalendar, name="getCalendar"),
 ]
