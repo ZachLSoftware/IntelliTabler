@@ -189,7 +189,18 @@ def assignPeriod(request, department, groupId):
             per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
             group.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
             group.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
+            info = {}
+            info["id"]=group.id
+            info["module"]= {
+                "period": group.period.name,
+                "week": group.period.week,
+                "name": group.name,
+                "parent": group.parent.id,
+                "color": group.parent.color
+            }
+            event={"periodUpdate":info}
+            event["moduleDetailsChange"]="Modules Changed"
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
     form=AssignPeriodForm(weeks,periods)
     context={'form':form}
     context['Operation']="Assign/Edit Period"
@@ -234,7 +245,8 @@ def addModuleCalendar(request, day, week, year):
                 "period": mod.period.name,
                 "week": mod.period.week,
                 "name": mod.name,
-                "parent": mod.parent.id
+                "parent": mod.parent.id,
+                "color": mod.parent.color
             }
             modules.append(info)
             events["addEvent"]={"modules":modules}

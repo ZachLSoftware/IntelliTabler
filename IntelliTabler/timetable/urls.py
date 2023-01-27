@@ -39,5 +39,6 @@ urlpatterns = [
     path('calendar/<int:year>', dataViews.calendarView, name="calendarView"),
     path('calendarPeriodDrop/<str:day>/<int:week>/<int:groupId>', formViews.calendarPeriodDrop, name="calendarPeriodDrop"),
     path('getCalendarData/<int:year>', dataViews.getCalendarData, name='getCalendarData'),
-    path('addModuleCalendar/<str:day>/<int:week>/<int:year>', formViews.addModuleCalendar, name='addModuleCalendar' )
+    path('addModuleCalendar/<str:day>/<int:week>/<int:year>', formViews.addModuleCalendar, name='addModuleCalendar' ),
+    path('getCalendar/<int:year>', dataViews.getCalendar, name="getCalendar"),
 ]

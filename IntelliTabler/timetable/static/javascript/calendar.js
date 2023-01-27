@@ -3,42 +3,55 @@ var selectedCell;
 var numCal=$(".calendars").length;
 let days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
 refresh=false;
+$(document).ready(function(){
+    createCalendar();
+})
 
-for(let week=1; week<=weeks; week++){
-    $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="d-none calendars" style="height: 1000px"></div>`)
-}
-$("#calendarWeek-1").removeClass("d-none").addClass("activeCalendar");
-setActive();
 
-$(".calendars").each(function(index){
-    week=this.id.split('-')[1]
-    $(this).append(`<div id="periodColumn-${week}" class="dayHeader border periodColumn"><div class="calendarHeader"><h3>Period</h3></div></div>`)
-    days.forEach((day) =>{
-        $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
-        for(let period=1; period<=periods; period++){
-            $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell">${day}-${period}<br/></div>`);
-            $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
-                $(ui.draggable).appendTo(this);
-                $(ui.draggable).css({'top' : 0, 'left' : 0})
-                p=this.id.split('-')
-                var element = htmx.ajax('POST', `/calendarPeriodDrop/${p[0]}-${p[1]}/${p[2]}/${ui.draggable[0].id}`);
-                }
-            });
-        }
-    });
+function createCalendar(){
+    for(let week=1; week<=weeks; week++){
+        $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="d-none calendars" style="height: 1000px"></div>`)
+    }
+    $("#calendarWeek-1").removeClass("d-none").addClass("activeCalendar");
+    setActive();
 
-        for(let period=1; period<=periods; period++){
-            $(`#periodColumn-${week}`).append(`<div class="border pRow">${period}</div>`);
-        }
+    $(".calendars").each(function(index){
+        week=this.id.split('-')[1]
+        $(this).append(`<div id="periodColumn-${week}" class="dayHeader periodColumn border"><div class="calendarHeader"><h3>Period</h3></div></div>`)
+        days.forEach((day) =>{
+            $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
+            for(let period=1; period<=periods; period++){
+                $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell">${day}-${period}<br/></div>`);
+                $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
+                    $(ui.draggable).appendTo(this);
+                    $(ui.draggable).css({'top' : 0, 'left' : 0})
+                    p=this.id.split('-')
+                    var element = htmx.ajax('POST', `/calendarPeriodDrop/${p[0]}-${p[1]}/${p[2]}/${ui.draggable[0].id}`);
+                    }
+                });
+            }
+        });
 
+            for(let period=1; period<=periods; period++){
+                $(`#periodColumn-${week}`).append(`<div class="border pRow">${period}</div>`);
+            }
+
+        })
+        $(".dayHeader").css("grid-template-rows", `1fr repeat(${periods}, 3fr`);
+
+
+    events["modules"].forEach((mod) => addEvent(mod));
+    refreshListeners();
+    $(".dayCell").on("click", function(e){
+        var id=this.id.split('-');
+        htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${year}`, '#addForm');
     })
-    $(".dayHeader").css("grid-template-rows", `1fr repeat(${periods}, 3fr`);
+    
+}
 
-
-events["modules"].forEach((mod) => addEvent(mod));
-refreshListeners();
 function addEvent(mod){
-        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.parent}?calendar=1" hx-target="#modalBody" class="event btn btn-info">${mod.module.name}</button>`);
+        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.id}?calendar=1" hx-target="#modalBody" class="event btn m-1">${mod.module.name}</button>`);
+        $(`#${mod.id}`).css('background-color', mod.module.color);
         $(`#${mod.id}`).draggable({cancel:false,
                                     revert : function(e, ui){
                                         $(this).data("uiDraggable").originalPosition={
@@ -49,10 +62,6 @@ function addEvent(mod){
                                     }});
     };
 
-$(".dayCell").on("click", function(e){
-    var id=this.id.split('-');
-    htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${year}`, '#addForm');
-})
 
 
 $('#next').click(function(){
@@ -98,11 +107,13 @@ function refreshListeners(){
         clicked=this.id;
         e.stopPropagation();
     });
+ 
+    htmx.process(htmx.find("#calendarWrapper"));
 }
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody") {
-        $("#assignPeriod").remove()
+        //$("#assignPeriod").remove()
         dataModal.show();
     }
 })
@@ -116,7 +127,11 @@ htmx.on("htmx:beforeSwap", (e) => {
 
 $(document).on("addEvent", function(e){
     addEvent(e.detail.modules[0]);
-    htmx.process(htmx.find("#calendarWrapper"));
     refreshListeners();
 })
 
+$(document).on("periodUpdate", function(e){
+    $(`#${e.detail.id}`).remove()
+    addEvent(e.detail);
+    refreshListeners();
+})

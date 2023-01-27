@@ -85,6 +85,7 @@ class ModuleParent(models.Model):
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     year=models.ForeignKey(Year, on_delete=models.CASCADE)
+    color=models.CharField(max_length=7, default="#0275d8")
 
 class ModuleGroup(models.Model):
     name=models.CharField(max_length=50)

@@ -1,6 +1,7 @@
 from django import forms
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
+from django.forms.widgets import TextInput
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
@@ -45,7 +46,10 @@ class AvailabilityForm(forms.Form):
 class ModuleParentForm(forms.ModelForm):
     class Meta:
         model=ModuleParent
-        fields=("name","numPeriods", "numClasses")
+        fields=("name","numPeriods", "numClasses", "color")
+        widgets={
+            'color': TextInput(attrs={'type': 'color'}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.year = kwargs.pop('year', None)
@@ -98,6 +102,10 @@ class addEventForm(forms.Form):
 
     def __init__(self, groups, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['group'].choices = groups
+        if(groups==[]):
+            self.fields['group'].choices=[('None', 'None'),]
+            self.fields['group'].widget.attrs['disabled']=True
+        else:
+            self.fields['group'].choices = groups
 
 

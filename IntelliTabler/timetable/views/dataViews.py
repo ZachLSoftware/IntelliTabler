@@ -123,6 +123,10 @@ def timetableView(request, timetable):
     return render(request, 'data/timetable.html', context)
 
 def calendarView(request, year):
+    context={'year':year}
+    return render(request, 'data/calendarView.html', context)
+
+def getCalendar(request, year):
     classes=ModuleGroup.objects.filter(parent__year_id=year)
     events={}
     modules=[]
@@ -134,7 +138,8 @@ def calendarView(request, year):
                 "period": cl.period.name,
                 "week": cl.period.week,
                 "name": cl.name,
-                "parent": cl.parent.id
+                "parent": cl.parent.id,
+                "color": cl.parent.color
             }
             
             modules.append(info)
@@ -145,7 +150,7 @@ def calendarView(request, year):
     context['periods']=classes[0].parent.department.format.numPeriods
     context['weeks']=classes[0].parent.department.format.numWeeks
     context['year']=year
-    return render(request, 'data/calendarView.html', context)
+    return render(request, 'data/calendarSetVariables.html', context)
 
 def getCalendarData(request, year):
     classes=ModuleGroup.objects.filter(parent__year_id=year)
@@ -159,7 +164,8 @@ def getCalendarData(request, year):
                 "period": cl.period.name,
                 "week": cl.period.week,
                 "name": cl.name,
-                "parent": cl.parent.id
+                "parent": cl.parent.id,
+                "color": cl.parent.color
             }
             
             modules.append(info)

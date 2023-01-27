@@ -7,23 +7,3 @@
 {% load static %}
 <script type="text/javascript" src="{% static 'javascript/modalHandler.js' %}" defer></script>
 <script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script>
-<div id="calendarWrapper"></div>
-<div id="viewDataModal" class="modal fade">
-    <div id="module" class="modal-dialog" hx-target="this">
-        <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Module Info</h5>
-                </div>
-                <div id="modalBody" class="modal-body" hx-trigger="moduleDetailsChange from:body" hx-get="{%url 'getModules' %}" hx-vals='js:{"groupId":getClicked(), "calendar":1}' hx-target="this">
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-  </div>
-
-  <div id="addFormModal" class="modal fade">
-    <div id="addForm" class="modal-dialog" hx-target="this"></div>
-  </div>
