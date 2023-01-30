@@ -24,15 +24,15 @@
 <table class="table">
     <th>Teachers</th>
     <th>Load</th>
-    {% for p in periods %}
-    <th>{{forloop.counter}}</th>
+    {% for k,v in periods.items %}
+    <th>{{k}}</th>
     {% endfor %}
     {% for t in teachers %}
     <tr>
         <td>{{t.name}}</td>
         <td>{{t.totalHours}}</td>
-        {% for p in periods %}
-        <td id="{{t.id}}x{{forloop.counter}}"></td>
+        {% for p,v in periods.items %}
+        <td id="{{t.id}}x{{v.name}}-{{v.week}}"></td>
         {% endfor %}
     </tr>
     {% endfor %}
@@ -51,7 +51,7 @@
             <tbody>
                 {% for module in parents %}
                 <tr>
-                <td>{{module.name}}</td>
+                <td style="background-color: {{module.color}}">{{module.name}}</td>
                 <td>{{module.numPeriods}}</td>
                 <td>{{module.numClasses}}</td>
                 <td id="{{module.id}}Total">{{module.numPeriods|mul:module.numClasses}}</td>
@@ -67,7 +67,7 @@
             <th>Teacher</th>
             <th>Load</th>
             {% for module in parents %}
-            <th>{{module.name}}</th>
+            <th style="background-color: {{module.color}}">{{module.name}}</th>
             {%endfor%}
             <th>Allocated</th>
             <th>Remaining</th>

@@ -124,12 +124,26 @@ def combingView(request, yearId):
     context={}
     year=Year.objects.get(id=yearId)
     teachers=Teacher.objects.filter(department=year.department)
-    periods=Period.objects.filter(department=year.department)
-    classes=Module.objects.filter(group__parent__year=year).order_by('group_id', 'name')
+    periods=list(Period.objects.filter(department=year.department))
+    groups=ModuleGroup.objects.filter(parent__year=year).order_by('parent__name', 'id')
+    classes=Module.objects.filter(group__parent__year=year).order_by('group__parent__name','group_id', 'name')
     unassigned = False
     modules=[]
     count={}
     parents=set()
+    pAssign={}
+    index=1
+    for group in groups:
+        if group.period not in periods:
+            continue
+        else:
+            pAssign[index]=group.period
+            periods.remove(group.period)
+            index+=1
+    if periods:
+        for period in periods:
+            pAssign[index]=period
+            index+=1
     
     for cl in classes:
         if cl.group.period:
@@ -144,7 +158,7 @@ def combingView(request, yearId):
                 info["module"]= {
                     "period": cl.group.period.name,
                     "week": cl.group.period.week,
-                    "session": count[cl.teacher],
+                    "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
                     "name": cl.name,
                     "teacher": cl.teacher.id,
                     "groupid": cl.group.id,
@@ -160,7 +174,7 @@ def combingView(request, yearId):
     
     context['modules']=json.dumps(modules)
     context['teachers']=teachers
-    context['periods']=periods
+    context['periods']=pAssign
     context['numPeriods']=len(periods)
     context['unassigned']=unassigned
     context['parents']=parents
