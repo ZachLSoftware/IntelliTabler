@@ -178,6 +178,64 @@ def assignTeacher(request, departmentId, moduleId):
     context['Operation']="Assign Teacher"
     return render(request, 'forms/modalForm.html', context)
 
+def assignTeacherCombing(request, teacherId, yearId):
+    g=ModuleGroup.objects.filter(parent__year_id=yearId)
+    m=Module.objects.filter(group__parent__year_id=yearId)
+    groups=[]
+    moduleChoices=[]
+    newMods=[]
+    for group in g:
+        groups.append((group.id, group.name))
+    for module in m:
+        moduleChoices.append((module.id, module.name))
+
+    if request.method=='POST':
+        teachers=set()
+        parents=set()
+        teachers.add(teacherId)
+        form=addTeacherCombingForm(groups,moduleChoices,request.POST,request.FILES)
+        if form.is_valid():
+            groupId=form.cleaned_data['group']
+            modId=form.cleaned_data['module']
+            group=ModuleGroup.objects.get(id=groupId)
+            module=Module.objects.get(id=modId)
+            if form.cleaned_data['assignToAll']:
+                modules=Module.objects.filter(group__parent=group.parent, name=module.name)
+            else:
+                modules=[module]
+            for cl in modules:
+                if cl.teacher_id:
+                    teachers.add(cl.teacher_id)
+                parents.add(cl.group.parent_id)
+                cl.teacher_id=teacherId
+                cl.save()
+                info = {}
+                info["id"]=cl.id
+                info["module"]= {
+                    "period": cl.group.period.name,
+                    "week": cl.group.period.week,
+                    "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
+                    "name": cl.name,
+                    "teacher": cl.teacher.id,
+                    "groupid": cl.group.id,
+                    "parent": cl.group.parent.id,
+                    "color": cl.group.parent.color
+                }
+                newMods.append(info)
+            event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
+            
+        else:
+            return render(request, 'forms/modalForm.html', {'form':form})
+
+    else:
+        form=addTeacherCombingForm(groups,moduleChoices)
+
+    context={}
+    context['form']=form
+    return render(request, 'forms/modalForm.html', context)
+
+
 def assignPeriod(request, department, groupId):
     weeks=[]
     periods=[]
@@ -260,4 +318,42 @@ def addModuleCalendar(request, day, week, year):
     context={'form':form}
     context['Operation']="Assign Module Timeslot"
     return render(request, 'forms/modalForm.html', context)
+
+def unassignTeacher(request, modId):
+    if request.method=='POST':
+        mod=Module.objects.get(id=modId)
+        event={"unassignSuccess": {"modId":modId, "parent":[mod.group.parent.id], "teacher":[mod.teacher.id]}}
+        mod.teacher=None
+        mod.save()
+        return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(event)})
+
+def assignTeacherDrop(request, teacherId, modId):
+    if request.method=='POST':
+        teachers=set()
+        parents=set()
+        teachers.add(teacherId)
+        cl=Module.objects.get(id=modId)
+        teachers.add(cl.teacher_id)
+        cl.teacher_id=teacherId
+        newMods=[]
+        cl.save()
+        parents.add(cl.group.parent_id)
+        cl.teacher_id=teacherId
+        cl.save()
+        info = {}
+        info["id"]=cl.id
+        info["module"]= {
+            "period": cl.group.period.name,
+            "week": cl.group.period.week,
+            "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
+            "name": cl.name,
+            "teacher": cl.teacher.id,
+            "groupid": cl.group.id,
+            "parent": cl.group.parent.id,
+            "color": cl.group.parent.color
+        }
+        newMods.append(info)
+    event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
+    return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
+
 

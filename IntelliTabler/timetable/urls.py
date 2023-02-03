@@ -42,4 +42,7 @@ urlpatterns = [
     path('getCalendarData/<int:year>', dataViews.getCalendarData, name='getCalendarData'),
     path('addModuleCalendar/<str:day>/<int:week>/<int:year>', formViews.addModuleCalendar, name='addModuleCalendar' ),
     path('getCalendar/<int:year>/<int:teacher>', dataViews.getCalendar, name="getCalendar"),
+    path('assignTeacherCombing/<int:teacherId>/<int:yearId>', formViews.assignTeacherCombing, name='assignTeacherCombing'),
+    path('unassignTeacher/<int:modId>', formViews.unassignTeacher, name="unassignTeacher"),
+    path('assignTeacherDrop/<int:teacherId>/<int:modId>', formViews.assignTeacherDrop, name="assignTeacherDrop"),
 ]

@@ -8,8 +8,16 @@
     overflow-x: auto;
 } */
 
-
-
+.modDiv{
+    position: relative;
+}
+.removeMod {
+    position: absolute;
+    top: 7%;
+    right: 7%;
+    z-index:1;
+    cursor:pointer;
+}
 td, th {
     width: 50px;
 }

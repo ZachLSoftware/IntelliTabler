@@ -110,3 +110,17 @@ class addEventForm(forms.Form):
             self.fields['group'].choices = groups
 
 
+class addTeacherCombingForm(forms.Form):
+    group=forms.ChoiceField(widget=forms.Select(attrs={'id': 'groupChoice'}))
+    module=forms.ChoiceField(widget=forms.Select(attrs={'id': 'moduleChoice'}))
+    assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    def __init__(self, groups, modules, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if(groups==[]):
+            self.fields['group'].choices=[('None', 'None'),]
+            self.fields['group'].widget.attrs['disabled']=True
+            self.fields['module'].widget.attrs['disabled']=True
+        else:
+            self.fields['group'].choices = groups
+            self.fields['module'].choices= modules

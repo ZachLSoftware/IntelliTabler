@@ -132,6 +132,7 @@ def combingView(request, yearId):
     count={}
     parents=set()
     pAssign={}
+    mJson={}
     index=1
     for group in groups:
         if group.period not in periods:
@@ -148,11 +149,10 @@ def combingView(request, yearId):
     for cl in classes:
         if cl.group.period:
             parents.add(cl.group.parent)
+            if cl.group.id not in mJson:
+                mJson[cl.group.id]=[]
+            mJson[cl.group.id].append((cl.id,cl.name))
             if cl.teacher:
-                if cl.teacher in count:
-                    count[cl.teacher]+=1
-                else:
-                    count[cl.teacher]=1
                 info = {}
                 info["id"]=cl.id
                 info["module"]= {
@@ -178,6 +178,8 @@ def combingView(request, yearId):
     context['numPeriods']=len(periods)
     context['unassigned']=unassigned
     context['parents']=parents
+    context['yearId']=yearId
+    context['modChoices']=json.dumps(mJson)
     return render(request, 'data/combingView.html', context)
 
 def calendarView(request, year, teacher=0):

@@ -1,12 +1,13 @@
 {% extends "base_template.html" %}
 {% block js %}
 {% load static %}
-<script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="{% static 'css/combing.css' %}">
 <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
+<script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
 <script>
     var numP = parseInt({{numPeriods}})
     const modules={{modules|safe}}
+    const modChoices={{modChoices|safe}}
 </script>
 {% endblock %}
 {% load mathfilters %}
@@ -21,18 +22,18 @@
 {% if unassigned %}
 <h1>Some classes are not assigned to a timeslot. Please assign these first.</h1>
 {% else %}
-<table class="table">
+<table id="combingChart" class="table">
     <th>Teachers</th>
     <th>Load</th>
     {% for k,v in periods.items %}
     <th>{{k}}</th>
     {% endfor %}
     {% for t in teachers %}
-    <tr>
-        <td>{{t.name}}</td>
+    <tr id="{{t.id}}Row" class="teacherRow">
+        <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id yearId %}" hx-target="#addForm">{{t.name}}</button></td>
         <td>{{t.totalHours}}</td>
         {% for p,v in periods.items %}
-        <td id="{{t.id}}x{{v.name}}-{{v.week}}"></td>
+        <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>
         {% endfor %}
     </tr>
     {% endfor %}
@@ -75,7 +76,7 @@
                 {% for t in teachers %}
                 <tr>
                 <td>{{t.name}}</td>
-                <td>{{t.totalHours}}</td>
+                <td id="{{t.id}}Load">{{t.totalHours}}</td>
                 {% for module in parents %}
                 <td id="{{t.id}}alloc{{module.id}}">0</td>
                 {%endfor%}
