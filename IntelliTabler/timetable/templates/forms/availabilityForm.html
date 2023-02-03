@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<h1>{{teacher.name}} Availability - Hours Remaining: <span id="totalHours"> {{ hours }}</span> </h1>
+<h1>{{teacher.name}} Availability - Hours Remaining: <span id="load"> {{ hours }}</span> </h1>
 <button id="selectAll" type="button" class="btn btn-primary">Select All</button>
 <button id="clearSelect" type="button" class="btn btn-primary">Clear Selection</button>
 <form method="POST" action="{% url 'setAvailability' teacher.id %}" enctype="multipart/form-data">

@@ -4,6 +4,17 @@ from django.contrib.auth.forms import UserCreationForm
 from django.forms.widgets import TextInput
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from .validators import *
+
+class BaseForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label_suffix', '')  
+        super(BaseForm, self).__init__(*args, **kwargs)
+
+class BaseModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label_suffix', '')
+        super(BaseModelForm, self).__init__(*args, **kwargs)
 
 class RegistrationForm(UserCreationForm):
     class Meta:
@@ -18,32 +29,27 @@ class RegistrationForm(UserCreationForm):
                 <li id="numCheck">Your password can’t be entirely numeric.</li>
             </ul>"""
 
-class DepartmentForm(forms.ModelForm):
-    class Meta:
-        model = Department
-        fields = ("name",)
+class DepartmentForm(BaseForm):
+    name = forms.CharField(max_length=30, label="Department Name")
+    numPeriods=forms.IntegerField(label=_("Number of Periods Per Day"), validators=[validate_positive], help_text="The number of periods that happen each day.")
+    numWeeks=forms.IntegerField(label=_("Number of recurring weeks"), validators=[validate_positive], help_text="The number of weeks before the schedule repeats.")
 
 
-class FormatForm(forms.ModelForm):
-    class Meta:
-        model=Format
-        fields = ("numPeriods","numWeeks",)
 
-
-class TeacherForm(forms.ModelForm):
+class TeacherForm(BaseModelForm):
+    name = forms.CharField(label="Teacher Name")
+    load = forms.IntegerField(label="Contracted Hours", validators=[validate_positive])
+    roomNum = forms.CharField(max_length=20, label="Room")
     class Meta:
         model=Teacher
-        fields = ("name", "totalHours", "roomNum", "id")
-        widgets = {
-            "id": forms.HiddenInput(),
-        }
+        exclude={"user","department", "id"}
 
-class AvailabilityForm(forms.Form):
+class AvailabilityForm(BaseForm):
     checked = forms.BooleanField(required=False)
     period = forms.CharField()
     week = forms.IntegerField()
 
-class ModuleParentForm(forms.ModelForm):
+class ModuleParentForm(BaseModelForm):
     class Meta:
         model=ModuleParent
         fields=("name","numPeriods", "numClasses", "color")
@@ -67,12 +73,12 @@ class ModuleParentForm(forms.ModelForm):
                     _('Module: %(value)s already exists for year: %(year)s'),
                     params={'value': name, 'year': year.year})
 
-class YearForm(forms.ModelForm):
+class YearForm(BaseModelForm):
     class Meta:
         model=Year
         fields=("year",)
 
-class AssignTeacherForm(forms.Form):
+class AssignTeacherForm(BaseForm):
     teacher=forms.ChoiceField()
     assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     
@@ -80,7 +86,7 @@ class AssignTeacherForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['teacher'].choices = teachers
 
-class AssignPeriodForm(forms.Form):
+class AssignPeriodForm(BaseForm):
     DAYS=(
         ("Mon", "Mon"),
         ("Tues", "Tues"),
@@ -97,7 +103,7 @@ class AssignPeriodForm(forms.Form):
         self.fields['week'].choices = weeks
         self.fields['period'].choices = periods
 
-class addEventForm(forms.Form):
+class addEventForm(BaseForm):
     group=forms.ChoiceField()
 
 
@@ -110,7 +116,7 @@ class addEventForm(forms.Form):
             self.fields['group'].choices = groups
 
 
-class addTeacherCombingForm(forms.Form):
+class addTeacherCombingForm(BaseForm):
     group=forms.ChoiceField(widget=forms.Select(attrs={'id': 'groupChoice'}))
     module=forms.ChoiceField(widget=forms.Select(attrs={'id': 'moduleChoice'}))
     assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))

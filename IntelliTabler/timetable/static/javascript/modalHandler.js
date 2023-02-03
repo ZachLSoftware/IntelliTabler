@@ -4,6 +4,9 @@ var clickedChild=0;
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "addForm") {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        console.log(tooltipList)
         modal.show();
     }
 })
@@ -41,3 +44,4 @@ function getChild(){
 document.body.addEventListener("deleted", function(e){
     alert('Delete triggered');
 })
+

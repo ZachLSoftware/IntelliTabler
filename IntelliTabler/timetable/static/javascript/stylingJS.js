@@ -1,3 +1,5 @@
+
+
 $(document).on("click", "button", function(){
     if($(this).hasClass("parentButtons")){
         $(".parentButtons").removeClass("active");

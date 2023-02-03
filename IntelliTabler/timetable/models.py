@@ -54,9 +54,9 @@ def createPeriods(sender, instance, created, **kwargs):
 
 class Teacher(RandomIDModel):
     name = models.CharField(max_length=50)
-    totalHours = models.IntegerField(blank=True, null=True)
+    load = models.IntegerField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    roomNum = models.IntegerField(blank=True, null=True)
+    roomNum = models.CharField(max_length=20, blank=True, null=True)
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
 
 class Availability(models.Model):
@@ -64,7 +64,7 @@ class Availability(models.Model):
     week = models.IntegerField()
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
-class Year(models.Model):
+class Year(RandomIDModel):
     YEARS=[]
     for i in range(datetime.datetime.now().year-10, datetime.datetime.now().year+10):
         YEARS.append((i,i))
@@ -78,7 +78,7 @@ def actualTimetable(sender, instance, created, **kwargs):
     if created:
         Timetable.objects.create(id=(instance.department.id*instance.year), user=instance.department.user, name=str(instance.year)+" Timetable", year=instance)
 
-class ModuleParent(models.Model):
+class ModuleParent(RandomIDModel):
     name=models.CharField(max_length=50)
     numPeriods=models.IntegerField()
     numClasses=models.IntegerField()
@@ -87,17 +87,17 @@ class ModuleParent(models.Model):
     year=models.ForeignKey(Year, on_delete=models.CASCADE)
     color=models.CharField(max_length=7, default="#0275d8")
 
-class ModuleGroup(models.Model):
+class ModuleGroup(RandomIDModel):
     name=models.CharField(max_length=50)
     period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
     parent=models.ForeignKey(ModuleParent, on_delete=models.CASCADE)
 
-class Module(models.Model):
+class Module(RandomIDModel):
     name=models.CharField(max_length=50)
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
 
-class Timetable(models.Model):
+class Timetable(RandomIDModel):
     name = models.CharField(max_length=20)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     year = models.ForeignKey(Year, on_delete=models.CASCADE)

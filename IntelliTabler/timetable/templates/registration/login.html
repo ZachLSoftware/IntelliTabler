@@ -3,9 +3,7 @@
 {% block content %}
 {% load widget_tweaks %}
 
-  {% if form.errors %}
-    <p>Your username and password didn't match. Please try again.</p>
-  {% endif %}
+
 
   {% if next %}
     {% if user.is_authenticated %}
@@ -19,20 +17,17 @@
   <div class="container-fluid justify-content-center mt-5 border" style="max-width: 50%">
   <form method="post" action="{% url 'login' %}">
     {% csrf_token %}
-    <div class="mb-4 mt-4">
-        {{ form.username.label }}
-        {{ form.username|add_class:"form-control" }}
-    </div>
-    <div class="mb-4 mt-4">
-        {{ form.password.label }}
-        {{ form.password|add_class:"form-control" }}
-    </div>
-    <button class="btn btn-primary" type="submit">Login</button>
+    {{form}}
+    {% if form.errors %}
+    <p style="color:red;">Your username and password didn't match. Please try again.</p>
+    {% endif %}
+    <button class="btn btn-primary mb-4" type="submit">Login</button>
     <input type="hidden" name="next" value="{{ next }}">
   </form>
 
 
   {# Assumes you setup the password_reset view in your URLconf #}
+  <a type="button" class="btn-sm btn-secondary" href="{% url "register" %}">Register</a>
   <p>Passowrd Reset Placeholder</p>
 </div>
 </br>

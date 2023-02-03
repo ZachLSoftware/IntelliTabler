@@ -11,6 +11,10 @@ select, option {
   color: black;
 }
 
+label {
+  color: black;
+}
+
 caption {
   color: white;
 }
@@ -49,4 +53,15 @@ td, th {
   background-color: rgb(3, 39, 107);
 }
 
+body .form-floating{
+  color:black;
+}
 
+.helptext{
+  position:relative;
+}
+
+.helpicon {
+  position: absolute;
+  top: 50%;
+}

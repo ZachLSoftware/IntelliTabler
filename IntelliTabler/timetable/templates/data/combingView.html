@@ -3,7 +3,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/combing.css' %}">
 <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
-<script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
+
 <script>
     var numP = parseInt({{numPeriods}})
     const modules={{modules|safe}}
@@ -31,7 +31,7 @@
     {% for t in teachers %}
     <tr id="{{t.id}}Row" class="teacherRow">
         <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id yearId %}" hx-target="#addForm">{{t.name}}</button></td>
-        <td>{{t.totalHours}}</td>
+        <td>{{t.load}}</td>
         {% for p,v in periods.items %}
         <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>
         {% endfor %}
@@ -76,12 +76,12 @@
                 {% for t in teachers %}
                 <tr>
                 <td>{{t.name}}</td>
-                <td id="{{t.id}}Load">{{t.totalHours}}</td>
+                <td id="{{t.id}}Load">{{t.load}}</td>
                 {% for module in parents %}
                 <td id="{{t.id}}alloc{{module.id}}">0</td>
                 {%endfor%}
                 <td id="{{t.id}}Allocated">0</td>
-                <td id="{{t.id}}Rem">{{t.totalHours}}</td>
+                <td id="{{t.id}}Rem">{{t.load}}</td>
                 </tr>
                 {%endfor%}
     </div>

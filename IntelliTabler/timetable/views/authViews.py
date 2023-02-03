@@ -34,10 +34,10 @@ def register(request):
             )
             if email.send():
                 username = form.cleaned_data.get('username')
-                messages.success(request, f"Dear <b>{username}")
+                messages.success(request, f"{username}, Please check your email for to confirm your account.")
             else:
                 message.error(request, f'Problem sending email')
-            return redirect('index')
+            return redirect('login')
         else:
             context["form"] = form
     else:

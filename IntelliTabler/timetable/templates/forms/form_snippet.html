@@ -1,0 +1,20 @@
+{% load widget_tweaks %}
+{% for field in form %}
+    <div class="fieldWrapper mb-4 mt-4 row">
+        <div class="col form-floating">
+        {% if form.errors|length > 0 and field.errors|length == 0 %}
+        {% render_field field class="form-control is-valid" placeholder=field.label %}
+        {%else%}
+        {% render_field field|add_error_class:"is-invalid" class="form-control" placeholder=field.label %}
+        {%endif%}
+        {{field.label_tag}}
+        {{ field.errors }}
+        </div>
+        <div class="col-1 helptext">
+            {% if field.help_text%}
+            <i class="fas fa-question-circle fa-lg helpicon" data-bs-toggle="tooltip" data-bs-placement="top"
+            data-bs-title="{{field.help_text}}"></i> 
+            {%endif%}
+        </div>
+    </div>
+{%endfor%}

@@ -10,30 +10,30 @@ import json
 # Create your views here.
 def addDepartment(request):
     if request.method == "POST":
-        departmentform = DepartmentForm(request.POST, request.FILES)
-        formatform = FormatForm(request.POST, request.FILES)
-        if departmentform.is_valid() and formatform.is_valid:
-            newdepartment=departmentform.save(commit=False)
-            #newdepartment.user=1
-            new_format = formatform.save(commit=False)
-            new_format.department=newdepartment
-            newdepartment.user=request.user
-            newdepartment.save()
-            new_format.save()
+        form = DepartmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            dep=Department()
+            dep.name=form.cleaned_data['name']
+            format = Format()
+            format.numPeriods=form.cleaned_data['numPeriods']
+            format.numWeeks=form.cleaned_data['numWeeks']
+            format.department=dep
+            dep.user=request.user
+            dep.save()
+            format.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'departmentChange'})
     else:
-        departmentform=DepartmentForm()
-        formatform=FormatForm()
+        form=DepartmentForm()
     context={
-        "departmentform": departmentform,
-        "formatform": formatform
+        "form": form,
+        "Operation": "Add Department"
     }
-    return render(request, 'forms/departmentForm.html',context)
+    return render(request, 'forms/modalForm.html',context)
 
 def addTeacher(request, department, id=0):
     if request.method=="POST":
         Teacher.objects.filter(pk=0).delete()
-        teacher, created=Teacher.objects.get_or_create(id=request.POST['id'], user=request.user, department_id=department)
+        teacher, created=Teacher.objects.get_or_create(id=id, user=request.user, department_id=department)
         Teacher.objects.filter(pk=0).delete()
         form = TeacherForm(request.POST, instance=teacher)
         if(form.is_valid()):
@@ -52,7 +52,7 @@ def addTeacher(request, department, id=0):
             teacher=get_object_or_404(Teacher, pk=id)
             form=TeacherForm(instance=teacher)
         else:     
-            form = TeacherForm(initial={"id":0})
+            form = TeacherForm()
     context={'form':form}
     context['Operation']="Add or Edit Teacher"
     return render(request, 'forms/modalForm.html', context)
