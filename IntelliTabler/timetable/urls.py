@@ -45,4 +45,9 @@ urlpatterns = [
     path('assignTeacherCombing/<int:teacherId>/<int:yearId>', formViews.assignTeacherCombing, name='assignTeacherCombing'),
     path('unassignTeacher/<int:modId>', formViews.unassignTeacher, name="unassignTeacher"),
     path('assignTeacherDrop/<int:teacherId>/<int:modId>', formViews.assignTeacherDrop, name="assignTeacherDrop"),
+    path('changeColor/<int:parentId>', formViews.changeColor, name='changeColor'),
+    path('dashboard', dataViews.dashboard, name="dashboard"),
+    path('displayDashboardContent/<int:yearId>', dataViews.displayDashboardContent, name='displayDashboardContent'),
+    path('getList/<str:type>/<int:yearId>', dataViews.getList, name='getList'),
+    path('getSidebar/<str:type>/<int:yearId>', dataViews.getSidebar, name='getSidebar'),
 ]

@@ -1,14 +1,17 @@
+{% extends "base_template.html" %}
 {% block js %}
 {% load static %}
+<link rel="stylesheet" href="{% static 'css/combing.css' %}">
 <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
 
 <script>
     var numP = parseInt({{numPeriods}})
-    var modules={{modules|safe}}
-    var modChoices={{modChoices|safe}}
+    const modules={{modules|safe}}
+    const modChoices={{modChoices|safe}}
 </script>
 {% endblock %}
 {% load mathfilters %}
+{% block content %}
 
 <div class="container overflow-scroll">
     {% comment %} <div id="combingWrapper">
@@ -85,3 +88,23 @@
 </div>
 </div>
 
+<div id="viewDataModal" class="modal fade">
+    <div id="module" class="modal-dialog" hx-target="this">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Module Info</h5>
+                </div>
+                <div id="modalBody" class="modal-body" hx-trigger="moduleDetailsChange from:body" hx-get="{%url 'getModules' %}" hx-vals='js:{"groupId":getClicked(), "calendar":1}' hx-target="this">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
+
+  <div id="addFormModal" class="modal fade">
+    <div id="addForm" class="modal-dialog" hx-target="this"></div>
+  </div>
+{% endblock %}

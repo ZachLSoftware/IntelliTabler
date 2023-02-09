@@ -15,6 +15,18 @@ label {
   color: black;
 }
 
+.checkboxInput label {
+  color: white;
+  position:absolute;
+  top: 0;
+  left:10%
+  
+}
+
+.checkboxInput, .colorInput {
+  position: relative;
+}
+
 caption {
   color: white;
 }
@@ -65,3 +77,25 @@ body .form-floating{
   position: absolute;
   top: 50%;
 }
+
+.dropdown-menu li {
+  position: relative;
+  }
+  .dropdown-menu .dropdown-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -7px;
+  }
+  .dropdown-menu .dropdown-submenu-left {
+  right: 100%;
+  left: auto;
+  }
+  .dropdown-menu > li:hover > .dropdown-submenu {
+  display: block;
+  }
+
+  .fa-bars:hover {
+    color: gray
+  }
+  

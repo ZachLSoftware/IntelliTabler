@@ -1,10 +1,10 @@
 //$('#combingWrapper').css("grid-template-columns", `repeat(${numP}, 1fr`);
-var dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+const dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
 var teachers=new Set();
 var modParents=new Set();
 modules.forEach((mod)=> addEvent(mod));
 setTeacherAllocTotal(teachers, modParents);
-refreshClickListeners();
 function addEvent(mod){
     $(mod.module.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
@@ -58,7 +58,6 @@ function refreshClickListeners(){
             htmx.ajax('POST', `/unassignTeacher/${modId}`);
         }
     });
-    htmx.process(htmx.find("#combingChart"));
 }
 
 $(document).on("unassignSuccess", function(e){
@@ -143,6 +142,7 @@ $(document).on("modUpdate", function(e){
         $(`#${val.id}Div`).remove();
         addEvent(val);
     });
+    htmx.process(htmx.find("#combingChart"));
     setTeacherAllocTotal(e.detail.teachers, e.detail.parents);
     refreshClickListeners();
     // $(`#${e.detail.id}`).remove()

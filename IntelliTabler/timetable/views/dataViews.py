@@ -10,6 +10,20 @@ from django.http import JsonResponse
 def index(request):
     return render(request, "index.html")
 
+def dashboard(request):
+    context={}
+    ds=Department.objects.filter(user=request.user)
+    departments={}
+    for d in ds:
+        departments[d.name]=Year.objects.filter(department_id=d.id)
+    context['departments']=departments
+    return render(request, "dashboard_test.html", context)
+
+def displayDashboardContent(request, yearId):
+    year=Year.objects.get(id=yearId)
+    context={'year':year, 'department': year.department}
+    return render(request,'data/dashboardNav.html', context)
+
 @login_required
 def departments(request):
     return render(request, "data/departments.html")
@@ -46,6 +60,35 @@ def viewObjects(request, type, id=0):
     context["entities"]=objects
     context["objectId"]=id
     return render(request, "data/sideBarList.html", context)
+
+def getList(request, type, yearId):
+    year=Year.objects.get(id=yearId)
+    context={'year':year}
+    if type.upper()=='MODULEPARENT':
+        objects=ModuleParent.objects.filter(year=year).order_by('name')
+        context['type']='module'
+        context['detailPath']='getModules'
+        context['addPath']='addModule'
+        context['addId']=year.id
+    elif type.upper()=='TEACHER':
+        objects=Teacher.objects.filter(department=year.department).order_by('name')
+        context['type']=type
+        context['detailPath']='getTeacher'
+        context['addPath']='addTeacher'
+        context['addId'] = year.department.id
+    context["objects"]=objects
+    return render(request, "data/buttonSidebar.html", context)
+
+def getSidebar(request, type, yearId):
+    year=Year.objects.get(id=yearId)
+    context={
+        'type':type, 
+        'year': year,
+        'detailPath': 'getTeacher',
+    }
+    if type.upper()=='MODULEPARENT':
+        context['detailPath']='getModules'
+    return render(request, 'data/sidebarTemplate.html', context)
 
 @login_required
 def viewModules(request, type, departmentId, yearId=0):
@@ -107,9 +150,9 @@ def getModules(request, groupId=0):
     if groupId==0:
         groupId=request.GET.get('groupId', 0) 
     if calendar:
-        moduleList=Module.objects.filter(group_id=groupId) 
+        moduleList=Module.objects.filter(group_id=groupId).order_by('name')
     else:      
-        moduleList=Module.objects.filter(group__parent_id=groupId)
+        moduleList=Module.objects.filter(group__parent_id=groupId).order_by('group__name','name')
     context={}
     modules={}
     for mod in moduleList:

@@ -54,7 +54,10 @@ class ModuleParentForm(BaseModelForm):
         model=ModuleParent
         fields=("name","numPeriods", "numClasses", "color")
         widgets={
-            'color': TextInput(attrs={'type': 'color'}),
+            'color': TextInput(attrs={'type': 'color', 'class':'form-control-color'}),
+        }
+        help_texts={
+            'color':"The color you would like the module to appear in calendars and charts.", 
         }
 
     def __init__(self, *args, **kwargs):
@@ -80,13 +83,14 @@ class YearForm(BaseModelForm):
 
 class AssignTeacherForm(BaseForm):
     teacher=forms.ChoiceField()
-    assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
     
     def __init__(self, teachers, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['teacher'].choices = teachers
 
 class AssignPeriodForm(BaseForm):
+    template_name="forms/period_form_snippet.html"
     DAYS=(
         ("Mon", "Mon"),
         ("Tues", "Tues"),
@@ -130,3 +134,6 @@ class addTeacherCombingForm(BaseForm):
         else:
             self.fields['group'].choices = groups
             self.fields['module'].choices= modules
+
+class changeColorForm(BaseForm):
+    color = forms.CharField(max_length=7, help_text="The color you would like the module to appear in calendars and charts.", widget=forms.TextInput(attrs={'type': 'color', 'class':'form-control-color'}))

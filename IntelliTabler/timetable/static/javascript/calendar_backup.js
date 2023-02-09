@@ -1,7 +1,7 @@
 var calendar;
 var selectedCell;
 var numCal=$(".calendars").length;
-var days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
+let days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
 refresh=false;
 $(document).ready(function(){
     createCalendar();
@@ -110,7 +110,7 @@ function setActive(){
     }
 }
 
-var dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+const dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
 
 function refreshListeners(){
     $(".event").on("click", function(e){

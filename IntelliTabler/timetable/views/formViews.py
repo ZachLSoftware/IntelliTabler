@@ -126,7 +126,7 @@ def addModule(request, year, groupId=0):
             group.department=department
             group.user=request.user
             group.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'moduleChange'})
+            return HttpResponse(status=204, headers={'HX-Trigger':'moduleParentChange'})
     else:
         if(groupId!=0):
             group=get_object_or_404(ModuleParent,pk=groupId)
@@ -239,6 +239,7 @@ def assignTeacherCombing(request, teacherId, yearId):
 def assignPeriod(request, department, groupId):
     weeks=[]
     periods=[]
+    group=ModuleGroup.objects.get(id=groupId)
     format = Format.objects.get(department_id=department)
     for i in range(1, format.numPeriods+1):
         periods.append((i,i))
@@ -247,7 +248,6 @@ def assignPeriod(request, department, groupId):
     if request.method=='POST':
         form=AssignPeriodForm(weeks,periods,request.POST,request.FILES)
         if form.is_valid():
-            group=ModuleGroup.objects.get(id=groupId)
             per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
             group.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
             group.save()
@@ -263,7 +263,11 @@ def assignPeriod(request, department, groupId):
             event={"periodUpdate":info}
             event["moduleDetailsChange"]="Modules Changed"
             return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
-    form=AssignPeriodForm(weeks,periods)
+    if group.period is not None:
+        day,p=group.period.name.split('-')[0], group.period.name.split('-')[1]
+        form=AssignPeriodForm(weeks,periods, initial={'week':group.period.week, 'day':day, 'period':p})
+    else:
+        form=AssignPeriodForm(weeks,periods)
     context={'form':form}
     context['Operation']="Assign/Edit Period"
     return render(request, 'forms/modalForm.html', context)
@@ -355,5 +359,19 @@ def assignTeacherDrop(request, teacherId, modId):
         newMods.append(info)
     event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
     return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
+
+
+def changeColor(request, parentId):
+    p=ModuleParent.objects.get(id=parentId)
+    if request.method=='POST':
+        form=changeColorForm(request.POST, request.FILES)
+        if form.is_valid():
+            p=ModuleParent.objects.get(id=parentId)
+            p.color=form.cleaned_data['color']
+            p.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
+    form=changeColorForm(initial={'color':p.color})
+    return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
+
 
 

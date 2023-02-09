@@ -40,11 +40,11 @@ $('#clearSelect').click(function(){
 
 function getHours(){
     const totalChecked = $('.form-check-input:checkbox:checked').length;
-    const remainingHours = totalHours-totalChecked;
-    $('#totalHours').text(remainingHours);
+    const remainingHours = load-totalChecked;
+    $('#load').text(remainingHours);
     if(remainingHours<0){
-        $('#totalHours').addClass('text-danger');
+        $('#load').addClass('text-danger');
     }else{
-        $('#totalHours').removeClass('text-danger');
+        $('#load').removeClass('text-danger');
     }
 }

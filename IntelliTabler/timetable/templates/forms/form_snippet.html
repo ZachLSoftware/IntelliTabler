@@ -1,20 +1,31 @@
 {% load widget_tweaks %}
 {% for field in form %}
     <div class="fieldWrapper mb-4 mt-4 row">
-        <div class="col form-floating">
-        {% if form.errors|length > 0 and field.errors|length == 0 %}
-        {% render_field field class="form-control is-valid" placeholder=field.label %}
+        {% if field|widget_type == "checkboxinput"%}
+        <div class="col checkboxInput">
+        {% elif field.name == 'color'%}
+        <div class="col-2 colorInput">
         {%else%}
-        {% render_field field|add_error_class:"is-invalid" class="form-control" placeholder=field.label %}
+        <div class="col form-floating">
+        {% endif %}
+
+
+        {% if form.errors|length > 0 and field.errors|length == 0 %}
+        {% render_field field class+="form-control is-valid" placeholder=field.label %}
+        {%else%}
+        {% render_field field|add_error_class:"is-invalid" class+="form-control" placeholder=field.label %}
         {%endif%}
+        {% if field.name != 'color' %}
         {{field.label_tag}}
+        {%endif%}
         {{ field.errors }}
         </div>
-        <div class="col-1 helptext">
-            {% if field.help_text%}
-            <i class="fas fa-question-circle fa-lg helpicon" data-bs-toggle="tooltip" data-bs-placement="top"
-            data-bs-title="{{field.help_text}}"></i> 
-            {%endif%}
+        {% if field.help_text%}
+        <div class="col-1 helptext" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-title="{{field.help_text}}">
+            <i class="fas fa-question-circle fa-lg helpicon"></i> 
         </div>
+            {%endif%}
+        
     </div>
 {%endfor%}
