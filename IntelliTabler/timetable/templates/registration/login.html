@@ -1,0 +1,34 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+{% load widget_tweaks %}
+
+
+
+  {% if next %}
+    {% if user.is_authenticated %}
+      <p>Your account doesn't have access to this page. To proceed,
+      please login with an account that has access.</p>
+    {% else %}
+      <h1 style="text-align: center">Please login to see this page.</h1>
+    {% endif %}
+  {% endif %}
+
+  <div class="container-fluid justify-content-center mt-5 border" style="max-width: 50%">
+  <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    {{form}}
+    {% if form.errors %}
+    <p style="color:red;">Your username and password didn't match. Please try again.</p>
+    {% endif %}
+    <button class="btn btn-primary mb-4" type="submit">Login</button>
+    <input type="hidden" name="next" value="{{ next }}">
+  </form>
+
+
+  {# Assumes you setup the password_reset view in your URLconf #}
+  <a type="button" class="btn-sm btn-secondary" href="{% url "register" %}">Register</a>
+  <p>Passowrd Reset Placeholder</p>
+</div>
+</br>
+{% endblock %}

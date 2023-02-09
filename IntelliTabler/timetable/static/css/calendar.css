@@ -1,0 +1,34 @@
+
+#calendarWrapper{
+    display:grid;
+}
+
+.calendars {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 2fr);
+    text-align: center;
+    height: 1000px;
+    grid-column:1;
+    grid-row:1;
+
+}
+
+.pRow{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+}
+
+.dayHeader{
+    display:grid;
+}
+
+.dayCell{
+    cursor:cell;
+}
+
+.arrows {
+    border:none;
+    background:none;
+}

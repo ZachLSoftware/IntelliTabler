@@ -1,0 +1,42 @@
+{% comment %} <div class="row justify-content-center">
+    <div class="btn-group" role="group">
+        <button class="btn btn-primary border" hx-get="{% url 'addModule' group.year.id group.id %}"  hx-target="#addForm">Edit Module</button>
+        <a type="button" class="btn btn-primary border" hx-delete="{% url 'deleteObject' 'ModuleGroup' group.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Module?</a>
+    </div>
+</div> {% endcomment %}
+
+    <div class="mb-3 mt-3 row">
+        <div class="col">
+            Module Color
+        </div>
+    <div class="col" style="align:center;background-color:{{group.color}}; color:{{group.color}}">color</div>
+    <div class="col"><button id="changeColor" class='btn btn-primary' hx-get="{% url 'changeColor' group.id %}" hx-target="#addForm">Change Color</button></div>
+    </div>
+{% for k,v in modules.items %}
+<table class="table">
+
+    <th>{{k.name}}</th>
+    <tr>
+        <td>Assigned Period</td>
+        {% if k.period is null%}
+        <td>None</td>
+        {%else%}
+        <td>Period: {{k.period.name}}, Week: {{k.period.week}}, </td>
+        {%endif%}
+        <td class="editBtnCol"><button id="assignPeriod" class='btn btn-primary' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button></td>
+    </tr>
+    {% for mod in v %}
+    <tr>
+        <td>Module: {{mod.name}}</td>
+        {% if mod.teacher is null %}
+        <td>Teacher: None</td>
+        {% else %}
+        <td>Teacher: {{mod.teacher.name}}</td>
+        {% endif %}
+        <td class="editBtnCol"><button class='btn btn-primary' hx-get="{% url 'assignTeacher' mod.group.parent.department.id mod.id %}" hx-target="#addForm"> add/edit Teacher</button></td>
+    </tr>
+    {% endfor %}
+</table>
+{%empty%}
+No modules
+{%endfor%}

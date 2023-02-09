@@ -1,0 +1,101 @@
+
+body * {
+  color: white;
+}
+
+input {
+  color: black;
+}
+
+select, option {
+  color: black;
+}
+
+label {
+  color: black;
+}
+
+.checkboxInput label {
+  color: white;
+  position:absolute;
+  top: 0;
+  left:10%
+  
+}
+
+.checkboxInput, .colorInput {
+  position: relative;
+}
+
+caption {
+  color: white;
+}
+
+
+td, th {
+  border: 1px solid white;
+  color: white;
+}
+
+
+#modTable td {
+  width: 20%;
+}
+
+.navbar-brand{
+  font-size: xx-large;
+  font-weight: bold;
+}
+.navbar-dark .navbar-nav .nav-link{
+  color: white;
+  font-size: larger;
+}
+
+.showcase-img {
+  filter: invert(1);
+}
+.img-fluid {
+  filter: invert(1);
+}
+.modal-content{
+  background-color: #343a40;
+}
+
+.calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
+  background-color: rgb(3, 39, 107);
+}
+
+body .form-floating{
+  color:black;
+}
+
+.helptext{
+  position:relative;
+}
+
+.helpicon {
+  position: absolute;
+  top: 50%;
+}
+
+.dropdown-menu li {
+  position: relative;
+  }
+  .dropdown-menu .dropdown-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -7px;
+  }
+  .dropdown-menu .dropdown-submenu-left {
+  right: 100%;
+  left: auto;
+  }
+  .dropdown-menu > li:hover > .dropdown-submenu {
+  display: block;
+  }
+
+  .fa-bars:hover {
+    color: gray
+  }
+  

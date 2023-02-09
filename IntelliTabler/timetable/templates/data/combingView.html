@@ -1,0 +1,87 @@
+{% block js %}
+{% load static %}
+<script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
+
+<script>
+    var numP = parseInt({{numPeriods}})
+    var modules={{modules|safe}}
+    var modChoices={{modChoices|safe}}
+</script>
+{% endblock %}
+{% load mathfilters %}
+
+<div class="container overflow-scroll">
+    {% comment %} <div id="combingWrapper">
+
+            {% for p in periods %}
+            <div>{{forloop.counter}}</div>
+            {% endfor %} {% endcomment %}
+{% if unassigned %}
+<h1>Some classes are not assigned to a timeslot. Please assign these first.</h1>
+{% else %}
+<table id="combingChart" class="table">
+    <th>Teachers</th>
+    <th>Load</th>
+    {% for k,v in periods.items %}
+    <th>{{k}}</th>
+    {% endfor %}
+    {% for t in teachers %}
+    <tr id="{{t.id}}Row" class="teacherRow">
+        <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id yearId %}" hx-target="#addForm">{{t.name}}</button></td>
+        <td>{{t.load}}</td>
+        {% for p,v in periods.items %}
+        <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+</div>
+<div class="container m-5">
+    <div class="row">
+    <div id="moduleAssignments" class="col">
+        <table>
+            <th>Class</th>
+            <th>Groups</th>
+            <th>Periods</th>
+            <th>Total</th>
+            <th>Allocated</th>
+            <tbody>
+                {% for module in parents %}
+                <tr>
+                <td style="background-color: {{module.color}}">{{module.name}}</td>
+                <td>{{module.numPeriods}}</td>
+                <td>{{module.numClasses}}</td>
+                <td id="{{module.id}}Total">{{module.numPeriods|mul:module.numClasses}}</td>
+                <td id="{{module.id}}Allocated">0</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="teacherLoad" class="col">
+        <table>
+            <th>Teacher</th>
+            <th>Load</th>
+            {% for module in parents %}
+            <th style="background-color: {{module.color}}">{{module.name}}</th>
+            {%endfor%}
+            <th>Allocated</th>
+            <th>Remaining</th>
+            <tbody>
+                {% for t in teachers %}
+                <tr>
+                <td>{{t.name}}</td>
+                <td id="{{t.id}}Load">{{t.load}}</td>
+                {% for module in parents %}
+                <td id="{{t.id}}alloc{{module.id}}">0</td>
+                {%endfor%}
+                <td id="{{t.id}}Allocated">0</td>
+                <td id="{{t.id}}Rem">{{t.load}}</td>
+                </tr>
+                {%endfor%}
+    </div>
+</div>
+</div>
+
