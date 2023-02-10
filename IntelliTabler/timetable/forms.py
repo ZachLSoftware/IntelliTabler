@@ -81,6 +81,20 @@ class YearForm(BaseModelForm):
         model=Year
         fields=("year",)
 
+    def __init__(self, *args, **kwargs):
+        self.departmentId=kwargs.pop('departmentId')
+        super(YearForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data=super(YearForm, self).clean()
+        year = cleaned_data["year"]
+        if(Year.objects.filter(department_id=self.departmentId, year=year).exists()):
+            self.add_error("year","You cannot have multiple timetables for the same department in the same year.")
+        
+        
+        return cleaned_data
+    
+
 class AssignTeacherForm(BaseForm):
     teacher=forms.ChoiceField()
     assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))

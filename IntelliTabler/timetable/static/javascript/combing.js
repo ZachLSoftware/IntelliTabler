@@ -1,5 +1,4 @@
-//$('#combingWrapper').css("grid-template-columns", `repeat(${numP}, 1fr`);
-var dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+
 var teachers=new Set();
 var modParents=new Set();
 modules.forEach((mod)=> addEvent(mod));
@@ -134,9 +133,7 @@ htmx.on("htmx:beforeSwap", (e) => {
     }
 })
 
-htmx.on("hidden.bs.modal", () => {
-    $("#addForm").html("");
-});
+
 
 $(document).on("modUpdate", function(e){
     $.each(e.detail.newMods, function(i,val){

@@ -1,25 +1,18 @@
 {% comment %} <nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow"> {% endcomment %}
-    <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSideBarLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Dark offcanvas</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
+
         <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' year.id %}" hx-target="#mainContent">Teachers</a>
+            <a class="nav-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i>  Teachers</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" hx-get="{% url 'getSidebar' 'moduleParent' year.id %}" hx-target="#mainContent">Modules</a>
+            <a class="nav-link" hx-get="{% url 'getSidebar' 'moduleParent' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader"></i>  Classes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" hx-get="{% url 'calendarView' year.id %}" hx-target="#mainContent">Calendar</a>
+            <a class="nav-link" hx-get="{% url 'calendarView' year.id %}" hx-target="#mainContent"><i class="fa-regular fa-calendar-days"></i>  Calendar</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" hx-get="{% url 'combingView' year.id %}" hx-target="#mainContent">Combing Chart</a>
+            <a class="nav-link" hx-get="{% url 'combingView' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"></i>  Combing Chart</a>
           </li>
         </ul>
-      </div>
-    </div>
-  </div>
+
   

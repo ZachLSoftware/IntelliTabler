@@ -1,14 +1,14 @@
 var calendar;
-var selectedCell;
-var numCal=$(".calendars").length;
-var days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
+
 refresh=false;
 $(document).ready(function(){
     createCalendar();
 })
 
 
-function createCalendar(){
+function createCalendar(id, ){
+    var numCal=$(".calendars").length;
+    var days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
     for(let week=1; week<=weeks; week++){
         $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="calendars" style="height: 1000px"></div>`)
     }
@@ -110,7 +110,6 @@ function setActive(){
     }
 }
 
-var dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
 
 function refreshListeners(){
     $(".event").on("click", function(e){

@@ -141,14 +141,14 @@ def addModule(request, year, groupId=0):
 def addYear(request, departmentId):
     
     if request.method=='POST':
-        form=YearForm(request.POST, request.FILES)
+        form=YearForm(request.POST, request.FILES, departmentId=departmentId)
         if form.is_valid():
             year=form.save(commit=False)
             year.department_id=departmentId
             year.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'yearChange'})
     else:
-        form=YearForm()
+        form=YearForm(departmentId=departmentId)
     context={}
     context['form']=form
     context['departmentId']=departmentId

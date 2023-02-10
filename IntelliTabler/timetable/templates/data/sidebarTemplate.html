@@ -1,5 +1,5 @@
 <div class="row">
-<div class="col-2 me-auto" id="childColumn">
+<div class="col-2 me-auto border-end border-3" id="childColumn">
     <div id="listObjects" hx-trigger="load, {{type}}Change from:body" hx-get="{%url 'getList' type year.id %}" hx-target="this" id="{{type}}sidebar" class="btn-group-vertical d-flex mt-4">
     </div>
 </div>

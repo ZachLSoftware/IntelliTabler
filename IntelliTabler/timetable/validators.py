@@ -10,3 +10,4 @@ def validate_positive(value):
         raise ValidationError(
             _('This value cannot be 0, please enter a positive number.'),
         )
+
