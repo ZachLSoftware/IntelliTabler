@@ -77,18 +77,19 @@ class ModuleParentForm(BaseModelForm):
                     params={'value': name, 'year': year.year})
 
 class YearForm(BaseModelForm):
+    department = forms.ChoiceField()
     class Meta:
         model=Year
         fields=("year",)
 
-    def __init__(self, *args, **kwargs):
-        self.departmentId=kwargs.pop('departmentId')
+    def __init__(self, departments, *args, **kwargs):
         super(YearForm, self).__init__(*args, **kwargs)
+        self.fields['department'].choices=departments
 
     def clean(self):
         cleaned_data=super(YearForm, self).clean()
         year = cleaned_data["year"]
-        if(Year.objects.filter(department_id=self.departmentId, year=year).exists()):
+        if(Year.objects.filter(department_id=cleaned_data["department"], year=year).exists()):
             self.add_error("year","You cannot have multiple timetables for the same department in the same year.")
         
         

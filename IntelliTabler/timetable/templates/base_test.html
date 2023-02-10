@@ -52,10 +52,10 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="Departments" aria-current="page" href="{% url 'departments' %} ">Departments</a>
+              <a class="nav-link" id="Departments" aria-current="page" hx-get="{% url 'addDepartment' %}" hx-target="#addForm">Add Departments</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="Modules" href="{% url 'modules' %}" aria-current="page" >Modules</a>
+              <a class="nav-link" id="addYear" hx-get="{% url 'addYear' %}" hx-target="#addForm" aria-current="page" >Add Timetable Year</a>
             </li>
             <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -89,7 +89,7 @@
         <i class="fa-solid fa-bars fa-2xl" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"></i></div>
 
         {% block content %}
-        <div id="mainContent" class="me-auto col row"></div>
+        <div id="mainContent" class="me-auto col row collapse"></div>
         {% endblock %}
 
     </div>

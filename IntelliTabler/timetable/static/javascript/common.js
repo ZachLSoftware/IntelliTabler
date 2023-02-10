@@ -22,6 +22,8 @@ htmx.on("htmx:afterSwap", (e) => {
     }
     if(e.detail.target.id=="mainContent"){
         $('#offcanvasSidebar').offcanvas('hide');
+        // $('#mainContent').collapse('show');
+        // htmx.config.defaultSwapDelay=0;
     }
 
     //AfterSwap for Modal Handeler
@@ -36,11 +38,22 @@ htmx.on("htmx:afterSwap", (e) => {
 
 
 htmx.on("htmx:beforeSwap", (e) => {
+
     if(e.detail.target.id=="displayChild"){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
         }
         $('#displayChild').collapse('hide');
+
+    }
+    // if(e.detail.target.id=="mainContent"){
+    //     if($('#mainContent').hasClass('show')){
+    //         htmx.config.defaultSwapDelay=500;
+    //     }
+    //     $("#mainContent").collapse('hide');
+    // }
+    if(e.detail.target.id=="offcanvasBody"){
+        $("#mainContent").html("");
     }
 
     //Handles Modal hiding
@@ -72,6 +85,10 @@ $(document).on("click", ".parentButtons, .childButtons", function(){
     }
     
     });
+
+$(document).on('departmentChange yearChange', function(){
+    location.reload();
+})
 
 function getClicked(){
     return clicked;

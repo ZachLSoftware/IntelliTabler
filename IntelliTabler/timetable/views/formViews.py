@@ -138,20 +138,26 @@ def addModule(request, year, groupId=0):
     context['form']=form
     return render (request, "forms/modalForm.html", context)
 
-def addYear(request, departmentId):
+def addYear(request):
+    dq=Department.objects.filter(user=request.user)
+    departments=[]
+    for d in dq:
+        departments.append((d.id,d.name))
     
     if request.method=='POST':
-        form=YearForm(request.POST, request.FILES, departmentId=departmentId)
+
+
+        form=YearForm(departments, request.POST, request.FILES,)
         if form.is_valid():
             year=form.save(commit=False)
-            year.department_id=departmentId
+            year.department_id=form.cleaned_data['department']
             year.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'yearChange'})
     else:
-        form=YearForm(departmentId=departmentId)
+        form=YearForm(departments)
     context={}
     context['form']=form
-    context['departmentId']=departmentId
+    #context['departmentId']=departmentId
     context['Operation']="Add Year"
     return render(request, "forms/modalForm.html", context)
 
