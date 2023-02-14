@@ -1,18 +1,21 @@
-
-var teachers=new Set();
-var modParents=new Set();
-modules.forEach((mod)=> addEvent(mod));
-setTeacherAllocTotal(teachers, modParents);
-refreshClickListeners();
-function addEvent(mod){
+function setupChart(){
+    dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+    cData.teachers=new Set();
+    cData.modParents=new Set();
+    cData.modules.forEach((mod)=> addCombEvent(mod));
+    setTeacherAllocTotal(cData.teachers, cData.modParents);
+    setCombListeners();
+    refreshClickListeners();
+}
+function addCombEvent(mod){
     $(mod.module.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
                                     <button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.module.parent}Class">${mod.module.name}</button>
                                 </div>`);
     $(`#${mod.id}`).css('background-color', mod.module.color);
     //$(`#${mod.module.teacher}alloc${mod.module.parent}`).text(parseInt($(`#${mod.module.teacher}alloc${mod.module.parent}`).text())+1)
-    teachers.add(mod.module.teacher);
-    modParents.add(mod.module.parent);
+    cData.teachers.add(mod.module.teacher);
+    cData.modParents.add(mod.module.parent);
     checkAssignment(mod.module.session);
         
         $(`#${mod.id}Div`).draggable({cancel:false,
@@ -60,11 +63,6 @@ function refreshClickListeners(){
     htmx.process(htmx.find("#combingChart"));
 }
 
-$(document).on("unassignSuccess", function(e){
-    $(`#${e.detail.modId}Div`).remove();
-    setTeacherAllocTotal(e.detail.teacher, e.detail.parent);
-
-});
 
 function checkAssignment(cellId){
     if($(cellId).find("button").length>1){
@@ -135,14 +133,21 @@ htmx.on("htmx:beforeSwap", (e) => {
 
 
 
-$(document).on("modUpdate", function(e){
-    $.each(e.detail.newMods, function(i,val){
-        $(`#${val.id}Div`).remove();
-        addEvent(val);
+function setCombListeners(){
+    $(document).on("modUpdate", function(e){
+        $.each(e.detail.newMods, function(i,val){
+            $(`#${val.id}Div`).remove();
+            addCombEvent(val);
+        });
+        setTeacherAllocTotal(e.detail.teachers, e.detail.parents);
+        refreshClickListeners();
+        // $(`#${e.detail.id}`).remove()
+        // addCombEvent(e.detail);
+        // refreshListeners();
+    })
+    $(document).on("unassignSuccess", function(e){
+        $(`#${e.detail.modId}Div`).remove();
+        setTeacherAllocTotal(e.detail.teacher, e.detail.parent);
+    
     });
-    setTeacherAllocTotal(e.detail.teachers, e.detail.parents);
-    refreshClickListeners();
-    // $(`#${e.detail.id}`).remove()
-    // addEvent(e.detail);
-    // refreshListeners();
-})
+}

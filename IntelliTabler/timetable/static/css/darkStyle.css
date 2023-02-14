@@ -100,10 +100,15 @@ body .form-floating{
   }
   
   .nav-link {
-    font-size: x-large;
+    font-size: large;
     cursor:pointer;
   }
 
-  #bodyContainer, #navContainer {
-    max-width: 75vw;
+  .nav-link:hover {
+      filter: brightness(75%);
+    }
+
+  .nav-link .disabled {
+    filter: brightness(50%);
   }
+  

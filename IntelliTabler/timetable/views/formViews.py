@@ -44,7 +44,7 @@ def addTeacher(request, department, id=0):
             teacher.save()
             #Teacher.objects.delete(id=0)
             if(not created):
-                return HttpResponse(status=204, headers={'HX-Trigger':'teacherDetailChange', 'Department':department})
+                return HttpResponse(status=204, headers={'HX-Trigger':'teacherDetailsChange', 'Department':department})
             return HttpResponse(status=204, headers={'HX-Trigger':'teacherChange', 'Department':department})
             
     else:
@@ -375,7 +375,8 @@ def changeColor(request, parentId):
             p=ModuleParent.objects.get(id=parentId)
             p.color=form.cleaned_data['color']
             p.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
+            events={'moduleDetailsChange':p.color, 'updateColor': {'parentId': p.id, 'color':p.color}}
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(events)})
     form=changeColorForm(initial={'color':p.color})
     return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
 

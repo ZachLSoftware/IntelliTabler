@@ -1,16 +1,15 @@
-var calendar;
-
 refresh=false;
-$(document).ready(function(){
-    createCalendar();
-})
-
-
-function createCalendar(id, ){
+// $(document).ready(function(){
+//     createCalendar();
+// })
+function createCalendar(id){
+    dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+    cData.calendarDiv=id;
+    console.log(cData);
     var numCal=$(".calendars").length;
     var days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
-    for(let week=1; week<=weeks; week++){
-        $("#calendarWrapper").append(`<div id="calendarWeek-${week}" class="calendars" style="height: 1000px"></div>`)
+    for(let week=1; week<=cData.weeks; week++){
+        $(cData.calendarDiv).append(`<div id="calendarWeek-${week}" class="calendars" style="height: auto"></div>`)
     }
     $(".calendars").hide()
     $("#calendarWeek-1").addClass("activeCalendar");
@@ -23,7 +22,7 @@ function createCalendar(id, ){
         $(this).append(`<div id="periodColumn-${week}" class="dayHeader periodColumn border"><div class="calendarHeader"><h3>Period</h3></div></div>`)
         days.forEach((day) =>{
             $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
-            for(let period=1; period<=periods; period++){
+            for(let period=1; period<=cData.periods; period++){
                 $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell">${day}-${period}<br/></div>`);
                 $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
                     $(ui.draggable).appendTo(this);
@@ -35,27 +34,43 @@ function createCalendar(id, ){
             }
         });
 
-            for(let period=1; period<=periods; period++){
+            for(let period=1; period<=cData.periods; period++){
                 $(`#periodColumn-${week}`).append(`<div class="border pRow">${period}</div>`);
             }
 
         })
-        $(".dayHeader").css("grid-template-rows", `1fr repeat(${periods}, 3fr`);
+        $(".dayHeader").css("grid-template-rows", `1fr repeat(${cData.periods}, 3fr`);
 
 
-    events["modules"].forEach((mod) => addEvent(mod));
+    cData.events["modules"].forEach((mod) => addCalEvent(mod));
     refreshListeners();
     $(".dayCell").on("click", function(e){
         var id=this.id.split('-');
-        htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${year}`, '#addForm');
+        htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${cData.year}`, '#addForm');
+    })
+
+    $(document).on("addCalEvent", function(e){
+        addCalEvent(e.detail.modules[0]);
+        refreshListeners();
+    })
+    
+    $(document).on("periodUpdate", function(e){
+        $(`#${e.detail.id}`).remove()
+        addCalEvent(e.detail);
+        refreshListeners();
+    })
+    
+    $(document).on("updateColor",function(e){
+        console.log(e.detail);
+        $(`.${e.detail.parentId}`).css("background-color", e.detail.color);
     })
     
 }
 
-function addEvent(mod){
-        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1">${mod.module.name}</button>`);
+function addCalEvent(mod){
+        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1 ${mod.module.parent}">${mod.module.name}</button>`);
         $(`#${mod.id}`).css('background-color', mod.module.color);
-        if(!teacher){
+        if(!cData.teacher){
             
             $(`#${mod.id}`).draggable({cancel:false,
                                         revert : function(e, ui){
@@ -97,6 +112,7 @@ function filterById(jsonObject, id) {
         ;}
 
 function setActive(){
+    console.log($(".calendars").length)
     calendar = $(".activeCalendar")[0];
     var week=calendar.id.split('-')[1]
     $("#title").text("Calendar Week " + week)
@@ -105,7 +121,7 @@ function setActive(){
     console.log($(".calendars").length)
     if(week==1){
         $("#previous").css('opacity',0.5).prop('disabled', true)  
-    }else if (week==$(".calendars").length){
+    }if (week==$(".calendars").length){
         $("#next").css('opacity',0.5).prop('disabled', true)  
     }
 }
@@ -117,12 +133,12 @@ function refreshListeners(){
         e.stopPropagation();
     });
  
-    htmx.process(htmx.find("#calendarWrapper"));
+    htmx.process(htmx.find(cData.calendarDiv));
 }
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody") {
-        if (teacher){
+        if (cData.teacher){
             $(".editBtnCol").remove()
         }
         dataModal.show();
@@ -136,13 +152,4 @@ htmx.on("htmx:beforeSwap", (e) => {
     }
 })
 
-$(document).on("addEvent", function(e){
-    addEvent(e.detail.modules[0]);
-    refreshListeners();
-})
 
-$(document).on("periodUpdate", function(e){
-    $(`#${e.detail.id}`).remove()
-    addEvent(e.detail);
-    refreshListeners();
-})

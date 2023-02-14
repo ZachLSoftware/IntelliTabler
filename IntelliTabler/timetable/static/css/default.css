@@ -1,6 +1,3 @@
-#bodyContainer {
-  width: 7vw;
-}
 .form-center
 {
     margin: auto;
@@ -67,4 +64,13 @@
   td label { 
     display: block;
     text-align: center;
+ }
+
+ #sidebarNav {
+  position:relative;
+ }
+
+ #sidebarAdd {
+  position: absolute;
+  bottom: 0;
  }

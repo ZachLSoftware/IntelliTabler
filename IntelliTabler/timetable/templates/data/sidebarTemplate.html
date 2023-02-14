@@ -3,4 +3,4 @@
     <div id="listObjects" hx-trigger="load, {{type}}Change from:body" hx-get="{%url 'getList' type year.id %}" hx-target="this" id="{{type}}sidebar" class="btn-group-vertical d-flex mt-4">
     </div>
 </div>
-<div id="displayChild" hx-trigger="objectDeleted from:body, {{type}}DetailChange from:body" hx-get="{%url detailPath %}" hx-vals='js:{"id":getChild()}' class="col collapse" hx-target="this"></div>
+<div id="displayChild" hx-trigger="objectDeleted from:body, {{infoType}}DetailsChange from:body" class="col collapse" hx-target="this"></div>

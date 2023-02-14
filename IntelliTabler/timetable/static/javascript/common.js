@@ -1,5 +1,6 @@
 const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
-const dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+var cData ={};
+var clicked;
 $(document).on("click", ".childButtons", function(){
     if($(this).hasClass("childButtons")){
         $(".childButtons").removeClass("active");
@@ -39,7 +40,7 @@ htmx.on("htmx:afterSwap", (e) => {
 
 htmx.on("htmx:beforeSwap", (e) => {
 
-    if(e.detail.target.id=="displayChild"){
+    if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request')){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
         }
@@ -61,15 +62,45 @@ htmx.on("htmx:beforeSwap", (e) => {
         modal.hide();
         e.detail.shouldSwap = false;
     }
+
+    if(cData.calendarDiv && e.target.id=="mainContent"){
+        cleanupCalendar();
+    }
 })
 
 htmx.on('htmx:beforeSend', (e) => {
     if(($(e.target).hasClass('yearItem'))){
         $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
-        console.log("#offcanvasLabel")
         $("#offcanvasLabel").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
     }
-});
+    if($(e.target).hasClass('childButtons')){
+        if($(e.target).hasClass('moduleButtons')){
+            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]);
+
+        }else{
+            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]);
+        }
+        htmx.process(htmx.find("#displayChild"));
+    }
+    if($(e.target).hasClass('event')){
+        $("#modalBody").attr("hx-get", "/getModules/"+e.target.id+"?calendar=1");
+        htmx.process(htmx.find("#modalBody"));
+    }
+})
+
+function cleanupCalendar(){
+    $(document).off("addEvent");
+    
+    $(document).off("periodUpdate");
+    
+    $(document).off("updateColor");
+    delete dataModal;
+    $(cData.calendarDiv).off();
+    for(var k in cData){
+        delete cData[k];
+    }
+    console.log(cData);
+}
 
 htmx.on("hidden.bs.modal", () => {
     $("#addForm").html("");
@@ -78,10 +109,8 @@ htmx.on("hidden.bs.modal", () => {
 $(document).on("click", ".parentButtons, .childButtons", function(){
     if($(this).hasClass("childButtons")){
         clickedChild=this.id.split('.')[0]
-        console.log(clickedChild);
     }else{
         clicked=this.id.split('.')[0];
-        console.log(clicked);
     }
     
     });

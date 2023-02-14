@@ -17,7 +17,7 @@ def dashboard(request):
     for d in ds:
         departments[d.name]=Year.objects.filter(department_id=d.id)
     context['departments']=departments
-    return render(request, "dashboard_test.html", context)
+    return render(request, "dashboard.html", context)
 
 def displayDashboardContent(request, yearId):
     year=Year.objects.get(id=yearId)
@@ -83,10 +83,12 @@ def getSidebar(request, type, yearId):
     year=Year.objects.get(id=yearId)
     context={
         'type':type, 
+        'infoType': type,
         'year': year,
         'detailPath': 'getTeacher',
     }
     if type.upper()=='MODULEPARENT':
+        context['infoType']='module'
         context['detailPath']='getModules'
     return render(request, 'data/sidebarTemplate.html', context)
 
@@ -160,7 +162,8 @@ def getModules(request, groupId=0):
             modules[mod.group]=[]
         modules[mod.group].append(mod)
     context["modules"]=modules
-    context["group"]=moduleList[0].group.parent
+    context["parent"]=moduleList[0].group.parent
+    context["group"]=groupId
     return render(request, "data/modulesInfo.html", context)
 
 def combingView(request, yearId):
@@ -231,10 +234,11 @@ def calendarView(request, year, teacher=0):
         title=Teacher.objects.get(id=teacher).name + " - "   + y.department.name + " - "+ str(y.year)
     else:
        title = y.department.name + " - " + str(y.year)
-    context={'year':year, 'teacher':teacher, 'title':title}
+    context=getCalendar(year, teacher)
+    context['title']=title
     return render(request, 'data/calendarView.html', context)
 
-def getCalendar(request, year, teacher=0):
+def getCalendar(year, teacher=0):
     events={}
     modules=[]
     context={}
@@ -279,7 +283,7 @@ def getCalendar(request, year, teacher=0):
     context['events']=json.dumps(events)
     context['year']=year
     context['teacher']=teacher
-    return render(request, 'data/calendarSetVariables.html', context)
+    return context
 
 def getCalendarData(year):
     classes=ModuleGroup.objects.filter(parent__year_id=year)

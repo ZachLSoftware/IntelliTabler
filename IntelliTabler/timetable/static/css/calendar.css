@@ -1,6 +1,7 @@
 
 #calendarWrapper{
     display:grid;
+    overflow: auto;
 }
 
 .calendars {

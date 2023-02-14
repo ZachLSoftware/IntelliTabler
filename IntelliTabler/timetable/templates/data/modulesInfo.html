@@ -9,8 +9,8 @@
         <div class="col">
             Module Color
         </div>
-    <div class="col" style="align:center;background-color:{{group.color}}; color:{{group.color}}">color</div>
-    <div class="col"><button id="changeColor" class='btn btn-primary' hx-get="{% url 'changeColor' group.id %}" hx-target="#addForm">Change Color</button></div>
+    <div class="col" style="align:center;background-color:{{parent.color}}; color:{{parent.color}}">color</div>
+    <div class="col"><button id="changeColor" class='btn btn-primary' hx-get="{% url 'changeColor' parent.id %}" hx-target="#addForm">Change Color</button></div>
     </div>
 {% for k,v in modules.items %}
 <table class="table">
