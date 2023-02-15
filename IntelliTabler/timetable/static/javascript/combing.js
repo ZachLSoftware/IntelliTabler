@@ -100,19 +100,19 @@ function setTeacherAllocTotal(teachers, parents){
 }
 
 htmx.on("htmx:afterSwap", (e) => {
-    if(e.detail.target.id == "modalBody") {
+    if(e.detail.target.id == "modalBody" && activePage=="combing") {
         $('.editBtnCol').remove();
         dataModal.show();
-    }else if(e.detail.target.id == "addForm") {
+    }else if(e.detail.target.id == "addForm" && activePage=="combing") {
         $('#moduleChoice').empty();
         let select=$('#groupChoice').find(':selected').val()
-        $.each(modChoices[select], function(index, val){
+        $.each(cData.modChoices[select], function(index, val){
           $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
         })
         $('#groupChoice').change(function(){
             $('#moduleChoice').empty();
             let select=$('#groupChoice').find(':selected').val()
-            $.each(modChoices[select], function(index, val){
+            $.each(cData.modChoices[select], function(index, val){
               $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
             })
         });
@@ -122,10 +122,10 @@ htmx.on("htmx:afterSwap", (e) => {
 
 
 htmx.on("htmx:beforeSwap", (e) => {
-    if (e.detail.target.id == "modalBody" && !e.detail.xhr.response){
+    if (e.detail.target.id == "modalBody" && !e.detail.xhr.response && activePage=="combing"){
         dataModal.hide();
         e.detail.shouldSwap = false;
-    }else if (e.detail.target.id == "addForm" && !e.detail.xhr.response){
+    }else if (e.detail.target.id == "addForm" && !e.detail.xhr.response && activePage=="combing"){
         modal.hide();
         e.detail.shouldSwap = false;
     }

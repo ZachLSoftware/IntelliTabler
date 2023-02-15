@@ -3,17 +3,18 @@
         {% comment %} <ul class="navbar-nav justify-content-end flex-grow-1 pe-3"> {% endcomment %}
           <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
           <li class="nav-item">
-            <a class="nav-link align-middle px-0" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
+            <a id="teacher" class="nav-link align-middle px-0 sidebar-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link align-middle px-0" hx-get="{% url 'getSidebar' 'moduleParent' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader"></i><span class="d-none d-sm-inline">  Classes</span></a>
+            <a id="class" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'getSidebar' 'moduleParent' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="View Classes"></i><span class="d-none d-sm-inline">  Classes</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link align-middle px-0" hx-get="{% url 'calendarView' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
+            <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link align-middle px-0" hx-get="{% url 'combingView' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
+            <a id="combing" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'combingView' year.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
           </li>
         </ul>
 
-  
+<script>enableTooltips();</script>

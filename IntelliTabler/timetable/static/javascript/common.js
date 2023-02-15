@@ -1,6 +1,6 @@
 const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
 var cData ={};
-var clicked;
+var activePage;
 $(document).on("click", ".childButtons", function(){
     if($(this).hasClass("childButtons")){
         $(".childButtons").removeClass("active");
@@ -30,12 +30,16 @@ htmx.on("htmx:afterSwap", (e) => {
     //AfterSwap for Modal Handeler
     if(e.detail.target.id == "addForm") {
         //Enables Tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        enableTooltips();
 
         modal.show();
     }
 })
+
+function enableTooltips(){
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
 
 
 htmx.on("htmx:beforeSwap", (e) => {
@@ -126,3 +130,9 @@ function getClicked(){
 function getChild(){
     return clickedChild;
 }
+
+$(document).on("click", ".sidebar-link", function(){
+    activePage=this.id;
+    $(".sidebar-link").parent().removeClass("border-bottom");
+    $(this).parent().addClass("border-bottom");
+})

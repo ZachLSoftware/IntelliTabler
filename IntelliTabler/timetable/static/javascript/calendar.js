@@ -85,26 +85,7 @@ function addCalEvent(mod){
 
 
 
-$('#next').click(function(){
-    var current=$(".activeCalendar")[0];
-    let nextId=parseInt(calendar.id.split('-')[1])+1;
-    var next=$("#calendarWeek-"+nextId);
-    $(current).hide("slide", { direction: "left", duration: 500 });
-    $(next).show("slide", { direction: "right", duration: 500});
-     $(current).removeClass("activeCalendar");
-    $(next).addClass("activeCalendar");
-    setActive();
-})
-$('#previous').click(function(){
-    var current=$(".activeCalendar")[0];
-    let nextId=parseInt(calendar.id.split('-')[1])-1;
-    var next=$("#calendarWeek-"+nextId);
-    $(current).hide("slide", { direction: "right" }, 500);
-    $(next).show("slide", { direction: "left" }, 500);
-     $(current).removeClass("activeCalendar");
-    $(next).addClass("activeCalendar");
-    setActive();
-})
+
 
 function filterById(jsonObject, id) {
     return jsonObject.filter(function(jsonObject) {
@@ -132,6 +113,26 @@ function refreshListeners(){
         clicked=this.id;
         e.stopPropagation();
     });
+    $('#next').click(function(){
+        var current=$(".activeCalendar")[0];
+        let nextId=parseInt(calendar.id.split('-')[1])+1;
+        var next=$("#calendarWeek-"+nextId);
+        $(current).hide("slide", { direction: "left", duration: 500 });
+        $(next).show("slide", { direction: "right", duration: 500});
+         $(current).removeClass("activeCalendar");
+        $(next).addClass("activeCalendar");
+        setActive();
+    })
+    $('#previous').click(function(){
+        var current=$(".activeCalendar")[0];
+        let nextId=parseInt(calendar.id.split('-')[1])-1;
+        var next=$("#calendarWeek-"+nextId);
+        $(current).hide("slide", { direction: "right" }, 500);
+        $(next).show("slide", { direction: "left" }, 500);
+         $(current).removeClass("activeCalendar");
+        $(next).addClass("activeCalendar");
+        setActive();
+    })
  
     htmx.process(htmx.find(cData.calendarDiv));
 }
