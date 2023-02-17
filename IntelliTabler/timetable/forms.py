@@ -50,9 +50,12 @@ class AvailabilityForm(BaseForm):
     week = forms.IntegerField()
 
 class ModuleParentForm(BaseModelForm):
+    name = forms.CharField(label="Class Name")
+    numPeriods=forms.IntegerField(label="Number of periods for class", validators=[validate_positive])
+    numClasses=forms.IntegerField(label="Number of class groups", validators=[validate_positive])
     class Meta:
         model=ModuleParent
-        fields=("name","numPeriods", "numClasses", "color")
+        exclude=("year","department", "user", "id")
         widgets={
             'color': TextInput(attrs={'type': 'color', 'class':'form-control-color'}),
         }
@@ -72,9 +75,7 @@ class ModuleParentForm(BaseModelForm):
             name=cleaned_data['name']
             year=Year.objects.filter(id=self.year)[0]
             if(ModuleParent.objects.filter(name=name, year=self.year, department=self.department).exists()):
-                raise ValidationError(
-                    _('Module: %(value)s already exists for year: %(year)s'),
-                    params={'value': name, 'year': year.year})
+                self.add_error('name', _('Module: {} already exists for year: {}').format(name, year.year))
 
 class YearForm(BaseModelForm):
     department = forms.ChoiceField()

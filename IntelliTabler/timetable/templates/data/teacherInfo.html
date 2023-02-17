@@ -1,13 +1,15 @@
 {%if teacher is not None %}
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="btn-group" role="group">
-            <button class="btn btn-primary border" hx-get="{% url 'addTeacher' teacher.department.id teacher.id %}" hx-target="#addForm">Edit Teacher</button>
-            <a type="button" class="btn btn-primary border" href="{% url 'setAvailability' teacher.id %}">Set Availability</a>
+        <div id="infoBtnGroup" class="btn-group" role="group">
+            <a role="button" class="btn btn-primary border" hx-get="{% url 'addTeacher' teacher.department.id teacher.id %}" hx-target="#addForm">Edit Teacher</a>
+            <button type="button" class="btn btn-primary border" hx-get="{% url 'setAvailability' teacher.id %}" hx-target="#availability">Set Availability</button>
             <a type="button" class="btn btn-primary border" hx-delete="{% url 'deleteObject' 'Teacher' teacher.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Teacher</a>
+            <button class="btn btn-primary border" type="button" data-bs-toggle="collapse" data-bs-target="#teacherCal" aria-expanded="false" aria-controls="teacherCal">View Calendar</button>
+            <button class="btn btn-primary border" type="button" data-bs-toggle="collapse" data-bs-target="#assignments" aria-expanded="false" aria-controls="assignments">View Modules</button>
         </div>
     </div>
-    <div class="container">
+    <div id="teacherInfoCont" class="container">
     <div class="row justify-content-center mt-2">
         <div class="col-4 border border-end-0">
             Teacher:
@@ -32,20 +34,20 @@
                 {{teacher.roomNum}}
             </div>
         </div>
-        <div id="assignments" class="row justify-content-center mt-3">
-            <div class="btn-group" role="group">
-            {% for year, mods in modules.items %}
+        <div id="assignments" class="row justify-content-center mt-3 collapse">
+            {% comment %} <div class="btn-group" role="group"> {% endcomment %}
+            {% comment %} {% for year, mods in modules.items %}
             <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#table{{year}}" >{{year}}</button>
             {% endfor %}
             </div>
             {% for year, mods in modules.items %}
             <div id="table{{year}}" class="collapse" data-bs-parent="#assignments">
-            <a type="button" class="btn btn-primary m-2" href="{% url 'calendarView' mods.0.group.parent.year.id teacher.id %}">View Calendar for {{year}}</a>
+            <a type="button" class="btn btn-primary m-2" href="{% url 'calendarView' mods.0.group.parent.year.id teacher.id %}">View Calendar for {{year}}</a> {% endcomment %}
             <table class="table">
                 <th>Assigned Modules</th>
                 <th>Week</th>
                 <th>Period</th>
-                {% for mod in mods %}
+                {% for mod in modules %}
                 <tr>
                     <td>{{mod.name}}</td>
                     <td>{{mod.group.period.week}}</td>
@@ -59,7 +61,8 @@
                 {% endfor %}
             </table>
         </div>
-                {%endfor%}
+        <div id="availability" class="collapse"></div>
+        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' year teacher.id%}" hx-target="this"></div>
             
 </div>
 {% endif %}

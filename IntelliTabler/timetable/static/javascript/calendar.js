@@ -23,7 +23,7 @@ function createCalendar(id){
         days.forEach((day) =>{
             $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
             for(let period=1; period<=cData.periods; period++){
-                $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell">${day}-${period}<br/></div>`);
+                $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell"></div>`);
                 $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
                     $(ui.draggable).appendTo(this);
                     $(ui.draggable).css({'top' : 0, 'left' : 0})

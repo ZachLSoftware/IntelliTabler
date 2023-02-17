@@ -15,17 +15,20 @@
     <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
     <script type="text/javascript" src="{% static 'javascript/common.js' %}" defer></script>
     <script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'css/lightStyle.css' %}">
+    <script type="text/javascript" src="{% static 'javascript/availability.js' %}" defer></script>
+    {% with 'css/'|add:request.user.theme|add:'Style.css' as theme %}
+    <link rel="stylesheet" href="{% static theme %}">
+    {% endwith %}
     <link rel="stylesheet" href="{% static 'css/default.css' %}">
 
     {% block js %}
     {% endblock %}
   </head>
-  <body class="body" id="body">
+  <body class="body bg-{{request.user.theme}}" id="body">
   {% block navbar %}
-    <nav id="titleBar"class="navbar bg-light navbar-expand-lg shadow-sm navbar-light fixed-top">
+    <nav id="titleBar"class="navbar navbar-expand-lg navbar-{{request.user.theme}} shadow fixed-top">
       <div id="navContainer" class="container-fluid" >
-        <h5 class="navbar-brand">{{Dashboard}}</h5>
+        <h5 class="navbar-brand">Dashboard</h5>
       </div>
     </nav>
 
@@ -37,9 +40,9 @@
       <div class="row flex-nowrap">
       {% comment %} <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasLabel">
       <div class="offcanvas-header"> {% endcomment %}
-        <div id="sidebar" class="col-auto bg-light px-sm-2 px-0 shadow position-fixed" style="height:100vh;">
-          <div class="navbar-nav d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-black">
-                    <li class="nav-item dropdown">
+        <div id="sidebar" class="col-auto px-sm-2 px-0 position-fixed shadow" style="height:100vh;">
+          <div class="navbar-nav d-flex flex-column align-items-center align-items-sm-start px-3 pt-2">
+            <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-regular fa-building"></i> <span id="departmentSelect" class="d-none d-sm-inline"> Select Department</span>
               </a>
@@ -66,7 +69,7 @@
               </ul>
             </li>
       <div id="offcanvasBody" class="offcanvas-body">
-        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" >
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" style="filter: brightness(50%)">
           <li class="nav-item">
             <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
           </li>
@@ -91,15 +94,28 @@
             <a class="nav-link align-middle px-0" id="addYear" hx-get="{% url 'addYear' %}" hx-target="#addForm" aria-current="page" ><i class="fa-regular fa-calendar-plus"></i><span class="d-none d-sm-inline"> Add Year</span></a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle align-middle px-0 text-black" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a id="profileDropdown" class="nav-link dropdown-toggle align-middle px-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-regular fa-user"></i>
               <span class="d-none d-sm-inline">
               Profile
               </span>
             </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
 
               {% if user.is_authenticated %}
+                <li class="dropdown-item dropdown">
+                    <a id="themeDropdown" class="dropdown-item dropdown-toggle align-middle px-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Change theme
+                    </a>
+                    <ul class="dropdown-menu dropdown-submenu" aria-labelledby="themeDropdown">
+                        <li>
+                            <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark</a>
+                        </li>
+                    </ul>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" id="Logout" href="{% url 'logout' %}">Logout</a></li>
               {% else %}
@@ -117,7 +133,7 @@
         <i class="fa-solid fa-bars fa-2xl" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"></i></div> {% endcomment %}
 
         {% block content %}
-        <div id="mainContent" class="me-auto">
+        <div id="mainContent" class="me-auto pt-2">
           Please select a department
         </div>
         {% endblock %}

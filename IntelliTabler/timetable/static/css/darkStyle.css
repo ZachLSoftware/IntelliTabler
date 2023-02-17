@@ -72,3 +72,11 @@ body .form-floating{
 #sidebar, #titleBar{
   background-color: #34393e;
 }
+
+#profileDropdown{
+  color: white;
+}
+
+#themeDropdown {
+  color: black;
+}

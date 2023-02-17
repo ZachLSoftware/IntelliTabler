@@ -17,6 +17,7 @@ def dashboard(request):
     for d in ds:
         departments[d.name]=Year.objects.filter(department_id=d.id)
     context['departments']=departments
+    context['template']="dashboard_"+request.user.theme+".html"
     return render(request, "dashboard.html", context)
 
 def displayDashboardContent(request, yearId):
@@ -129,25 +130,21 @@ def modules(request, departmentId=0):
 
 
 
-def getTeacher(request, id=0):
+def getTeacher(request, id=0, yearId=0):
     if id==0:
         id=request.GET.get('id', 0)
     try: 
         teacher=Teacher.objects.get(id=id)
     except:
         teacher=None
-    mods=Module.objects.filter(teacher=teacher)
-    modules={}
-    for mod in mods:
-        if mod.group.parent.year.year not in modules:
-            modules[mod.group.parent.year.year]=[]
-        modules[mod.group.parent.year.year].append(mod)
+    mods=Module.objects.filter(teacher=teacher, group__parent__year_id=yearId)
     context={}
-    context['modules']=modules
+    context['modules']=mods
     context["teacher"]=teacher
+    context["year"]=yearId
     return render(request, "data/teacherInfo.html", context)
 
-def getModules(request, groupId=0):
+def getModules(request, groupId=0, yearId=0):
     calendar=request.GET.get('calendar',0)
     if groupId==0:
         groupId=request.GET.get('groupId', 0) 

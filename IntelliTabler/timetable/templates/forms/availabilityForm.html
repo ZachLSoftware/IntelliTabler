@@ -1,19 +1,13 @@
-{% extends "base_template.html" %}
 {% load widget_tweaks %}
 {% load mathfilters %}
 {% load customTags %}
-{% block js %}
-{% load static %}
-    <script>let list = {{current|safe}}</script>
-    <script type="text/javascript" src="{% static 'javascript/availability.js' %}" defer></script>
-{% endblock %}
+    <script>list = {{current|safe}}</script>
 
-{% block content %}
 
 <h1>{{teacher.name}} Availability - Hours Remaining: <span id="load"> {{ hours }}</span> </h1>
 <button id="selectAll" type="button" class="btn btn-primary">Select All</button>
 <button id="clearSelect" type="button" class="btn btn-primary">Clear Selection</button>
-<form method="POST" action="{% url 'setAvailability' teacher.id %}" enctype="multipart/form-data">
+<form hx-post="{{ request.path }}" enctype="multipart/form-data" hx-target="#availability">
     {% csrf_token %}
     {% for formset in formsets %}
     <h1>Week - {{forloop.counter}}</h1>
@@ -58,6 +52,6 @@
     </table>
     {{ formset.management_form }}
     {%endfor%}
-    <input type="submit" class="btn btn-primary" value="Submit">
+    <button class="btn btn-primary" type="submit">Submit</button>
 </form>
-{% endblock %}
+<script>setupAvailabilityForm()</script>

@@ -79,10 +79,10 @@ htmx.on('htmx:beforeSend', (e) => {
     }
     if($(e.target).hasClass('childButtons')){
         if($(e.target).hasClass('moduleButtons')){
-            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]);
+            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]+"/"+currentYear);
 
         }else{
-            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]);
+            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]+"/"+currentYear);
         }
         htmx.process(htmx.find("#displayChild"));
     }
@@ -163,3 +163,11 @@ function getTextColor(color){
         return '#ffffff';
      }
 }
+
+$(document).on('click', '#infoBtnGroup button', function(){
+    $("#teacherInfoCont .collapse").collapse('hide');
+})
+
+$(document).on('objectDeleted', function(e){
+    $("#displayChild").html('');
+});

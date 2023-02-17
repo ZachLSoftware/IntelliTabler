@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    theme = models.CharField(max_length=5)
 
 class Department(RandomIDModel):
     name = models.CharField(max_length=50)

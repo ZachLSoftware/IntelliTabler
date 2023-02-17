@@ -88,7 +88,7 @@ def setAvailability(request, teacherid):
                 valid=False
             formsets.append(formset1)
         if valid==True:
-            return redirect(reverse('departments'))
+            return HttpResponse(status=204, headers={'HX-Trigger':'availabilitySaved'})
     else:
         for w in range(ft.numWeeks):
             formsets.append(availabilityFormSet(prefix="week-"+str(w)))
@@ -380,5 +380,9 @@ def changeColor(request, parentId):
     form=changeColorForm(initial={'color':p.color})
     return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
 
+def changeTheme(request, theme):
+    request.user.theme=theme
+    request.user.save()
+    return redirect('dashboard')
 
 
