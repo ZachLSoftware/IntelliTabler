@@ -1,0 +1,3 @@
+.calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
+    background-color: rgb(132, 175, 255);
+  }

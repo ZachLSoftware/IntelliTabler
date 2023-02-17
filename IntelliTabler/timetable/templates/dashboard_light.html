@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block title %}<title>IntelliTabler</title>{% endblock %}
+    {% load static %}
+    <script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script type="text/javascript" src="{% static 'javascript/htmx.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'javascript/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/jquery-3.6.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/jquery-ui.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/combing.css' %}">
+    <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'javascript/common.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/lightStyle.css' %}">
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+
+    {% block js %}
+    {% endblock %}
+  </head>
+  <body class="body" id="body">
+  {% block navbar %}
+    <nav id="titleBar"class="navbar bg-light navbar-expand-lg shadow-sm navbar-light fixed-top">
+      <div id="navContainer" class="container-fluid" >
+        <h5 class="navbar-brand">Dashboard</h5>
+      </div>
+    </nav>
+
+    {% endblock %}
+    {% block messages %}
+    {% endblock %} 
+    {% block container-override %}
+    <div id="bodyContainer" class="container-fluid shadow">
+      <div class="row flex-nowrap">
+      {% comment %} <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasLabel">
+      <div class="offcanvas-header"> {% endcomment %}
+        <div id="sidebar" class="col-auto bg-light px-sm-2 px-0 shadow position-fixed" style="height:100vh;">
+          <div class="navbar-nav d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-black">
+                    <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-regular fa-building"></i> <span id="departmentSelect" class="d-none d-sm-inline"> Select Department</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="departmentSelect">
+
+              {% if user.is_authenticated %}
+              {% for d,ys in departments.items %}
+                {% comment %} <li><a class="dropdown-item departmentDrop" hx-get="{% url 'dashboard2' d.id %}" hx-target="#yearSelectList">{{d.name}}</a></li> {% endcomment %}
+                <li class="depDropDown"><a class="dropdown-item depItem">{{d}} &raquo;</a>
+                <ul class="dropdown-menu dropdown-submenu">
+                {% for y in ys %}
+                  <li><a id="{{y.id}}" class="dropdown-item yearItem" hx-get="{% url 'displayDashboardContent' y.id %}" hx-target="#offcanvasBody">{{y.year}}</a></li>
+                  {%empty%}
+                  <li class="dropdown-item">None</li>
+                {% endfor %}
+                </ul>
+              </li>
+              {% empty %}
+                
+              <li>No Departments</li>
+              {%endfor%}
+              {% endif %}
+
+              </ul>
+            </li>
+      <div id="offcanvasBody" class="offcanvas-body">
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" >
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-book-open-reader"></i><span class="d-none d-sm-inline">  Classes</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
+          </li>
+        </ul>
+      </div>
+      <div id="staticSidebar" class="mt-4">
+        <hr/>
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0 " id="Departments" aria-current="page" hx-get="{% url 'addDepartment' %}" hx-target="#addForm"><i class="fa-regular fa-square-plus"></i><span class="d-none d-sm-inline">  Add Departments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link align-middle px-0" id="addYear" hx-get="{% url 'addYear' %}" hx-target="#addForm" aria-current="page" ><i class="fa-regular fa-calendar-plus"></i><span class="d-none d-sm-inline"> Add Year</span></a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle align-middle px-0 text-black" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-regular fa-user"></i>
+              <span class="d-none d-sm-inline">
+              Profile
+              </span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+              {% if user.is_authenticated %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" id="Logout" href="{% url 'logout' %}">Logout</a></li>
+              {% else %}
+                <li><a class="dropdown-item" id="Register" href="{% url 'register' %}">Register</a></li>
+                <li><a class="dropdown-item" id="Login" href="{% url 'login' %}">Login</a></li>
+              {% endif %}
+
+        </ul>
+      </div>
+  </div>
+</div>
+    {% endblock %}
+    <div id="contentCol" class="col overflow-auto">
+      {% comment %} <div id="offsetToggle" class="collapse col-1 mt-4 mb-4">
+        <i class="fa-solid fa-bars fa-2xl" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"></i></div> {% endcomment %}
+
+        {% block content %}
+        <div id="mainContent" class="me-auto">
+          Please select a department
+        </div>
+        {% endblock %}
+
+    </div>
+  </div>
+</div>
+    
+
+  {% comment %} Modals for viewing modules and adding new elements {% endcomment %}
+
+  <div id="addFormModal" class="modal fade">
+    <div id="addForm" class="modal-dialog" hx-target="this"></div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+      </div>
+        <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+          event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        })
+      </script>
+    </body>
+</html>

@@ -136,3 +136,30 @@ $(document).on("click", ".sidebar-link", function(){
     $(".sidebar-link").parent().removeClass("border-bottom");
     $(this).parent().addClass("border-bottom");
 })
+
+let prevWidth = 0;
+sidebar= document.getElementById("sidebar")
+
+const sidebarObserver = new ResizeObserver(entries => {
+  for (const entry of entries) {
+    const width = entry.borderBoxSize?.[0].inlineSize;
+    if (typeof width === 'number' && width !== prevWidth) {
+      prevWidth = width;
+      $("#contentCol").css("margin-left", width+'px');
+    }
+  }
+});
+
+sidebarObserver.observe(sidebar);
+
+function getTextColor(color){
+    rgb=color.split('#')[1].match(/.{1,2}/g);
+    r=parseInt(rgb[0], 16);
+    g=parseInt(rgb[1], 16);
+    b=parseInt(rgb[2], 16);
+    if ((r*0.299 + g*0.587 + b*0.114) > 150) {
+        return '#000000'
+     }else{
+        return '#ffffff';
+     }
+}

@@ -13,6 +13,7 @@ function addCombEvent(mod){
                                     <button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.module.parent}Class">${mod.module.name}</button>
                                 </div>`);
     $(`#${mod.id}`).css('background-color', mod.module.color);
+    $(`#${mod.id}`).css('color', getTextColor(mod.module.color));
     //$(`#${mod.module.teacher}alloc${mod.module.parent}`).text(parseInt($(`#${mod.module.teacher}alloc${mod.module.parent}`).text())+1)
     cData.teachers.add(mod.module.teacher);
     cData.modParents.add(mod.module.parent);

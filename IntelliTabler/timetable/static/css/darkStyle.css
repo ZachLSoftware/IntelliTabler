@@ -43,7 +43,7 @@ td, th {
 }
 
 .navbar-brand{
-  font-size: xx-large;
+  font-size: x-large;
   font-weight: bold;
 }
 .navbar-dark .navbar-nav .nav-link{
@@ -51,12 +51,12 @@ td, th {
   font-size: larger;
 }
 
-.showcase-img {
+/* .showcase-img {
   filter: invert(1);
 }
 .img-fluid {
   filter: invert(1);
-}
+} */
 .modal-content{
   background-color: #343a40;
 }
@@ -69,46 +69,6 @@ body .form-floating{
   color:black;
 }
 
-.helptext{
-  position:relative;
+#sidebar, #titleBar{
+  background-color: #34393e;
 }
-
-.helpicon {
-  position: absolute;
-  top: 50%;
-}
-
-.dropdown-menu li {
-  position: relative;
-  }
-  .dropdown-menu .dropdown-submenu {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: -7px;
-  }
-  .dropdown-menu .dropdown-submenu-left {
-  right: 100%;
-  left: auto;
-  }
-  .dropdown-menu > li:hover > .dropdown-submenu {
-  display: block;
-  }
-
-  .fa-bars:hover {
-    color: gray
-  }
-  
-  .nav-link {
-    font-size: large;
-    cursor:pointer;
-  }
-
-  .nav-link:hover {
-      filter: brightness(75%);
-    }
-
-  .nav-link .disabled {
-    filter: brightness(50%);
-  }
-  

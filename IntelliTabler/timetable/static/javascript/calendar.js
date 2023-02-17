@@ -63,6 +63,7 @@ function createCalendar(id){
     $(document).on("updateColor",function(e){
         console.log(e.detail);
         $(`.${e.detail.parentId}`).css("background-color", e.detail.color);
+        $(`.${e.detail.parentId}`).css("color", getTextColor(e.detail.color));
     })
     
 }
@@ -70,6 +71,7 @@ function createCalendar(id){
 function addCalEvent(mod){
         $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1 ${mod.module.parent}">${mod.module.name}</button>`);
         $(`#${mod.id}`).css('background-color', mod.module.color);
+        $(`#${mod.id}`).css('color',getTextColor(mod.module.color));
         if(!cData.teacher){
             
             $(`#${mod.id}`).draggable({cancel:false,
