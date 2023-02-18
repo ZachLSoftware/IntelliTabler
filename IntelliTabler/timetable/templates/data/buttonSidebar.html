@@ -1,7 +1,7 @@
 {% load customTags %}
 <button id='new{{type}}' class="btn btn-primary border" hx-get="{% url addPath addId %}" hx-target="#addForm">New {{type}} </button>
 {% for t in objects %}
-<button id="{{t.id}}.button"  hx-get="{% url detailPath t.id year.id %}" hx-target="#displayChild" class="btn btn-primary childButtons border {{type}}Buttons">{{t.name}}</button>
+<button id="{{t.id}}.button"  hx-get="{% url detailPath t.id timetable.id %}" hx-target="#displayChild" class="btn btn-primary childButtons border {{type}}Buttons">{{t.name}}</button>
 {% empty %}
 Nothing found
 {% endfor %}

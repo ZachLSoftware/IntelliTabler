@@ -79,10 +79,10 @@ htmx.on('htmx:beforeSend', (e) => {
     }
     if($(e.target).hasClass('childButtons')){
         if($(e.target).hasClass('moduleButtons')){
-            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]+"/"+currentYear);
+            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]+"/"+currentTimetable);
 
         }else{
-            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]+"/"+currentYear);
+            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]+"/"+currentTimetable);
         }
         htmx.process(htmx.find("#displayChild"));
     }

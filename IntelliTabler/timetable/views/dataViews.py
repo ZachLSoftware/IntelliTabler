@@ -20,9 +20,10 @@ def dashboard(request):
     context['template']="dashboard_"+request.user.theme+".html"
     return render(request, "dashboard.html", context)
 
-def displayDashboardContent(request, yearId):
-    year=Year.objects.get(id=yearId)
-    context={'year':year, 'department': year.department}
+def displayDashboardContent(request, timetableId):
+    timetable=Timetable.objects.get(id=timetableId)
+    tables=Timetable.objects.filter(tableYear=timetable.tableYear)
+    context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables}
     return render(request,'data/dashboardNav.html', context)
 
 @login_required
@@ -62,30 +63,30 @@ def viewObjects(request, type, id=0):
     context["objectId"]=id
     return render(request, "data/sideBarList.html", context)
 
-def getList(request, type, yearId):
-    year=Year.objects.get(id=yearId)
-    context={'year':year}
+def getList(request, type, timetableId):
+    timetable=Timetable.objects.get(id=timetableId)
+    context={'timetable':timetable}
     if type.upper()=='MODULEPARENT':
-        objects=ModuleParent.objects.filter(year=year).order_by('name')
+        objects=ModuleParent.objects.filter(timetable=timetable).order_by('name')
         context['type']='module'
         context['detailPath']='getModules'
         context['addPath']='addModule'
-        context['addId']=year.id
+        context['addId']=timetable.tableYear.id
     elif type.upper()=='TEACHER':
-        objects=Teacher.objects.filter(department=year.department).order_by('name')
+        objects=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
         context['type']=type
         context['detailPath']='getTeacher'
         context['addPath']='addTeacher'
-        context['addId'] = year.department.id
+        context['addId'] = timetable.tableYear.department.id
     context["objects"]=objects
     return render(request, "data/buttonSidebar.html", context)
 
-def getSidebar(request, type, yearId):
-    year=Year.objects.get(id=yearId)
+def getSidebar(request, type, timetableId):
+    timetable=Timetable.objects.get(id=timetableId)
     context={
         'type':type, 
         'infoType': type,
-        'year': year,
+        'timetable': timetable,
         'detailPath': 'getTeacher',
     }
     if type.upper()=='MODULEPARENT':
@@ -94,19 +95,17 @@ def getSidebar(request, type, yearId):
     return render(request, 'data/sidebarTemplate.html', context)
 
 @login_required
-def viewModules(request, type, departmentId, yearId=0):
+def viewModules(request, type, departmentId, timetableId=0):
     context={}
     Type = apps.get_model(app_label='timetable', model_name=type)
-    if yearId==0:
-        yearId=request.GET.get('yearId', 0)
-    if(yearId):
-        objects=Type.objects.filter(user=request.user, year=yearId)
+    if(timetableId):
+        objects=Type.objects.filter(user=request.user, timetable=timetableId)
     else:
         objects=Type.objects.filter(department_id=departmentId)
     context['type']= type
     context["entities"]=objects
     context["departmentId"]=departmentId
-    context["yearId"]=yearId
+    context["timetableId"]=timetableId
     return render(request, "data/modulesList.html", context)
 
 def modules(request, departmentId=0):
@@ -119,7 +118,7 @@ def modules(request, departmentId=0):
     modules=ModuleParent.objects.filter(department=departmentId)
     years=set()
     for mod in modules:
-        years.add(mod.year)
+        years.add(mod.timetable.tableYear)
         if(mod.year not in context):
             context[mod.year]=[]
         context[mod.year].append(mod)
@@ -130,21 +129,21 @@ def modules(request, departmentId=0):
 
 
 
-def getTeacher(request, id=0, yearId=0):
+def getTeacher(request, id=0, timetableId=0):
     if id==0:
         id=request.GET.get('id', 0)
     try: 
         teacher=Teacher.objects.get(id=id)
     except:
         teacher=None
-    mods=Module.objects.filter(teacher=teacher, group__parent__year_id=yearId)
+    mods=Module.objects.filter(teacher=teacher, group__parent__timetable_id=timetableId)
     context={}
     context['modules']=mods
     context["teacher"]=teacher
-    context["year"]=yearId
+    context["timetable"]=timetableId
     return render(request, "data/teacherInfo.html", context)
 
-def getModules(request, groupId=0, yearId=0):
+def getModules(request, groupId=0, timetableId=0):
     calendar=request.GET.get('calendar',0)
     if groupId==0:
         groupId=request.GET.get('groupId', 0) 
@@ -163,13 +162,13 @@ def getModules(request, groupId=0, yearId=0):
     context["group"]=groupId
     return render(request, "data/modulesInfo.html", context)
 
-def combingView(request, yearId):
+def combingView(request, timetableId):
     context={}
-    year=Year.objects.get(id=yearId)
-    teachers=Teacher.objects.filter(department=year.department)
-    periods=list(Period.objects.filter(department=year.department))
-    groups=ModuleGroup.objects.filter(parent__year=year).order_by('parent__name', 'id')
-    classes=Module.objects.filter(group__parent__year=year).order_by('group__parent__name','group_id', 'name')
+    timetable=Timetable.objects.get(id=timetableId)
+    teachers=Teacher.objects.filter(department=timetable.tableYear.department)
+    periods=list(Period.objects.filter(department=timetable.tableYear.department))
+    groups=ModuleGroup.objects.filter(parent__timetable=timetable).order_by('parent__name', 'id')
+    classes=Module.objects.filter(group__parent__timetable=timetable).order_by('group__parent__name','group_id', 'name')
     unassigned = False
     modules=[]
     count={}
@@ -221,26 +220,26 @@ def combingView(request, yearId):
     context['numPeriods']=len(periods)
     context['unassigned']=unassigned
     context['parents']=parents
-    context['yearId']=yearId
+    context['timetableId']=timetableId
     context['modChoices']=json.dumps(mJson)
     return render(request, 'data/combingView.html', context)
 
-def calendarView(request, year, teacher=0):
-    y=Year.objects.get(id=year)
+def calendarView(request, timetableId, teacher=0):
+    t=Timetable.objects.get(id=timetableId)
     if teacher:
-        title=Teacher.objects.get(id=teacher).name + " - "   + y.department.name + " - "+ str(y.year)
+        title=Teacher.objects.get(id=teacher).name + " - "   + t.tableYear.department.name + " - "+ str(t.name)
     else:
-       title = y.department.name + " - " + str(y.year)
-    context=getCalendar(year, teacher)
+       title = t.tableYear.department.name + " - " + str(t.name)
+    context=getCalendar(timetableId, teacher)
     context['title']=title
     return render(request, 'data/calendarView.html', context)
 
-def getCalendar(year, teacher=0):
+def getCalendar(timetableId, teacher=0):
     events={}
     modules=[]
     context={}
     if teacher:
-        classes=Module.objects.filter(teacher_id=teacher, group__parent__year_id=year)
+        classes=Module.objects.filter(teacher_id=teacher, group__parent__timetable_id=timetableId)
         for cl in classes:
             if cl.group.period:
                 info = {}
@@ -256,7 +255,7 @@ def getCalendar(year, teacher=0):
                 
                 modules.append(info)
     else:
-        classes=ModuleGroup.objects.filter(parent__year_id=year)
+        classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
         for cl in classes:
             if cl.period:
                 info = {}
@@ -267,23 +266,24 @@ def getCalendar(year, teacher=0):
                     "name": cl.name,
                     "groupid": cl.id,
                     "parent": cl.parent.id,
-                    "color": cl.parent.color
+                    "color": cl.parent.color,
+                    "teacher": 0
                 }
                 
                 modules.append(info)
 
     events["modules"]=modules
-    format=Format.objects.get(department=Year.objects.get(id=year).department)
+    format=Format.objects.get(department=Timetable.objects.get(id=timetableId).tableYear.department)
     context['periods']=format.numPeriods
     context['weeks']=format.numWeeks
 
     context['events']=json.dumps(events)
-    context['year']=year
+    context['timetable']=timetableId
     context['teacher']=teacher
     return context
 
-def getCalendarData(year):
-    classes=ModuleGroup.objects.filter(parent__year_id=year)
+def getCalendarData(timetableId):
+    classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
     events={}
     modules=[]
     for cl in classes:
@@ -294,6 +294,7 @@ def getCalendarData(year):
                 "period": cl.period.name,
                 "week": cl.period.week,
                 "name": cl.name,
+                "groupid": cl.id,
                 "parent": cl.parent.id,
                 "color": cl.parent.color
             }

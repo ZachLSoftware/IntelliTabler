@@ -53,9 +53,10 @@ class ModuleParentForm(BaseModelForm):
     name = forms.CharField(label="Class Name")
     numPeriods=forms.IntegerField(label="Number of periods for class", validators=[validate_positive])
     numClasses=forms.IntegerField(label="Number of class groups", validators=[validate_positive])
+    repeat=forms.BooleanField(label="Does this class repeat the same schedule each week?", widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
     class Meta:
         model=ModuleParent
-        exclude=("year","department", "user", "id")
+        exclude=("timetable","department", "user", "id")
         widgets={
             'color': TextInput(attrs={'type': 'color', 'class':'form-control-color'}),
         }
@@ -74,8 +75,8 @@ class ModuleParentForm(BaseModelForm):
             cleaned_data=super().clean()
             name=cleaned_data['name']
             year=Year.objects.filter(id=self.year)[0]
-            if(ModuleParent.objects.filter(name=name, year=self.year, department=self.department).exists()):
-                self.add_error('name', _('Module: {} already exists for year: {}').format(name, year.year))
+            if(ModuleParent.objects.filter(name=name, timetable=year.defaultTimetable, department=self.department).exists()):
+                self.add_error('name', _('Module: {} already exists for Year: {}').format(name, year.year))
 
 class YearForm(BaseModelForm):
     department = forms.ChoiceField()
@@ -91,7 +92,7 @@ class YearForm(BaseModelForm):
         cleaned_data=super(YearForm, self).clean()
         year = cleaned_data["year"]
         if(Year.objects.filter(department_id=cleaned_data["department"], year=year).exists()):
-            self.add_error("year","You cannot have multiple timetables for the same department in the same year.")
+            self.add_error("year","Select a new year for the department.")
         
         
         return cleaned_data

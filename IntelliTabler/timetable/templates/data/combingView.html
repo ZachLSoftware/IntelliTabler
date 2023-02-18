@@ -29,7 +29,7 @@
     {% endfor %}
     {% for t in teachers %}
     <tr id="{{t.id}}Row" class="teacherRow">
-        <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id yearId %}" hx-target="#addForm">{{t.name}}</button></td>
+        <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id timetableId %}" hx-target="#addForm">{{t.name}}</button></td>
         <td>{{t.load}}</td>
         {% for p,v in periods.items %}
         <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>

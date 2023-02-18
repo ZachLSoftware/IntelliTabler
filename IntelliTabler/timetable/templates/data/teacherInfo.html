@@ -62,7 +62,7 @@
             </table>
         </div>
         <div id="availability" class="collapse"></div>
-        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' year teacher.id%}" hx-target="this"></div>
+        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this"></div>
             
 </div>
 {% endif %}

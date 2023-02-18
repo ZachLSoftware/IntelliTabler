@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    theme = models.CharField(max_length=5)
+    theme = models.CharField(max_length=5, default="light")
 
 class Department(RandomIDModel):
     name = models.CharField(max_length=50)
@@ -71,22 +71,31 @@ class Year(RandomIDModel):
         YEARS.append((i,i))
     year=models.IntegerField(('year'), choices=YEARS, default=datetime.datetime.now().year)
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
+    defaultTimetable=models.OneToOneField('Timetable', null=True, on_delete=models.SET_NULL)
 
 #Create a default timetable. This is the actual table that manipulates modules
 #Other timetables created won't affect the actual modules and are for making theoretical tables
 @receiver(post_save, sender=Year)
-def actualTimetable(sender, instance, created, **kwargs):
+def defaultTimetable(sender, instance, created, **kwargs):
     if created:
-        Timetable.objects.create(id=(instance.department.id*instance.year), user=instance.department.user, name=str(instance.year)+" Timetable", year=instance)
+        t=Timetable.objects.create(user=instance.department.user, name=str(instance.year)+" Timetable", tableYear=instance)
+        instance.defaultTimetable=t
+        instance.save()
 
+class Timetable(RandomIDModel):
+    name = models.CharField(max_length=20)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tableYear = models.ForeignKey(Year, on_delete=models.CASCADE)
+    
 class ModuleParent(RandomIDModel):
     name=models.CharField(max_length=50)
     numPeriods=models.IntegerField()
     numClasses=models.IntegerField()
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
     user=models.ForeignKey(User, on_delete=models.CASCADE)
-    year=models.ForeignKey(Year, on_delete=models.CASCADE)
+    timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
     color=models.CharField(max_length=7, default="#0275d8")
+    repeat=models.BooleanField(null=True, blank=True, default=False)
 
 class ModuleGroup(RandomIDModel):
     name=models.CharField(max_length=50)
@@ -98,42 +107,45 @@ class Module(RandomIDModel):
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
 
-class Timetable(RandomIDModel):
-    name = models.CharField(max_length=20)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    year = models.ForeignKey(Year, on_delete=models.CASCADE)
-
-class TimetableRow(models.Model):
-    timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
-    module=models.ForeignKey(Module, on_delete=models.CASCADE)
-    manualTeacher=models.ForeignKey(Teacher, null=True, blank=True, on_delete=models.SET_NULL)
-    manualPeriod=models.ForeignKey(Period, null=True, on_delete=models.SET_NULL)
+# class TimetableRow(models.Model):
+#     timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
+#     module=models.ForeignKey(Module, on_delete=models.CASCADE)
+#     manualTeacher=models.ForeignKey(Teacher, null=True, blank=True, on_delete=models.SET_NULL)
+#     manualPeriod=models.ForeignKey(Period, null=True, on_delete=models.SET_NULL)
 
 @receiver(post_save, sender=ModuleParent)
 def createModules(sender, instance, created, **kwargs):
     if created:
         try:
-            timetable=Timetable.objects.get(id=instance.department.id*instance.year.year)
+            timetable=Timetable.objects.get(id=instance.department.id*instance.tableYear.year)
         except:
             timetable=None
         for i in range(1, instance.numPeriods+1):
-            group = ModuleGroup.objects.create(name=instance.name+" Group " + str(i), parent=instance)
+            group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance)
             for j in range(1, instance.numClasses+1):
-                mod = Module.objects.create(name=instance.name+"x"+str(j), group=group)
-                if timetable is not None:
-                    TimetableRow.objects.create(timetable=timetable, module=mod)
+                mod = Module.objects.create(name=instance.name+"-"+str(j), group=group)
+                # if timetable is not None:
+                #     TimetableRow.objects.create(timetable=timetable, module=mod)
 
-@receiver(post_save, sender=Module)
-def updateRow(sender, instance, created, **kwargs):
-    if not created:
-        try:
-            timetable=Timetable.objects.get(id=instance.group.department.id*instance.group.year.year)
-            row=TimetableRow.objects.get(module=instance, timetable=timetable)
-        except:
-            return
-        row.manualTeacher=instance.teacher
-        row.manualPeriod=instance.period
-        row.save()
+@receiver(post_save, sender=Timetable)
+def cloneModules(sender, instance, created, **kwargs):
+    if created:
+        modules=ModuleParent.objects.filter(timetable__year=instance.tableYear)
+        for mod in modules:
+            mod.pk=None
+            mod.save()
+
+# @receiver(post_save, sender=Module)
+# def updateRow(sender, instance, created, **kwargs):
+#     if not created:
+#         try:
+#             timetable=Timetable.objects.get(id=instance.group.department.id*instance.group.year.year)
+#             row=TimetableRow.objects.get(module=instance, timetable=timetable)
+#         except:
+#             return
+#         row.manualTeacher=instance.teacher
+#         row.manualPeriod=instance.period
+#         row.save()
 
 class Preference(models.Model):
     class Priority(models.IntegerChoices):

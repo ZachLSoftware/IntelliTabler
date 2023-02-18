@@ -111,29 +111,32 @@ def setAvailability(request, teacherid):
     return render(request, 'forms/availabilityForm.html', context)
 
 
-def addModule(request, year, groupId=0):
+def addModule(request, yearId, groupId=0):
     context={}
-    department=Year.objects.get(id=year).department
+    department=Year.objects.get(id=yearId).department
     if request.method=='POST':
         if groupId!=0:
             group=get_object_or_404(ModuleParent,pk=groupId)
-            form=ModuleParentForm(request.POST, request.FILES,year=year, department=department, edit=True, instance=group)
+            form=ModuleParentForm(request.POST, request.FILES,year=yearId, department=department, edit=True, instance=group)
         else:
-            form=ModuleParentForm(request.POST, request.FILES,year=year, department=department)
+            form=ModuleParentForm(request.POST, request.FILES,year=yearId, department=department)
         if form.is_valid():
+            timetables=Timetable.objects.filter(tableYear_id=yearId)
             group=form.save(commit=False)
-            group.year_id=year
-            group.department=department
-            group.user=request.user
-            group.save()
+            for table in timetables:
+                group.pk=None
+                group.timetable=table
+                group.department=department
+                group.user=request.user
+                group.save()
             return HttpResponse(status=204, headers={'HX-Trigger':'moduleParentChange'})
     else:
         if(groupId!=0):
             group=get_object_or_404(ModuleParent,pk=groupId)
-            form=ModuleParentForm(year=year, department=department, edit=True, instance=group)
+            form=ModuleParentForm(year=yearId, department=department, edit=True, instance=group)
             context['Operation']="Edit Modules"
         else:
-            form=ModuleParentForm(year=year, department=department)
+            form=ModuleParentForm(year=yearId, department=department)
             context['Operation']="Add Modules"
     context['form']=form
     return render (request, "forms/modalForm.html", context)
@@ -184,9 +187,9 @@ def assignTeacher(request, departmentId, moduleId):
     context['Operation']="Assign Teacher"
     return render(request, 'forms/modalForm.html', context)
 
-def assignTeacherCombing(request, teacherId, yearId):
-    g=ModuleGroup.objects.filter(parent__year_id=yearId)
-    m=Module.objects.filter(group__parent__year_id=yearId)
+def assignTeacherCombing(request, teacherId, timetableId):
+    g=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
+    m=Module.objects.filter(group__parent__timetable_id=timetableId)
     groups=[]
     moduleChoices=[]
     newMods=[]
@@ -287,16 +290,22 @@ def calendarPeriodDrop(request, day, week, groupId):
 
 def deleteObject(request, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)
-    try:
-        obj = Type.objects.get(id=id).delete()
-    except Type.DoesNotExist:
-        obj=None
+    if(Type==ModuleParent):
+        o=Type.objects.get(id=id)
+        objs=Type.objects.filter(timetable__tableYear=o.timetable.tableYear)
+        for obj in objs:
+            obj.delete()
+    else:
+        try:
+            obj = Type.objects.get(id=id).delete()
+        except Type.DoesNotExist:
+            obj=None
     trigger = type[0].lower()+type[1:]+"Change"
     events='{\"'+trigger+'\": "Deleted", "objectDeleted": "ObjectDeleted"}'
     return HttpResponse(status=204, headers={"HX-Trigger": events})
 
-def addModuleCalendar(request, day, week, year):
-    groups=ModuleGroup.objects.filter(parent__year_id=year, period__isnull=True)
+def addModuleCalendar(request, day, week, timetableId, teacher=0):
+    groups=ModuleGroup.objects.filter(parent__timetable_id=timetableId, period__isnull=True)
     choices=[]
     for group in groups:
         choices.append((group.id, group.name))
@@ -305,7 +314,7 @@ def addModuleCalendar(request, day, week, year):
         form=addEventForm(choices, request.POST,request.FILES)
         if form.is_valid():
             mod=ModuleGroup.objects.get(id=form.cleaned_data["group"])
-            department=Year.objects.get(id=year).department
+            department=Timetable.objects.get(id=timetableId).year.department
             period=Period.objects.get(department=department, name=day, week=week)
             mod.period=period
             mod.save()
@@ -321,7 +330,7 @@ def addModuleCalendar(request, day, week, year):
                 "color": mod.parent.color
             }
             modules.append(info)
-            events["addEvent"]={"modules":modules}
+            events["addCalendarEvent"]={"modules":modules}
             #events='{"addEvent": {"cellId": \"'+day+'-'+str(week)+'\", "mod":"'+form.cleaned_data["group"]+'"} }'
             return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(events)})
     form=addEventForm(choices)

@@ -46,10 +46,13 @@ function createCalendar(id){
     refreshListeners();
     $(".dayCell").on("click", function(e){
         var id=this.id.split('-');
-        htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${cData.year}`, '#addForm');
+        if(!cData.teacher){
+        
+            htmx.ajax('GET', `/addModuleCalendar/${id[0]}-${id[1]}/${id[2]}/${cData.timetable}`, '#addForm');
+        }
     })
 
-    $(document).on("addCalEvent", function(e){
+    $(document).on("addCalendarEvent", function(e){
         addCalEvent(e.detail.modules[0]);
         refreshListeners();
     })

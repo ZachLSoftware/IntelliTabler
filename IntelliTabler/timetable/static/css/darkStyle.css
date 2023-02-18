@@ -73,7 +73,7 @@ body .form-floating{
   background-color: #34393e;
 }
 
-#profileDropdown{
+#profileDropdown, #timetableDropdown{
   color: white;
 }
 
