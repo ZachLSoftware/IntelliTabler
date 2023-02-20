@@ -80,3 +80,7 @@ body .form-floating{
 #themeDropdown {
   color: black;
 }
+
+#departmentDropdown i {
+  color: black;
+}

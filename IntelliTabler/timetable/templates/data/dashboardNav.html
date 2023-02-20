@@ -9,6 +9,10 @@
               <ul class="dropdown-menu" aria-labelledby="timetableSelect">
 
               {% if user.is_authenticated %}
+                <li>
+                  <a class="dropdown-item" hx-get="{% url 'addTimetable' timetable.tableYear.id %}" hx-target="#addForm" aria-current="page" ><i class="fa-regular fa-calendar-plus"></i>  Add Timetable</a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
               {% for t in tables %}
                 {% comment %} <li><a class="dropdown-item departmentDrop" hx-get="{% url 'dashboard2' d.id %}" hx-target="#yearSelectList">{{d.name}}</a></li> {% endcomment %}
                 <li class="depDropDown"><a class="dropdown-item depItem" hx-get="{% url 'displayDashboardContent' t.id %}" hx-target="#offcanvasBody">{{t.name}}</a></li>

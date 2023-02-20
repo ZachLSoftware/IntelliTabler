@@ -89,6 +89,7 @@ class Timetable(RandomIDModel):
     
 class ModuleParent(RandomIDModel):
     name=models.CharField(max_length=50)
+    sharedId=models.CharField(max_length=36, default=uuid.uuid4)
     numPeriods=models.IntegerField()
     numClasses=models.IntegerField()
     department=models.ForeignKey(Department, on_delete=models.CASCADE)

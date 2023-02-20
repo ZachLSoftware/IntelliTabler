@@ -2,22 +2,25 @@ function setupChart(){
     dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
     cData.teachers=new Set();
     cData.modParents=new Set();
-    cData.modules.forEach((mod)=> addCombEvent(mod));
-    setTeacherAllocTotal(cData.teachers, cData.modParents);
-    setCombListeners();
-    refreshClickListeners();
+    if(cData.modules.length>0){
+        cData.modules.forEach((mod)=> addCombEvent(mod));
+        setTeacherAllocTotal(cData.teachers, cData.modParents);
+        setCombListeners();
+        refreshClickListeners();
+    }
 }
 function addCombEvent(mod){
-    $(mod.module.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
+    console.log(mod)
+    $(mod.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
-                                    <button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.module.parent}Class">${mod.module.name}</button>
+                                    <button id="${mod.id}" hx-get="/getModules/${mod.group.id}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.group.parent.id}Class">${mod.name}</button>
                                 </div>`);
-    $(`#${mod.id}`).css('background-color', mod.module.color);
-    $(`#${mod.id}`).css('color', getTextColor(mod.module.color));
+    $(`#${mod.id}`).css('background-color', mod.group.parent.color);
+    $(`#${mod.id}`).css('color', getTextColor(mod.group.parent.color));
     //$(`#${mod.module.teacher}alloc${mod.module.parent}`).text(parseInt($(`#${mod.module.teacher}alloc${mod.module.parent}`).text())+1)
-    cData.teachers.add(mod.module.teacher);
-    cData.modParents.add(mod.module.parent);
-    checkAssignment(mod.module.session);
+    cData.teachers.add(mod.teacher);
+    cData.modParents.add(mod.group.parent.id);
+    checkAssignment(mod.session);
         
         $(`#${mod.id}Div`).draggable({cancel:false,
                                     start: function(event, ui) {
@@ -40,15 +43,6 @@ function addCombEvent(mod){
                                     }});
                                 
 };
-
-$(".teacherRow").droppable({accept:".modDiv", drop: function(e, ui){
-    teacher=this.id.split("Row")[0];
-    mod=$(ui.draggable)[0].id.split("Div")[0]; 
-    if($(ui.draggable).closest('tr')[0].id==this.id){
-        $(ui.draggable).addClass('drag-revert');
-    }else
-        htmx.ajax("POST", `/assignTeacherDrop/${teacher}/${mod}`);
-}});
 
 function refreshClickListeners(){
     $(".removeMod").click(function(e){
@@ -151,4 +145,12 @@ function setCombListeners(){
         setTeacherAllocTotal(e.detail.teacher, e.detail.parent);
     
     });
+    $(".teacherRow").droppable({accept:".modDiv", drop: function(e, ui){
+        teacher=this.id.split("Row")[0];
+        mod=$(ui.draggable)[0].id.split("Div")[0]; 
+        if($(ui.draggable).closest('tr')[0].id==this.id){
+            $(ui.draggable).addClass('drag-revert');
+        }else
+            htmx.ajax("POST", `/assignTeacherDrop/${teacher}/${mod}`);
+    }});
 }

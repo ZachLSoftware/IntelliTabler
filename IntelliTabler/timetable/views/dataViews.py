@@ -4,18 +4,22 @@ from django.contrib.auth.decorators import login_required
 from django.apps import apps
 import json
 from django.http import JsonResponse
+from ..serializers import *
+from rest_framework.renderers import JSONRenderer
+
 
 
 
 def index(request):
-    return render(request, "index.html")
+    return redirect('dashboard')
 
+@login_required
 def dashboard(request):
     context={}
     ds=Department.objects.filter(user=request.user)
     departments={}
     for d in ds:
-        departments[d.name]=Year.objects.filter(department_id=d.id)
+        departments[d]=Year.objects.filter(department_id=d.id)
     context['departments']=departments
     context['template']="dashboard_"+request.user.theme+".html"
     return render(request, "dashboard.html", context)
@@ -24,7 +28,9 @@ def displayDashboardContent(request, timetableId):
     timetable=Timetable.objects.get(id=timetableId)
     tables=Timetable.objects.filter(tableYear=timetable.tableYear)
     context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables}
-    return render(request,'data/dashboardNav.html', context)
+    response=render(request,'data/dashboardNav.html', context)
+    response['HX-Trigger']='dashboardLoaded'
+    return response
 
 @login_required
 def departments(request):
@@ -171,7 +177,6 @@ def combingView(request, timetableId):
     classes=Module.objects.filter(group__parent__timetable=timetable).order_by('group__parent__name','group_id', 'name')
     unassigned = False
     modules=[]
-    count={}
     parents=set()
     pAssign={}
     mJson={}
@@ -195,21 +200,16 @@ def combingView(request, timetableId):
                 mJson[cl.group.id]=[]
             mJson[cl.group.id].append((cl.id,cl.name))
             if cl.teacher:
-                info = {}
-                info["id"]=cl.id
-                info["module"]= {
-                    "period": cl.group.period.name,
-                    "week": cl.group.period.week,
-                    "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
-                    "name": cl.name,
-                    "teacher": cl.teacher.id,
-                    "groupid": cl.group.id,
-                    "parent": cl.group.parent.id,
-                    "color": cl.group.parent.color
-                }
-                modules.append(info)
+                module_ser=ModuleSerializer(cl)
+                module=module_ser.data
+                module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
+                module["teacher"]=cl.teacher.id
+                module.pop('teacher', None)
+            
+                modules.append(module)
         else:
             unassigned=True
+            modules=[]
             break
     
 
@@ -242,35 +242,23 @@ def getCalendar(timetableId, teacher=0):
         classes=Module.objects.filter(teacher_id=teacher, group__parent__timetable_id=timetableId)
         for cl in classes:
             if cl.group.period:
-                info = {}
-                info["id"]=cl.id
-                info["module"]= {
-                    "period": cl.group.period.name,
-                    "week": cl.group.period.week,
-                    "name": cl.name,
-                    "groupid": cl.group.id,
-                    "parent": cl.group.parent.id,
-                    "color": cl.group.parent.color
-                }
+                module_ser=ModuleSerializer(cl)
+                module=module_ser.data
+                module['parent']=module['group']['parent']
+                module['period']=module['group']['period']
+                module['groupid']=module['group']['id']
+                module.pop('group', None)
+                module.pop('teacher', None)
                 
-                modules.append(info)
+                modules.append(module)
     else:
         classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
         for cl in classes:
             if cl.period:
-                info = {}
-                info["id"]=cl.id
-                info["module"]= {
-                    "period": cl.period.name,
-                    "week": cl.period.week,
-                    "name": cl.name,
-                    "groupid": cl.id,
-                    "parent": cl.parent.id,
-                    "color": cl.parent.color,
-                    "teacher": 0
-                }
-                
-                modules.append(info)
+                module_ser=ModuleGroupSerializer(cl)
+                module=module_ser.data
+                module['groupid']=module_ser.data['id']
+                modules.append(module)
 
     events["modules"]=modules
     format=Format.objects.get(department=Timetable.objects.get(id=timetableId).tableYear.department)
@@ -288,18 +276,10 @@ def getCalendarData(timetableId):
     modules=[]
     for cl in classes:
         if cl.period:
-            info = {}
-            info["id"]=cl.id
-            info["module"]= {
-                "period": cl.period.name,
-                "week": cl.period.week,
-                "name": cl.name,
-                "groupid": cl.id,
-                "parent": cl.parent.id,
-                "color": cl.parent.color
-            }
-            
-            modules.append(info)
+            module_ser=ModuleGroupSerializer(cl)
+            module=module_ser.data
+            module['groupid']=module_ser.data['id']
+            modules.append(module)
     events["modules"]=modules
     context={}
     context['events']=events

@@ -6,6 +6,7 @@ from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.apps import apps
 import json
+from ..serializers import *
 
 # Create your views here.
 def addDepartment(request):
@@ -141,8 +142,12 @@ def addModule(request, yearId, groupId=0):
     context['form']=form
     return render (request, "forms/modalForm.html", context)
 
-def addYear(request):
-    dq=Department.objects.filter(user=request.user)
+def addYear(request, departmentId=0):
+
+    if(departmentId):
+        dq=Department.objects.filter(id=departmentId)
+    else:
+        dq=Department.objects.filter(user=request.user)
     departments=[]
     for d in dq:
         departments.append((d.id,d.name))
@@ -218,19 +223,12 @@ def assignTeacherCombing(request, teacherId, timetableId):
                 parents.add(cl.group.parent_id)
                 cl.teacher_id=teacherId
                 cl.save()
-                info = {}
-                info["id"]=cl.id
-                info["module"]= {
-                    "period": cl.group.period.name,
-                    "week": cl.group.period.week,
-                    "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
-                    "name": cl.name,
-                    "teacher": cl.teacher.id,
-                    "groupid": cl.group.id,
-                    "parent": cl.group.parent.id,
-                    "color": cl.group.parent.color
-                }
-                newMods.append(info)
+                module_ser=ModuleSerializer(cl)
+                module=module_ser.data
+                module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
+                module["teacher"]=cl.teacher.id
+                module.pop('teacher', None)
+                newMods.append(module)
             event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
             return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
             
@@ -260,16 +258,10 @@ def assignPeriod(request, department, groupId):
             per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
             group.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
             group.save()
-            info = {}
-            info["id"]=group.id
-            info["module"]= {
-                "period": group.period.name,
-                "week": group.period.week,
-                "name": group.name,
-                "parent": group.parent.id,
-                "color": group.parent.color
-            }
-            event={"periodUpdate":info}
+            module_ser=ModuleGroupSerializer(group)
+            module=module_ser.data
+            module['groupid']=module_ser.data['id']
+            event={"periodUpdate":module}
             event["moduleDetailsChange"]="Modules Changed"
             return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
     if group.period is not None:
@@ -291,8 +283,7 @@ def calendarPeriodDrop(request, day, week, groupId):
 def deleteObject(request, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)
     if(Type==ModuleParent):
-        o=Type.objects.get(id=id)
-        objs=Type.objects.filter(timetable__tableYear=o.timetable.tableYear)
+        objs=Type.objects.filter(sharedId=id)
         for obj in objs:
             obj.delete()
     else:
@@ -320,18 +311,11 @@ def addModuleCalendar(request, day, week, timetableId, teacher=0):
             mod.save()
             events={}
             modules=[]
-            info = {}
-            info["id"]=mod.id
-            info["module"]= {
-                "period": mod.period.name,
-                "week": mod.period.week,
-                "name": mod.name,
-                "parent": mod.parent.id,
-                "color": mod.parent.color
-            }
-            modules.append(info)
+            module_ser=ModuleGroupSerializer(mod)
+            module=module_ser.data
+            module['groupid']=module_ser.data['id']
+            modules.append(module)
             events["addCalendarEvent"]={"modules":modules}
-            #events='{"addEvent": {"cellId": \"'+day+'-'+str(week)+'\", "mod":"'+form.cleaned_data["group"]+'"} }'
             return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(events)})
     form=addEventForm(choices)
     context={'form':form}
@@ -359,19 +343,12 @@ def assignTeacherDrop(request, teacherId, modId):
         parents.add(cl.group.parent_id)
         cl.teacher_id=teacherId
         cl.save()
-        info = {}
-        info["id"]=cl.id
-        info["module"]= {
-            "period": cl.group.period.name,
-            "week": cl.group.period.week,
-            "session": "#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week),
-            "name": cl.name,
-            "teacher": cl.teacher.id,
-            "groupid": cl.group.id,
-            "parent": cl.group.parent.id,
-            "color": cl.group.parent.color
-        }
-        newMods.append(info)
+        module_ser=ModuleSerializer(cl)
+        module=module_ser.data
+        module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
+        module["teacher"]=cl.teacher.id
+        module.pop('teacher', None)
+        newMods.append(module)
     event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
     return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
 
@@ -395,3 +372,20 @@ def changeTheme(request, theme):
     return redirect('dashboard')
 
 
+def addTimetable(request, yearId):
+    if request.method=="POST":
+        form = TimetableForm(request.POST, request.FILES)
+        if form.is_valid():
+            table=form.save(commit=False)
+            table.tableYear_id=yearId
+            table.user=request.user
+            table.save()
+            if form.cleaned_data['default']:
+                y=Year.objects.get(id=yearId)
+                y.defaultTimetable=table
+                y.save()
+            return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
+    else:
+        form = TimetableForm()
+    return render(request, "forms/modalForm.html", {'Operation':'Add Timetable', 'form':form})
+    

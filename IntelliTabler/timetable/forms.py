@@ -53,10 +53,10 @@ class ModuleParentForm(BaseModelForm):
     name = forms.CharField(label="Class Name")
     numPeriods=forms.IntegerField(label="Number of periods for class", validators=[validate_positive])
     numClasses=forms.IntegerField(label="Number of class groups", validators=[validate_positive])
-    repeat=forms.BooleanField(label="Does this class repeat the same schedule each week?", widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
+    repeat=forms.BooleanField(required=False, label="Does this class repeat the same schedule each week?", widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
     class Meta:
         model=ModuleParent
-        exclude=("timetable","department", "user", "id")
+        exclude=("timetable","department", "user", "id", "sharedId")
         widgets={
             'color': TextInput(attrs={'type': 'color', 'class':'form-control-color'}),
         }
@@ -93,8 +93,7 @@ class YearForm(BaseModelForm):
         year = cleaned_data["year"]
         if(Year.objects.filter(department_id=cleaned_data["department"], year=year).exists()):
             self.add_error("year","Select a new year for the department.")
-        
-        
+
         return cleaned_data
     
 
@@ -154,3 +153,11 @@ class addTeacherCombingForm(BaseForm):
 
 class changeColorForm(BaseForm):
     color = forms.CharField(max_length=7, help_text="The color you would like the module to appear in calendars and charts.", widget=forms.TextInput(attrs={'type': 'color', 'class':'form-control-color'}))
+
+class TimetableForm(BaseModelForm):
+    name=forms.CharField(max_length=20)
+    default=forms.BooleanField(required=False, label="Set as default timetable?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    class Meta:
+        model=Timetable
+        exclude=("id","user","tableYear")

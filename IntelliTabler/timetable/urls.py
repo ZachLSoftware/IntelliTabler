@@ -54,4 +54,5 @@ urlpatterns = [
     path('getList/<str:type>/<int:timetableId>', dataViews.getList, name='getList'),
     path('getSidebar/<str:type>/<int:timetableId>', dataViews.getSidebar, name='getSidebar'),
     path('changeTheme/<str:theme>', formViews.changeTheme, name='changeTheme'),
+    path('addTimetable/<int:yearId>', formViews.addTimetable, name="addTimetable")
 ]

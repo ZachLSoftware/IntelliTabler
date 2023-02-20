@@ -53,11 +53,13 @@ function createCalendar(id){
     })
 
     $(document).on("addCalendarEvent", function(e){
+        console.log(e.detail)
         addCalEvent(e.detail.modules[0]);
         refreshListeners();
     })
     
     $(document).on("periodUpdate", function(e){
+        console.log(e.detail)
         $(`#${e.detail.id}`).remove()
         addCalEvent(e.detail);
         refreshListeners();
@@ -72,9 +74,10 @@ function createCalendar(id){
 }
 
 function addCalEvent(mod){
-        $(`#${mod.module.period}-${mod.module.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.module.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1 ${mod.module.parent}">${mod.module.name}</button>`);
-        $(`#${mod.id}`).css('background-color', mod.module.color);
-        $(`#${mod.id}`).css('color',getTextColor(mod.module.color));
+    console.log(mod);
+        $(`#${mod.period.name}-${mod.period.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1 ${mod.parent.id}">${mod.name}</button>`);
+        $(`#${mod.id}`).css('background-color', mod.parent.color);
+        $(`#${mod.id}`).css('color',getTextColor(mod.parent.color));
         if(!cData.teacher){
             
             $(`#${mod.id}`).draggable({cancel:false,
