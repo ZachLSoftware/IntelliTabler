@@ -5,7 +5,6 @@ refresh=false;
 function createCalendar(id){
     dataModal = new bootstrap.Modal(document.getElementById("viewDataModal"));
     cData.calendarDiv=id;
-    console.log(cData);
     var numCal=$(".calendars").length;
     var days=['Mon', 'Tues', 'Wed', 'Thurs', 'Fri']
     for(let week=1; week<=cData.weeks; week++){
@@ -45,6 +44,9 @@ function createCalendar(id){
     cData.events["modules"].forEach((mod) => addCalEvent(mod));
     refreshListeners();
     $(".dayCell").on("click", function(e){
+        if(this!=e.target){
+            return false;
+        }
         var id=this.id.split('-');
         if(!cData.teacher){
         
@@ -52,29 +54,30 @@ function createCalendar(id){
         }
     })
 
-    $(document).on("addCalendarEvent", function(e){
-        console.log(e.detail)
-        addCalEvent(e.detail.modules[0]);
-        refreshListeners();
+    $('#next').click(function(){
+        var current=$(".activeCalendar")[0];
+        let nextId=parseInt(calendar.id.split('-')[1])+1;
+        var next=$("#calendarWeek-"+nextId);
+        $(current).hide("slide", { direction: "left", duration: 500 });
+        $(next).show("slide", { direction: "right", duration: 500});
+         $(current).removeClass("activeCalendar");
+        $(next).addClass("activeCalendar");
+        setActive();
     })
-    
-    $(document).on("periodUpdate", function(e){
-        console.log(e.detail)
-        $(`#${e.detail.id}`).remove()
-        addCalEvent(e.detail);
-        refreshListeners();
-    })
-    
-    $(document).on("updateColor",function(e){
-        console.log(e.detail);
-        $(`.${e.detail.parentId}`).css("background-color", e.detail.color);
-        $(`.${e.detail.parentId}`).css("color", getTextColor(e.detail.color));
+    $('#previous').click(function(){
+        var current=$(".activeCalendar")[0];
+        let nextId=parseInt(calendar.id.split('-')[1])-1;
+        var next=$("#calendarWeek-"+nextId);
+        $(current).hide("slide", { direction: "right" }, 500);
+        $(next).show("slide", { direction: "left" }, 500);
+         $(current).removeClass("activeCalendar");
+        $(next).addClass("activeCalendar");
+        setActive();
     })
     
 }
 
 function addCalEvent(mod){
-    console.log(mod);
         $(`#${mod.period.name}-${mod.period.week}`).append(`<button id="${mod.id}" hx-get="/getModules/${mod.groupid}?calendar=1" hx-target="#modalBody" class="event btn m-1 ${mod.parent.id}">${mod.name}</button>`);
         $(`#${mod.id}`).css('background-color', mod.parent.color);
         $(`#${mod.id}`).css('color',getTextColor(mod.parent.color));
@@ -101,13 +104,10 @@ function filterById(jsonObject, id) {
         ;}
 
 function setActive(){
-    console.log($(".calendars").length)
     calendar = $(".activeCalendar")[0];
     var week=calendar.id.split('-')[1]
     $("#title").text("Calendar Week " + week)
     $(".arrows").css('opacity',1).prop('disabled', false)
-    console.log(week==$(".calendars").length)
-    console.log($(".calendars").length)
     if(week==1){
         $("#previous").css('opacity',0.5).prop('disabled', true)  
     }if (week==$(".calendars").length){
@@ -115,35 +115,15 @@ function setActive(){
     }
 }
 
-
 function refreshListeners(){
-    $(".event").on("click", function(e){
-        clicked=this.id;
-        e.stopPropagation();
-    });
-    $('#next').click(function(){
-        var current=$(".activeCalendar")[0];
-        let nextId=parseInt(calendar.id.split('-')[1])+1;
-        var next=$("#calendarWeek-"+nextId);
-        $(current).hide("slide", { direction: "left", duration: 500 });
-        $(next).show("slide", { direction: "right", duration: 500});
-         $(current).removeClass("activeCalendar");
-        $(next).addClass("activeCalendar");
-        setActive();
-    })
-    $('#previous').click(function(){
-        var current=$(".activeCalendar")[0];
-        let nextId=parseInt(calendar.id.split('-')[1])-1;
-        var next=$("#calendarWeek-"+nextId);
-        $(current).hide("slide", { direction: "right" }, 500);
-        $(next).show("slide", { direction: "left" }, 500);
-         $(current).removeClass("activeCalendar");
-        $(next).addClass("activeCalendar");
-        setActive();
-    })
- 
-    htmx.process(htmx.find(cData.calendarDiv));
+    htmx.process(htmx.find(cData.calendarDiv));   
+    
 }
+
+$(cData.calendarDiv).on("click", ".event", function(e){
+    clicked=this.id;
+    e.stopPropagation();
+});
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody") {
@@ -162,3 +142,22 @@ htmx.on("htmx:beforeSwap", (e) => {
 })
 
 
+$(document).on("addCalendarEvent", function(e){
+    e.detail.modules.forEach((mod) => addCalEvent(mod));
+    refreshListeners();
+})
+
+$(document).on("periodUpdate", function(e){
+    console.log(e.detail)
+    e.detail.modules.forEach((mod) => {
+        $(`#${mod.id}`).remove()
+        addCalEvent(mod);
+    });
+
+    refreshListeners();
+})
+
+$(document).on("updateColor",function(e){
+    $(`.${e.detail.parentId}`).css("background-color", e.detail.color);
+    $(`.${e.detail.parentId}`).css("color", getTextColor(e.detail.color));
+})

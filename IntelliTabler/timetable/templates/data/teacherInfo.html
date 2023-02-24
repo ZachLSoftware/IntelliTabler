@@ -1,3 +1,4 @@
+{% load mathfilters %}
 {%if teacher is not None %}
 <div class="container mt-4">
     <div class="row justify-content-center">
@@ -20,12 +21,31 @@
         </div>
         <div class="row justify-content-center">
         <div class="col-4 border border-end-0">
-            hours:
+            Total Load:
         </div>
         <div class="col-4 border border-start-0">
             {{teacher.load}}
         </div>
+    </div>
+    {% with modules|length as assigned %}
+    <div class="row justify-content-center">
+        <div class="col-4 border border-end-0">
+            Total Assigned Load:
         </div>
+        <div class="col-4 border border-start-0">
+            {{assigned}}
+        </div>
+    </div>
+        <div class="row justify-content-center">
+        <div class="col-4 border border-end-0">
+            Remaining Load:
+        </div>
+        <div class="col-4 border border-start-0">
+            {{teacher.load|sub:assigned}}
+            
+        </div>
+    </div>
+    {% endwith %}
         <div class="row justify-content-center">
             <div class="col-4 border border-end-0">
                 Room:

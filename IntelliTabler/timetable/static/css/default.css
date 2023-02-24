@@ -50,4 +50,10 @@
     padding-top: 50px;
   }
 
+
+
+  #sidebar {
+    z-index: 1000;
+  }
+
  

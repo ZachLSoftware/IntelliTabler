@@ -7,39 +7,49 @@ from django.http import JsonResponse
 from ..serializers import *
 from rest_framework.renderers import JSONRenderer
 
-
-
-
+###Default Landing Page###
 def index(request):
     return redirect('dashboard')
 
+
+#Dashboard, returns basic dashboard with available departments and years
 @login_required
 def dashboard(request):
+    """dashboard gets all departments from the user and creates a dictionary
+    with years as their values."""
+
     context={}
-    ds=Department.objects.filter(user=request.user)
+    ds=Department.objects.filter(user=request.user).order_by('name')
     departments={}
     for d in ds:
-        departments[d]=Year.objects.filter(department_id=d.id)
+        departments[d]=Year.objects.filter(department_id=d.id).order_by('year')
     context['departments']=departments
     context['template']="dashboard_"+request.user.theme+".html"
     return render(request, "dashboard.html", context)
 
 def displayDashboardContent(request, timetableId):
+    """Sets the current timetable and gets all available timetables for the year.
+        Creates the side navbar with the correct links for the timetable."""
+
     timetable=Timetable.objects.get(id=timetableId)
-    tables=Timetable.objects.filter(tableYear=timetable.tableYear)
+    tables=Timetable.objects.filter(tableYear=timetable.tableYear).order_by('name')
     context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables}
     response=render(request,'data/dashboardNav.html', context)
+
+    #Creates an event trigger when content is loaded
     response['HX-Trigger']='dashboardLoaded'
     return response
 
+###OLD MAY NEED TO BE REMOVED###
 @login_required
 def departments(request):
     return render(request, "data/departments.html")
 
+
 @login_required
 def departmentChange(request):
     context={}
-    departments=Department.objects.filter(user=request.user)
+    departments=Department.objects.filter(user=request.user).order_by('name')
     context["entities"]=departments
     return render(request, "data/sideBarList.html", context)
 
@@ -50,7 +60,7 @@ def teachers(request):
 @login_required
 def teacherChange(request):
     context={}
-    teachers=Teacher.objects.filter(user=request.user)
+    teachers=Teacher.objects.filter(user=request.user).order_by('name')
     context["entities"]=teachers
     return render(request, "data/sideBarList.html", context)
 
@@ -61,17 +71,24 @@ def viewObjects(request, type, id=0):
     if id==0:
         id=request.GET.get('id', 0)
     if(id):
-        objects=Type.objects.filter(user=request.user, department_id=id)
+        objects=Type.objects.filter(user=request.user, department_id=id).order_by('name')
     else:
-        objects=Type.objects.filter(user=request.user)
+        objects=Type.objects.filter(user=request.user).order_by('name')
     context['type']= type
     context["entities"]=objects
     context["objectId"]=id
     return render(request, "data/sideBarList.html", context)
 
+#Gets the sidebar for Teachers and Modules
 def getList(request, type, timetableId):
+    """getList gets a type and the current timetableId.
+    Returns instances of the type in order to create a list of items."""
+
+    #Get current Timetable
     timetable=Timetable.objects.get(id=timetableId)
     context={'timetable':timetable}
+
+    #Get items of Type. Sets paths for setting hx-get functions
     if type.upper()=='MODULEPARENT':
         objects=ModuleParent.objects.filter(timetable=timetable).order_by('name')
         context['type']='module'
@@ -87,6 +104,7 @@ def getList(request, type, timetableId):
     context["objects"]=objects
     return render(request, "data/buttonSidebar.html", context)
 
+#Creates the necessary elements for the Teacher and Module page to list items
 def getSidebar(request, type, timetableId):
     timetable=Timetable.objects.get(id=timetableId)
     context={
@@ -100,23 +118,26 @@ def getSidebar(request, type, timetableId):
         context['detailPath']='getModules'
     return render(request, 'data/sidebarTemplate.html', context)
 
+
+##Old view before dashboard
 @login_required
 def viewModules(request, type, departmentId, timetableId=0):
     context={}
     Type = apps.get_model(app_label='timetable', model_name=type)
     if(timetableId):
-        objects=Type.objects.filter(user=request.user, timetable=timetableId)
+        objects=Type.objects.filter(user=request.user, timetable=timetableId).order_by('name')
     else:
-        objects=Type.objects.filter(department_id=departmentId)
+        objects=Type.objects.filter(department_id=departmentId).order_by('name')
     context['type']= type
     context["entities"]=objects
     context["departmentId"]=departmentId
     context["timetableId"]=timetableId
     return render(request, "data/modulesList.html", context)
 
+##Old view before dashboard
 def modules(request, departmentId=0):
     context={}
-    departments=Department.objects.filter(user=request.user)
+    departments=Department.objects.filter(user=request.user).order_by('name')
     if(not departmentId):
         context["departments"]=departments
         context["departmentId"]=0
@@ -142,7 +163,7 @@ def getTeacher(request, id=0, timetableId=0):
         teacher=Teacher.objects.get(id=id)
     except:
         teacher=None
-    mods=Module.objects.filter(teacher=teacher, group__parent__timetable_id=timetableId)
+    mods=Module.objects.filter(teacher=teacher, group__parent__timetable_id=timetableId).order_by('name', 'group__period')
     context={}
     context['modules']=mods
     context["teacher"]=teacher
@@ -171,10 +192,10 @@ def getModules(request, groupId=0, timetableId=0):
 def combingView(request, timetableId):
     context={}
     timetable=Timetable.objects.get(id=timetableId)
-    teachers=Teacher.objects.filter(department=timetable.tableYear.department)
+    teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
     periods=list(Period.objects.filter(department=timetable.tableYear.department))
-    groups=ModuleGroup.objects.filter(parent__timetable=timetable).order_by('parent__name', 'id')
-    classes=Module.objects.filter(group__parent__timetable=timetable).order_by('group__parent__name','group_id', 'name')
+    groups=ModuleGroup.objects.filter(parent__timetable=timetable).order_by('name', 'session')
+    classes=Module.objects.filter(group__parent__timetable=timetable)
     unassigned = False
     modules=[]
     parents=set()
@@ -204,7 +225,7 @@ def combingView(request, timetableId):
                 module=module_ser.data
                 module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
                 module["teacher"]=cl.teacher.id
-                module.pop('teacher', None)
+                
             
                 modules.append(module)
         else:
@@ -239,7 +260,7 @@ def getCalendar(timetableId, teacher=0):
     modules=[]
     context={}
     if teacher:
-        classes=Module.objects.filter(teacher_id=teacher, group__parent__timetable_id=timetableId)
+        classes=Module.objects.filter(teacher_id=teacher, group__parent__timetable_id=timetableId).order_by('name')
         for cl in classes:
             if cl.group.period:
                 module_ser=ModuleSerializer(cl)
@@ -252,7 +273,7 @@ def getCalendar(timetableId, teacher=0):
                 
                 modules.append(module)
     else:
-        classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
+        classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
         for cl in classes:
             if cl.period:
                 module_ser=ModuleGroupSerializer(cl)
@@ -271,7 +292,7 @@ def getCalendar(timetableId, teacher=0):
     return context
 
 def getCalendarData(timetableId):
-    classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
+    classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
     events={}
     modules=[]
     for cl in classes:

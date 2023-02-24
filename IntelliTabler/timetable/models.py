@@ -2,11 +2,13 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django_random_id_model import RandomIDModel
 import uuid
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 import datetime
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.db.models import F
+from django.db.models import Q
 
 
 class User(AbstractUser):
@@ -102,6 +104,7 @@ class ModuleGroup(RandomIDModel):
     name=models.CharField(max_length=50)
     period=models.ForeignKey(Period, blank=True, null=True, on_delete=models.SET_NULL)
     parent=models.ForeignKey(ModuleParent, on_delete=models.CASCADE)
+    session=models.IntegerField()
 
 class Module(RandomIDModel):
     name=models.CharField(max_length=50)
@@ -122,18 +125,46 @@ def createModules(sender, instance, created, **kwargs):
         except:
             timetable=None
         for i in range(1, instance.numPeriods+1):
-            group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance)
+            group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance, session=i)
             for j in range(1, instance.numClasses+1):
                 mod = Module.objects.create(name=instance.name+"-"+str(j), group=group)
                 # if timetable is not None:
                 #     TimetableRow.objects.create(timetable=timetable, module=mod)
+    else:
+        test=kwargs['update_fields']
+        print(test)
+        # groups=ModuleGroup.objects.filter(parent=instance.id).order_by('session')
+        # if len(groups)>instance.numPeriods:
+        #     for group in groups:
+        #         if group.session > instance.numPeriods:
+        #             group.delete()
+        #         else:
+        #             mods=Module.objects.filter(group=group)
+        #             for mod in mods:
+        #                 if int(mod.name.split("-")[1])> instance.numClasses:
+        #                     mod.delete()
 
+@receiver(pre_save, sender=ModuleParent)
+def updateModuleParent(sender, instance, **kwargs):
+    if not instance._state.adding:
+        old_instance=ModuleParent.objects.get(id=instance.id)
+        if old_instance.numClasses!=instance.numClasses:
+            test
+    else:
+        print("creating")
+
+    test=instance
 @receiver(post_save, sender=Timetable)
 def cloneModules(sender, instance, created, **kwargs):
     if created:
-        modules=ModuleParent.objects.filter(timetable__year=instance.tableYear)
+        sharedIds=ModuleParent.objects.filter(timetable__tableYear=instance.tableYear).values('sharedId').distinct()
+        modules=[]
+        for sid in sharedIds:
+            m=ModuleParent.objects.filter(sharedId=sid['sharedId']).first()
+            modules.append(m)
         for mod in modules:
             mod.pk=None
+            mod.timetable=instance
             mod.save()
 
 # @receiver(post_save, sender=Module)
@@ -157,3 +188,5 @@ class Preference(models.Model):
 
     priority = models.IntegerField(choices=Priority.choices, default=Priority.NEUTRAL)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+
+

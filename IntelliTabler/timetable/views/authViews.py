@@ -70,7 +70,7 @@ def logout_view(request):
 def successPage(request):
     if request.user.is_authenticated:
         messages.info(request, "You have succesfully logged in.")
-        return redirect("departments")
+        return redirect("dashboard")
     else:
         messages.info(request, "You have successfully Logged Out.")
     return render(request, 'index.html')
