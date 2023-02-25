@@ -17,7 +17,7 @@ htmx.on("htmx:afterSwap", (e) => {
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
     }
-    if(e.detail.target.id=="offcanvasBody"){
+    if(e.detail.target.id=="sidebarBody"){
         $("#offsetToggle").collapse('show');
         htmx.config.defaultSwapDelay=0;
     }
@@ -57,7 +57,7 @@ htmx.on("htmx:beforeSwap", (e) => {
     //     }
     //     $("#mainContent").collapse('hide');
     // }
-    if(e.detail.target.id=="offcanvasBody"){
+    if(e.detail.target.id=="sidebarBody"){
         $("#mainContent").html("");
     }
 

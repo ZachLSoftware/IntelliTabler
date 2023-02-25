@@ -6,6 +6,9 @@ import json
 from django.http import JsonResponse
 from ..serializers import *
 from rest_framework.renderers import JSONRenderer
+from ..csp import *
+from django.http import HttpResponse
+
 
 ###Default Landing Page###
 def index(request):
@@ -305,3 +308,21 @@ def getCalendarData(timetableId):
     context={}
     context['events']=events
     return JsonResponse(events)
+
+
+def cspTest(request, timetableA):
+    from datetime import datetime
+    now = datetime.now()
+    tA=Timetable.objects.get(id=timetableA)
+    t=createNewGeneratedTimetable(tA.tableYear, request.user, tA.name +"-"+ now.strftime("%d-%m"), tA)
+    sched=getClassSchedule(t)
+    teach=getTeacherDomains(t)
+    csp1=CSP(sched, teach)
+    if (csp1.assignTeacher()):
+        for c, t in csp1.class_assignments.items():
+            Module.objects.filter(id=c).update(teacher_id=t)
+        return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
+    else:
+        t.delete()
+        return HttpResponse(status=502)
+    

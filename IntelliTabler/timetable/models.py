@@ -63,8 +63,8 @@ class Teacher(RandomIDModel):
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
 
 class Availability(models.Model):
-    period = models.CharField(max_length=20)
-    week = models.IntegerField()
+    period = models.ForeignKey(Period, on_delete=models.CASCADE)
+    #week = models.IntegerField()
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
 class Year(RandomIDModel):
@@ -144,14 +144,14 @@ def createModules(sender, instance, created, **kwargs):
         #                 if int(mod.name.split("-")[1])> instance.numClasses:
         #                     mod.delete()
 
-@receiver(pre_save, sender=ModuleParent)
-def updateModuleParent(sender, instance, **kwargs):
-    if not instance._state.adding:
-        old_instance=ModuleParent.objects.get(id=instance.id)
-        if old_instance.numClasses!=instance.numClasses:
-            test
-    else:
-        print("creating")
+# @receiver(pre_save, sender=ModuleParent)
+# def updateModuleParent(sender, instance, **kwargs):
+#     if not instance._state.adding:
+#         old_instance=ModuleParent.objects.get(id=instance.id)
+#         if old_instance.numClasses!=instance.numClasses:
+#             test
+#     else:
+#         print("creating")
 
     test=instance
 @receiver(post_save, sender=Timetable)
@@ -187,6 +187,7 @@ class Preference(models.Model):
         NEUTRAL=1
 
     priority = models.IntegerField(choices=Priority.choices, default=Priority.NEUTRAL)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
 

@@ -74,14 +74,13 @@ def setAvailability(request, teacherid):
             formset1 = availabilityFormSet(request.POST, prefix="week-"+str(w))
             if formset1.is_valid():
                 i=0
-                Availability.objects.filter(teacher=teacherid).filter(week=w+1).delete()
+                Availability.objects.filter(teacher=teacherid).filter(period__week=w+1).delete()
                 for f in formset1:
                     cd = f.cleaned_data
                     checked = cd.get('checked')
                     if(checked):
                         newperiod=Availability()
-                        newperiod.period=cd.get('period')
-                        newperiod.week=cd.get('week')
+                        newperiod.period=Period.objects.get(department = context['teacher'].department, name=cd.get('period'), week=cd.get('week'))
                         newperiod.teacher=Teacher.objects.get(id=teacherid)
                         newperiod.save()
                     i=i+1
@@ -99,7 +98,7 @@ def setAvailability(request, teacherid):
     currentQuery=Availability.objects.filter(teacher=teacherid)
     current = []
     for c in currentQuery:
-        current.append(str(c.week)+"-"+c.period)
+        current.append(str(c.period.week)+"-"+c.period.name)
 
     #hours=Teacher.objects.values_list('totalHours', flat=True).get(id=teacherid)
     #context['hours']=hours
