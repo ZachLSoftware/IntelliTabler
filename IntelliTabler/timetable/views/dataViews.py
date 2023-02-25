@@ -314,15 +314,20 @@ def cspTest(request, timetableA):
     from datetime import datetime
     now = datetime.now()
     tA=Timetable.objects.get(id=timetableA)
-    t=createNewGeneratedTimetable(tA.tableYear, request.user, tA.name +"-"+ now.strftime("%d-%m"), tA)
+    t=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"NEWTEST", tA)
     sched=getClassSchedule(t)
+    if(not sched):
+        return HttpResponse(status=502)
     teach=getTeacherDomains(t)
-    csp1=CSP(sched, teach)
-    if (csp1.assignTeacher()):
-        for c, t in csp1.class_assignments.items():
-            Module.objects.filter(id=c).update(teacher_id=t)
-        return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
-    else:
+    csp1=CSP(sched, teach, tA.tableYear.department.format.numWeeks)
+    if csp1.checkPossible():
+        count=0
+        while count<3:
+            if (csp1.assignTeacher()):
+                for c, t in csp1.class_assignments.items():
+                    Module.objects.filter(id=c).update(teacher_id=t)
+                return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
+            count+=1
         t.delete()
         return HttpResponse(status=502)
     

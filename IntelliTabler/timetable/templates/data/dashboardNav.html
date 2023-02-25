@@ -41,6 +41,9 @@
           <li class="nav-item">
             <a id="generateTest" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'cspTest' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Generate Timeable</span></a>
           </li>
+          <li class="nav-item">
+            <a id="deleteTable" class="nav-link align-middle px-0 sidebar-link" hx-delete="{% url 'deleteObject' 'Timetable' timetable.id %}"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Delete Timetable</span></a>
+          </li>
         </ul>
 
 <script>enableTooltips();</script>

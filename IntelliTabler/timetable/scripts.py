@@ -13,7 +13,7 @@ def updatePeriod(group, pName, week):
         w=1
     else:
         objs=[group]
-        w=week
+        w=int(week)
     update=[]
     for obj in objs:
         obj.period=Period.objects.get(department=group.parent.department, name=pName, week=w)

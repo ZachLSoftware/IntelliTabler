@@ -161,3 +161,4 @@ class TimetableForm(BaseModelForm):
     class Meta:
         model=Timetable
         exclude=("id","user","tableYear")
+
