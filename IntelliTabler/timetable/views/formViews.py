@@ -141,7 +141,7 @@ def addModule(request, yearId, parentId=0):
                     p.repeat=form.cleaned_data['repeat']
                     p.color=form.cleaned_data['color']
                     p.save()
-                return HttpResponse(status=204, headers={'HX-Trigger':'moduleDetailsChange'})
+                return HttpResponse(status=204, headers={'HX-Trigger':'{"moduleDetailsChange":"None", "moduleParentChange": "None"}'})
     else:
         if(parentId!=0):
             group=get_object_or_404(ModuleParent,pk=parentId)

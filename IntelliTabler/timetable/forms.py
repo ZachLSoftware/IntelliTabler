@@ -70,13 +70,20 @@ class ModuleParentForm(BaseModelForm):
         self.edit = kwargs.pop('edit', False)
         super(ModuleParentForm, self).__init__(*args, **kwargs)
 
+    def clean_repeat(self):
+        repeat = self.cleaned_data.get('repeat')
+        if repeat:
+            if self.cleaned_data['numPeriods']%self.department.format.numWeeks!=0:
+                self.add_error('repeat', _('The number of periods must evenly divide into the number of weeks ({}) for repeat to work properly.').format(self.department.format.numWeeks))
+        return repeat
+
     def clean(self):
-        if not self.edit:
-            cleaned_data=super().clean()
-            name=cleaned_data['name']
-            year=Year.objects.filter(id=self.year)[0]
-            if(ModuleParent.objects.filter(name=name, timetable=year.defaultTimetable, department=self.department).exists()):
-                self.add_error('name', _('Module: {} already exists for Year: {}').format(name, year.year))
+        #if not self.edit:
+        cleaned_data=super().clean()
+        name=cleaned_data['name']
+        year=Year.objects.filter(id=self.year)[0]
+        if(ModuleParent.objects.filter(name=name, timetable=year.defaultTimetable, department=self.department).exclude(id=self.instance.id).exists()):
+            self.add_error('name', _('Module: {} already exists for Year: {}').format(name, year.year))
 
 class YearForm(BaseModelForm):
     department = forms.ChoiceField()

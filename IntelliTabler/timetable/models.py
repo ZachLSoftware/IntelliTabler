@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models import F
 from django.db.models import Q
+# from .scripts import updatePeriod
 
 
 class User(AbstractUser):
@@ -108,8 +109,10 @@ class ModuleGroup(RandomIDModel):
 
 class Module(RandomIDModel):
     name=models.CharField(max_length=50)
+    lesson=models.IntegerField()
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
+    sharedKey=models.CharField(max_length=36, default=uuid.uuid4)
 
 # class TimetableRow(models.Model):
 #     timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
@@ -124,15 +127,22 @@ def createModules(sender, instance, created, **kwargs):
             timetable=Timetable.objects.get(id=instance.department.id*instance.tableYear.year)
         except:
             timetable=None
+        mSharedKey={}
         for i in range(1, instance.numPeriods+1):
             group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance, session=i)
             for j in range(1, instance.numClasses+1):
-                mod = Module.objects.create(name=instance.name+"-"+str(j), group=group)
+                if i==1:
+                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                    mSharedKey[j]=mod.sharedKey
+                else:
+                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group, sharedKey=mSharedKey[j])
+                
+
                 # if timetable is not None:
                 #     TimetableRow.objects.create(timetable=timetable, module=mod)
-    else:
-        test=kwargs['update_fields']
-        print(test)
+    # else:
+    #     test=kwargs['update_fields']
+    #     print(test)
         # groups=ModuleGroup.objects.filter(parent=instance.id).order_by('session')
         # if len(groups)>instance.numPeriods:
         #     for group in groups:
@@ -144,16 +154,56 @@ def createModules(sender, instance, created, **kwargs):
         #                 if int(mod.name.split("-")[1])> instance.numClasses:
         #                     mod.delete()
 
-# @receiver(pre_save, sender=ModuleParent)
-# def updateModuleParent(sender, instance, **kwargs):
-#     if not instance._state.adding:
-#         old_instance=ModuleParent.objects.get(id=instance.id)
-#         if old_instance.numClasses!=instance.numClasses:
-#             test
-#     else:
-#         print("creating")
+@receiver(pre_save, sender=ModuleParent)
+def updateModuleParent(sender, instance, **kwargs):
+    if not instance._state.adding and ModuleParent.objects.filter(id=instance.id).exists():
+        oldInstance=ModuleParent.objects.get(id=instance.id)
+        if oldInstance.numPeriods>instance.numPeriods:
+            for mod in ModuleGroup.objects.filter(parent=oldInstance, session__gt=instance.numPeriods):
+                if mod.session > instance.numPeriods:
+                    mod.delete()
+        if oldInstance.numClasses>instance.numClasses:
+            for mod in Module.objects.filter(group__parent=oldInstance, lesson__gt=instance.numClasses):
+                if mod.lesson>instance.numClasses:
+                    mod.delete()
+        mSharedKey={}
+        g=ModuleGroup.objects.filter(parent=oldInstance).order_by('session').first()
+        for mod in Module.objects.filter(group=g):
+            mSharedKey[mod.lesson]=mod.sharedKey
+        if oldInstance.numClasses<instance.numClasses:
+            groups = ModuleGroup.objects.filter(parent=oldInstance, session__lte=instance.numPeriods)
+            i=1
+            for group in groups:
+                for j in range(oldInstance.numClasses+1, instance.numClasses+1):
+                    if j not in mSharedKey.keys():
+                        mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                        mSharedKey[j]=mod.sharedKey
+                    else:
+                        mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group, sharedKey=mSharedKey[j])
 
-    test=instance
+                i+=1
+        if oldInstance.numPeriods<instance.numPeriods:
+            for i in range(oldInstance.numPeriods+1, instance.numPeriods+1):
+                group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance, session=i)
+                for j in range(1, instance.numClasses+1):
+                    mod=Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                    mSharedKey[j]=mod.sharedKey
+        if oldInstance.name!=instance.name:
+            group=ModuleGroup.objects.filter(parent=oldInstance)
+            for g in group:
+                split=g.name.split()
+                g.name=instance.name+ " " + split[1] + " " + split[2]
+                g.save()
+        if oldInstance.repeat!=instance.repeat:
+            if instance.repeat:
+                sessions=instance.numPeriods/oldInstance.timetable.tableYear.department.format.numWeeks
+                groups=ModuleGroup.objects.filter(parent=oldInstance).filter(session__lte=sessions).order_by('session')
+                for group in groups:
+                    if group.period:
+                        from .scripts import updatePeriod
+                        updatePeriod(group, group.period.name, group.period.week, True)
+
+            
 @receiver(post_save, sender=Timetable)
 def cloneModules(sender, instance, created, **kwargs):
     if created:

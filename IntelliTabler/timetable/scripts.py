@@ -2,8 +2,9 @@ from .models import ModuleGroup, Period
 from django.db.models import F
 from .serializers import *
 
-def updatePeriod(group, pName, week):
-    if group.parent.repeat:
+def updatePeriod(group, pName, week, manual=False):
+    weeks=group.parent.department.format.numWeeks
+    if group.parent.repeat or manual:
         weeks=group.parent.department.format.numWeeks
         sessions=group.parent.numPeriods
         modu=sessions/weeks
