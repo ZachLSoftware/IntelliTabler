@@ -2,8 +2,8 @@ from .models import *
 
 def createNewGeneratedTimetable(year, user, name, timetableA):
     t=Timetable.objects.create(name=name, tableYear=year, user=user)
-    mgA=ModuleGroup.objects.filter(parent__timetable=timetableA)
-    mgB=ModuleGroup.objects.filter(parent__timetable=t)
+    mgA=ModuleGroup.objects.filter(parent__timetable=timetableA).order_by('name')
+    mgB=ModuleGroup.objects.filter(parent__timetable=t).order_by('name')
     for i in range(len(mgB)):
         mgB[i].period=mgA[i].period
         mgB[i].save()
@@ -50,6 +50,7 @@ class CSP():
         self.class_assignments={id:None for id in schedule.keys()}
         self.weeks=weeks
         self.unassigned=list(schedule.keys())
+        self.teacher_splitClass={teacher: {} for teacher in teachers.keys()}
         self.assignedPeriods={}
         for k,v in schedule.items():
             self.assignedPeriods[v['period']]=set()
@@ -57,9 +58,11 @@ class CSP():
         for k,v in self.currDoms.items():
             for teacher, val in teachers.items():
                 if k in val['prefrences']:
-                    self.currDoms[k][teacher]=val['prefrences'][k]
+                    self.currDoms[k][teacher]={'base_pref':val['prefrences'][k], 'sharedKey_pref':0}
                 else:
-                    self.currDoms[k][teacher]=0
+                    self.currDoms[k][teacher]={'base_pref':0, 'sharedKey_pref':0}
+                if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
+                    self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
         
     def isComplete(self):
         return all(teacher is not None for teacher in self.class_assignments.values())
@@ -79,6 +82,7 @@ class CSP():
         if self.isComplete():
             return True
         
+        self.unassigned.sort(key=lambda cl: (len(self.currDoms[cl]), -self.currDoms[cl][next(iter(self.currDoms[cl]))]['base_pref'] if self.currDoms[cl] else 0))
         classId=self.unassigned[0]
         domain=self.currDoms[classId]
         if not domain:
@@ -86,9 +90,9 @@ class CSP():
 
         
         #Get list of teachers by highest remaining load
-        teachers = sorted(domain, key=lambda t: (domain[t], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True)
+        teachers = sorted(domain, key=lambda t: (domain[t]['sharedKey_pref'], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True)
         print('\n****START****\n', teachers, '\n*****END*****\n')
-        for teacher in teachers:
+        for teacher in sorted(domain, key=lambda t: (domain[t]['base_pref'], domain[t]['sharedKey_pref'], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True):
             if teacher not in domain.keys():
                 continue
             if self.isValidAssignment(teacher, classId):
@@ -101,6 +105,7 @@ class CSP():
                 self.unassigned.remove(classId)
                 self.assignedPeriods[self.schedule[classId]['period']].add(teacher)
                 del self.currDoms[classId]
+                self.teacher_splitClass[teacher][self.schedule[classId]['sharedKey']].add(classId)
                 self.forwardCheck(classId, teacher)
 
                 #Run recursive step
@@ -112,6 +117,7 @@ class CSP():
                 self.teachers[teacher]['load'][self.schedule[classId]['period'].week]+=1
                 self.unassigned.append(classId)
                 self.assignedPeriods[self.schedule[classId]['period']].remove(teacher)
+                self.teacher_splitClass[teacher][self.schedule[classId]['sharedKey']].remove(classId)
                 self.currDoms[classId]=domain
             else:
                 del domain[teacher]
@@ -129,8 +135,10 @@ class CSP():
                 if not self.isValidAssignment(teacherId, nextCl):
                    del self.currDoms[nextCl][teacherId]
                 else:
-                    if self.schedule[nextCl]['sharedKey']==sKey:
-                        self.currDoms[nextCl][teacherId]+=1
+                    self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
+                tempDom=self.currDoms[nextCl].copy()
+                self.currDoms[nextCl].clear()
+                self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
 
     def checkPossible(self):
         loadCheck={}

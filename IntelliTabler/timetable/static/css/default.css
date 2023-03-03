@@ -1,3 +1,7 @@
+html, body {
+  height:100%;
+}
+
 .helptext{
   position:relative;
 }
@@ -63,3 +67,17 @@
  .dropdown-item {
   cursor: pointer;
  }
+
+ #contentSidebar {
+  display: inline-block;
+ }
+
+#listObjects {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+ #contentSidebar li {
+  text-align: center;
+ }
+

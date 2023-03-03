@@ -10,10 +10,9 @@ function setupChart(){
     }
 }
 function addCombEvent(mod){
-    console.log(mod)
     $(mod.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
-                                    <button id="${mod.id}" hx-get="/getModules/${mod.group.id}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.group.parent.id}Class">${mod.name}</button>
+                                    <button id="${mod.id}" hx-get="/getModules/${mod.group.id}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.group.parent.id}Class week${mod.group.period.week}">${mod.name}</button>
                                 </div>`);
     $(`#${mod.id}`).css('background-color', mod.group.parent.color);
     $(`#${mod.id}`).css('color', getTextColor(mod.group.parent.color));
@@ -66,18 +65,28 @@ function checkAssignment(cellId){
 }
 
 function setTeacherAllocTotal(teachers, parents){
+    updateSet=new Set();
     teachers.forEach(function(teacher){
         parents.forEach(function(parent){
             let cTotal=$(`#${teacher}Row`).find(`.${parent}Class`).length
-            $(`#${teacher}alloc${parent}`).text(cTotal).effect("highlight", 1000);
+            $(`#${teacher}alloc${parent}`).text(cTotal);
+            updateSet.add(`#${teacher}alloc${parent}`);
         })
-        tTotal=$(`#${teacher}Row`).find(".mod").length
+        
+        for(let i=1; i<=cData.numWeeks; i++){
+        tTotal=$(`#${teacher}Row`).find(`.week${i}`).length
         load=parseInt($(`#${teacher}Load`).text());
-        $(`#${teacher}Allocated`).text(tTotal).effect("highlight", 1000);
-        $(`#${teacher}Rem`).text(load-tTotal).effect("highlight", 1000);
+        $(`#${teacher}Allocated-${i}`).text(tTotal);
+        $(`#${teacher}Rem-${i}`).text(load-tTotal);
+        updateSet.add(`#${teacher}Rem-${i}`);
+        updateSet.add(`#${teacher}Allocated-${i}`);
+        }
+    
+    });
         parents.forEach(function(parent){
             let pTotal= $(`.${parent}Class`).length;
-            $(`#${parent}Allocated`).text(pTotal).effect("highlight", 1000);
+            $(`#${parent}Allocated`).text(pTotal);
+            updateSet.add(`#${parent}Allocated`);
             if(parseInt($(`#${parent}Allocated`).text())==parseInt($(`#${parent}Total`).text())){
                 $(`#${parent}Allocated`).addClass('bg-success');
             }else{
@@ -85,13 +94,16 @@ function setTeacherAllocTotal(teachers, parents){
             }
         });
         //$(`#${teacher}Rem`).fadeOut8k("slow", function(){$(`#${teacher}Rem`).removeClass("bg-warning", 1000);});
-    });
 
 
     // $(`#${mod.module.teacher}Rem`).text(parseInt($(`#${mod.module.teacher}Rem`).text())-1)
     // $(`#${mod.module.parent}Allocated`).text(parseInt($(`#${mod.module.parent}Allocated`).text())+1)
     // $(`#${mod.module.teacher}Allocated`).text(parseInt($(`#${mod.module.teacher}Allocated`).text())+1)
     // $(`#${mod.module.teacher}Rem`).text(parseInt($(`#${mod.module.teacher}Rem`).text())-1)
+
+    updateSet.forEach(function(id){
+        $(id).effect("highlight", 1000);
+    })
 }
 
 htmx.on("htmx:afterSwap", (e) => {

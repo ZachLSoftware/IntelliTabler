@@ -25,6 +25,11 @@ class Format(models.Model):
     numWeeks=models.IntegerField()
     department=models.OneToOneField(Department, on_delete=models.CASCADE, primary_key=True)
 
+@receiver(post_save, sender=Department)
+def createDefaultYear(sender, instance, created, **kwargs):
+    if created:
+        Year.objects.create(department=instance)
+
 class Period(models.Model):
     name = models.CharField(max_length=50)
     dayNum = models.IntegerField()
@@ -86,7 +91,7 @@ def defaultTimetable(sender, instance, created, **kwargs):
         instance.save()
 
 class Timetable(RandomIDModel):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=40)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tableYear = models.ForeignKey(Year, on_delete=models.CASCADE)
     

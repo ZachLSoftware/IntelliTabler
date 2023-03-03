@@ -1,16 +1,16 @@
 const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
 var cData ={};
 var activePage;
-$(document).on("click", ".childButtons", function(){
-    if($(this).hasClass("childButtons")){
-        $(".childButtons").removeClass("active");
-    }
-    else{
-        $("button").not(".parentButtons").not(".childButtons").removeClass("active");
-    }
+// $(document).on("click", ".childButtons", function(){
+//     if($(this).hasClass("childButtons")){
+//         $(".childButtons").removeClass("active");
+//     }
+//     else{
+//         $("button").not(".parentButtons").not(".childButtons").removeClass("active");
+//     }
     
-    $(this).addClass("active");
-})
+//     $(this).addClass("active");
+// })
 
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id=="displayChild"){
@@ -25,6 +25,22 @@ htmx.on("htmx:afterSwap", (e) => {
         $('#offcanvasSidebar').offcanvas('hide');
         // $('#mainContent').collapse('show');
         // htmx.config.defaultSwapDelay=0;
+    }
+    if(e.detail.target.id=="listObjects"){
+        let pWidth = 0;
+        listSidebar= document.getElementById("listObjectsDiv")
+        
+        const tempObserver = new ResizeObserver(entries => {
+          for (const entry of entries) {
+            const width = entry.borderBoxSize?.[0].inlineSize;
+            if (typeof width === 'number' && width !== pWidth) {
+              pWidth = width;
+              $("#displayChild").css("margin-left", width+'px');
+            }
+          }
+        });
+        
+        tempObserver.observe(listSidebar);
     }
 
     //AfterSwap for Modal Handeler

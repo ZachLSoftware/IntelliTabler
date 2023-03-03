@@ -26,3 +26,7 @@ def getPeriodName(periods, counter):
 @register.filter
 def getCheckBoxId(period, pcounter):
     return str(pcounter) + "-"+ period
+
+@register.filter
+def forRange(val):
+    return [*range(1, val+1)]

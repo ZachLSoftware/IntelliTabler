@@ -9,3 +9,8 @@ body {
   #sidebar, #titleBar {
     background-color: #f8f9fa;
   }
+
+  td, th {
+    border: 1px solid black;
+    color: black;
+  }

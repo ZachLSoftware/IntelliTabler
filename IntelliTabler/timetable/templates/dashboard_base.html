@@ -36,16 +36,16 @@
     {% endblock %}
     {% block messages %}
     {% endblock %} 
-    {% block container-override %}
-    <div id="bodyContainer" class="container-fluid shadow">
-      <div class="row flex-nowrap">
+    <div id="bodyContainer" class="container-fluid shadow h-100">
+      <div class="row flex-nowrap h-100">
       {% comment %} <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasLabel">
       <div class="offcanvas-header"> {% endcomment %}
-        <div id="sidebar" class="col-auto px-sm-2 px-0 position-fixed shadow" style="height:100vh;">
+        {% block sidebar %}
+        <div id="sidebar" class="col-auto px-sm-2 px-0 position-fixed shadow h-100">
           <div class="navbar-nav d-flex flex-column align-items-center align-items-sm-start px-3 pt-2">
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-regular fa-building"></i> <span id="departmentSelect" class="d-none d-sm-inline"> Select Department</span>
+                <i class="fa-regular fa-building"></i> <span id="departmentSelect" class="d-none d-sm-inline"> Department</span>
               </a>
               <ul id="departmentDropdown" class="dropdown-menu" aria-labelledby="departmentSelect">
                 <li>
@@ -95,12 +95,12 @@
       <div id="staticSidebar" class="mt-4">
         <hr/>
         <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
-          <li class="nav-item">
+          {% comment %} <li class="nav-item">
             <a class="nav-link align-middle px-0 " id="Departments" aria-current="page" hx-get="{% url 'addDepartment' %}" hx-target="#addForm"><i class="fa-regular fa-square-plus"></i><span class="d-none d-sm-inline">  Add Departments</a>
           </li>
           <li class="nav-item">
             <a class="nav-link align-middle px-0" id="addYear" hx-get="{% url 'addYear' %}" hx-target="#addForm" aria-current="page" ><i class="fa-regular fa-calendar-plus"></i><span class="d-none d-sm-inline"> Add Year</span></a>
-          </li>
+          </li> {% endcomment %}
           <li class="nav-item dropdown">
             <a id="profileDropdown" class="nav-link dropdown-toggle align-middle px-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-regular fa-user"></i>
@@ -135,13 +135,14 @@
       </div>
   </div>
 </div>
-    {% endblock %}
-    <div id="contentCol" class="col overflow-auto">
+{% endblock %}
+
+    <div id="contentCol" class="col overflow-auto h-100">
       {% comment %} <div id="offsetToggle" class="collapse col-1 mt-4 mb-4">
         <i class="fa-solid fa-bars fa-2xl" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"></i></div> {% endcomment %}
 
         {% block content %}
-        <div id="mainContent" class="me-auto pt-2">
+        <div id="mainContent" class="me-auto h-100">
           Please select a department
         </div>
         {% endblock %}

@@ -1,6 +1,5 @@
 {% load mathfilters %}
 {%if teacher is not None %}
-<div class="container mt-4">
     <div class="row justify-content-center">
         <div id="infoBtnGroup" class="btn-group" role="group">
             <a role="button" class="btn btn-primary border" hx-get="{% url 'addTeacher' teacher.department.id teacher.id %}" hx-target="#addForm">Edit Teacher</a>
@@ -84,5 +83,4 @@
         <div id="availability" class="collapse"></div>
         <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this"></div>
             
-</div>
 {% endif %}

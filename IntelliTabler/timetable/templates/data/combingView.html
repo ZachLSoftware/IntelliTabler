@@ -6,11 +6,13 @@
     cData={
         numP:parseInt({{numPeriods}}),
         modules:{{modules|safe}},
-        modChoices:{{modChoices|safe}}
+        modChoices:{{modChoices|safe}},
+        numWeeks:{{numWeeks}}
     };
 </script>
 {% endblock %}
 {% load mathfilters %}
+{% load customTags %}
 
 <div class="row overflow-scroll">
     {% comment %} <div id="combingWrapper">
@@ -62,26 +64,36 @@
     </div>
 
     <div id="teacherLoad" class="col">
-        <table>
+        <table id="loadDistTable">
             <th>Teacher</th>
-            <th>Load</th>
+            <th>Load per Week</th>
+            <th>Total Load</th>
             {% for module in parents %}
             <th style="background-color: {{module.color}}">{{module.name}}</th>
             {%endfor%}
-            <th>Allocated</th>
-            <th>Remaining</th>
+            {% with weeks=teachers.0.department.format.numWeeks %}
+            {% for w in weeks|forRange %}
+            <th>Alloc W-{{w}}</th>
+            <th>Remaining W-{{w}}</th>
+            {% endfor %}
             <tbody>
+                
                 {% for t in teachers %}
                 <tr>
                 <td>{{t.name}}</td>
                 <td id="{{t.id}}Load">{{t.load}}</td>
+                <td id="{{t.id}}Load">{{t.load|mul:weeks }}</td>
                 {% for module in parents %}
                 <td id="{{t.id}}alloc{{module.id}}">0</td>
                 {%endfor%}
-                <td id="{{t.id}}Allocated">0</td>
-                <td id="{{t.id}}Rem">{{t.load}}</td>
+                {% for w in weeks|forRange %}
+                <td id="{{t.id}}Allocated-{{w}}">0</td>
+                <td id="{{t.id}}Rem-{{w}}">{{t.load}}</td>
+                {% endfor %}
                 </tr>
                 {%endfor%}
+                {% endwith %}
+            </table>
     </div>
 
 </div>

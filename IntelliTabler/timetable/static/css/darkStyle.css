@@ -46,7 +46,7 @@ td, th {
   font-size: x-large;
   font-weight: bold;
 }
-.navbar-dark .navbar-nav .nav-link{
+.nav-link{
   color: white;
   font-size: larger;
 }
@@ -83,4 +83,15 @@ body .form-floating{
 
 #departmentDropdown i {
   color: black;
+}
+
+#listObjectsDiv {
+  background-color: #3f454b;
+}
+
+#loadDistTable {
+  background-color: #32373b;
+}
+#loadDistTable tr:nth-child(even) {
+  background-color: #1a2127;
 }

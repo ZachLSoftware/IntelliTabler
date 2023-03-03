@@ -178,9 +178,9 @@ def getModules(request, groupId=0, timetableId=0):
     if groupId==0:
         groupId=request.GET.get('groupId', 0) 
     if calendar:
-        moduleList=Module.objects.filter(group_id=groupId).order_by('name')
+        moduleList=Module.objects.filter(group_id=groupId).order_by('lesson')
     else:      
-        moduleList=Module.objects.filter(group__parent_id=groupId).order_by('group__name','name')
+        moduleList=Module.objects.filter(group__parent_id=groupId).order_by('group__session','lesson')
     context={}
     modules={}
     for mod in moduleList:
@@ -245,6 +245,7 @@ def combingView(request, timetableId):
     context['unassigned']=unassigned
     context['parents']=parents
     context['timetableId']=timetableId
+    context['numWeeks']=timetable.tableYear.department.format.numWeeks
     context['modChoices']=json.dumps(mJson)
     return render(request, 'data/combingView.html', context)
 
@@ -314,7 +315,7 @@ def cspTest(request, timetableA):
     from datetime import datetime
     now = datetime.now()
     tA=Timetable.objects.get(id=timetableA)
-    t=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"NEWTEST", tA)
+    t=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"-"+now.strftime("%m/%d"), tA)
     sched=getClassSchedule(t)
     if(not sched):
         return HttpResponse(status=502)
@@ -330,4 +331,5 @@ def cspTest(request, timetableA):
             count+=1
         t.delete()
         return HttpResponse(status=502)
+    # return render(request, 'forms/timetableWizard.html', {'timetable':t})
     
