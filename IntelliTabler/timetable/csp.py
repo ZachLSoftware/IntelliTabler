@@ -45,24 +45,40 @@ def getTeacherDomains(timetable):
 class CSP():
 
     def __init__(self, schedule, teachers, weeks):
-        self.schedule=schedule
-        self.teachers=teachers
-        self.class_assignments={id:None for id in schedule.keys()}
-        self.weeks=weeks
-        self.unassigned=list(schedule.keys())
-        self.teacher_splitClass={teacher: {} for teacher in teachers.keys()}
-        self.assignedPeriods={}
-        for k,v in schedule.items():
-            self.assignedPeriods[v['period']]=set()
+        self.schedule=schedule  #Classes and Periods
+        self.teachers=teachers  #Teachers and prefrences
+        self.weeks=weeks #Number of weeks (Helps with checking Load)
+        self.unassigned=list(schedule.keys())  #Get variable list
+        self.class_assignments={id:None for id in schedule.keys()} #Create assignments dict
+        self.preassigned={} #Get dict of any preassigned classes
+        self.teacher_splitClass={teacher: {} for teacher in teachers.keys()} #Create Dict to track like classes
+        self.assignedPeriods={v['period']:set() for k,v in schedule.items()} #Dict to track which periods a teacher is already in. Helps for quick constraint checking.
         self.currDoms={cl: {} for cl in schedule.keys()}
+        
         for k,v in self.currDoms.items():
             for teacher, val in teachers.items():
-                if k in val['prefrences']:
-                    self.currDoms[k][teacher]={'base_pref':val['prefrences'][k], 'sharedKey_pref':0}
+                if self.isValidAssignment(teacher, k):
+                    if k in val['prefrences']:
+                        if val['prefrences'][k]==4:
+                            if k in self.preassigned:
+                                raise ValueError("Multiple teachers have been given a required preference for class " + str(k))
+                            self.preassigned[k]=teacher
+                            del self.currDoms[k]
+                            self.unassigned.remove(k)
+                        else:
+                            self.currDoms[k][teacher]={'base_pref':val['prefrences'][k], 'sharedKey_pref':0}
+                    else:
+                        self.currDoms[k][teacher]={'base_pref':0, 'sharedKey_pref':0}
+                    if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
+                        self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
                 else:
-                    self.currDoms[k][teacher]={'base_pref':0, 'sharedKey_pref':0}
-                if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
-                    self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
+                    if k in val['prefrences']:
+                        if val['prefrences'][k]==4:
+                            raise ValueError("A teacher has been assigned a required class, however that assignment is impossible.")
+
+        tempDom=self.currDoms[k].copy()
+        self.currDoms[k].clear()
+        self.currDoms[k] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
         
     def isComplete(self):
         return all(teacher is not None for teacher in self.class_assignments.values())
@@ -82,6 +98,7 @@ class CSP():
         if self.isComplete():
             return True
         
+
         self.unassigned.sort(key=lambda cl: (len(self.currDoms[cl]), -self.currDoms[cl][next(iter(self.currDoms[cl]))]['base_pref'] if self.currDoms[cl] else 0))
         classId=self.unassigned[0]
         domain=self.currDoms[classId]
@@ -127,18 +144,47 @@ class CSP():
 
 
     def forwardCheck(self, classId, teacherId):
-        sKey=self.schedule[classId]['sharedKey']
+        sKey = self.schedule[classId]['sharedKey']
         for nextCl in self.unassigned:
-            if nextCl==classId:
+            changed=False
+            if nextCl == classId:
                 continue
             if teacherId in self.currDoms[nextCl]:
                 if not self.isValidAssignment(teacherId, nextCl):
-                   del self.currDoms[nextCl][teacherId]
+                    del self.currDoms[nextCl][teacherId]
                 else:
-                    self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
+                    self.currDoms[nextCl][teacherId]['sharedKey_pref'] = len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
+                    changed=True
+            else:
+                if self.isValidAssignment(teacherId, nextCl):
+                    if nextCl in self.teachers[teacherId]['prefrences']:
+                        base=self.teachers[teacherId]['prefrences'][nextCl]
+                    else: base=0
+                    self.currDoms[nextCl][teacherId] = {'base_pref': base, 'sharedKey_pref': len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})}
+                    changed=True
+            if changed:
                 tempDom=self.currDoms[nextCl].copy()
                 self.currDoms[nextCl].clear()
                 self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
+                
+
+
+        # sKey=self.schedule[classId]['sharedKey']
+        # for nextCl in self.unassigned:
+        #     if nextCl==classId:
+        #         continue
+        #     if teacherId in self.currDoms[nextCl]:
+        #         if not self.isValidAssignment(teacherId, nextCl):
+        #            del self.currDoms[nextCl][teacherId]
+        #         else:
+        #             self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
+        #     else:
+        #         if self.isValidAssignment(teacherId, nextCl):
+        #             self.currDoms[nextCl]={teacherId: {'base_pref':0}}
+        #             self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
+        #     tempDom=self.currDoms[nextCl].copy()
+        #     self.currDoms[nextCl].clear()
+        #     self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
 
     def checkPossible(self):
         loadCheck={}

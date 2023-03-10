@@ -72,12 +72,28 @@ html, body {
   display: inline-block;
  }
 
+ #listObjectsDiv{
+  height:100%;
+ }
 #listObjects {
   height: 100%;
-  overflow-y: scroll;
+  padding-bottom:100px;
+  overflow-y: auto;
 }
 
  #contentSidebar li {
   text-align: center;
  }
 
+ .rotate{
+  -moz-transition: all .25s linear;
+  -webkit-transition: all .25s linear;
+  transition: all .25s linear;
+}
+
+.rotate.down{
+  -ms-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}

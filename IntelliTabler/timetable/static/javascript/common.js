@@ -187,3 +187,7 @@ $(document).on('click', '#infoBtnGroup button', function(){
 $(document).on('objectDeleted', function(e){
     $("#displayChild").html('');
 });
+
+$(document).on("click", ".rotate", function(){
+    $(this).toggleClass("down"); 
+});

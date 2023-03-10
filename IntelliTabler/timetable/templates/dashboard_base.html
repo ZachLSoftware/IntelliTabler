@@ -36,12 +36,12 @@
     {% endblock %}
     {% block messages %}
     {% endblock %} 
-    <div id="bodyContainer" class="container-fluid shadow h-100">
-      <div class="row flex-nowrap h-100">
+    <div id="bodyContainer" class="container-fluid shadow ">
+      <div class="row flex-nowrap ">
       {% comment %} <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasLabel">
       <div class="offcanvas-header"> {% endcomment %}
         {% block sidebar %}
-        <div id="sidebar" class="col-auto px-sm-2 px-0 position-fixed shadow h-100">
+        <div id="sidebar" class="col-auto px-sm-2 px-0 position-fixed shadow " style="height:100vh;">
           <div class="navbar-nav d-flex flex-column align-items-center align-items-sm-start px-3 pt-2">
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -137,12 +137,12 @@
 </div>
 {% endblock %}
 
-    <div id="contentCol" class="col overflow-auto h-100">
+    <div id="contentCol" class="col overflow-auto ">
       {% comment %} <div id="offsetToggle" class="collapse col-1 mt-4 mb-4">
         <i class="fa-solid fa-bars fa-2xl" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"></i></div> {% endcomment %}
 
         {% block content %}
-        <div id="mainContent" class="me-auto h-100">
+        <div id="mainContent" class="me-auto ">
           Please select a department
         </div>
         {% endblock %}

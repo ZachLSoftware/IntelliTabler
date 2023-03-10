@@ -196,7 +196,7 @@ def combingView(request, timetableId):
     context={}
     timetable=Timetable.objects.get(id=timetableId)
     teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
-    periods=list(Period.objects.filter(department=timetable.tableYear.department))
+    periods=Period.objects.filter(department=timetable.tableYear.department)
     groups=ModuleGroup.objects.filter(parent__timetable=timetable).order_by('name', 'session')
     classes=Module.objects.filter(group__parent__timetable=timetable)
     unassigned = False
@@ -205,17 +205,19 @@ def combingView(request, timetableId):
     pAssign={}
     mJson={}
     index=1
-    for group in groups:
-        if group.period not in periods:
-            continue
-        else:
-            pAssign[index]=group.period
-            periods.remove(group.period)
-            index+=1
-    if periods:
-        for period in periods:
-            pAssign[index]=period
-            index+=1
+    for period in periods:
+        pAssign[period.dayNum]=period
+    # for group in groups:
+    #     if group.period not in periods:
+    #         continue
+    #     else:
+    #         pAssign[index]=group.period
+    #         periods.remove(group.period)
+    #         index+=1
+    # if periods:
+    #     for period in periods:
+    #         pAssign[index]=period
+    #         index+=1
     
     for cl in classes:
         if cl.group.period:
@@ -320,7 +322,11 @@ def cspTest(request, timetableA):
     if(not sched):
         return HttpResponse(status=502)
     teach=getTeacherDomains(t)
-    csp1=CSP(sched, teach, tA.tableYear.department.format.numWeeks)
+    try:
+        csp1=CSP(sched, teach, tA.tableYear.department.format.numWeeks)
+    except ValueError as msg:
+        return msg
+
     if csp1.checkPossible():
         count=0
         while count<3:
