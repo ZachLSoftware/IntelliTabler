@@ -30,9 +30,19 @@
 
 <table class="table">
     <th class="border-none">
-        {{k.name}}
-        <a data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
-            <i class="fa-solid fa-square-caret-down rotate"></i>
+        <h3>
+        <a class="text-decoration-none rotateLink" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
+            {{k.name}} <i class="fa-solid fa-square-caret-down rotate"></i>
+        
+        <span class="m-5">
+        Timeslot: 
+        {% if k.period is null%}
+        <td>None
+        {%else%}
+        Week: {{k.period.week}} Day: {{k.period.name}}
+        {%endif%}
+        </span>
+        </h3>
     </a>
 </th>
     <tbody id="table{{k.id}}" class="collapse">
@@ -41,7 +51,7 @@
         {% if k.period is null%}
         <td>None</td>
         {%else%}
-        <td>Period: {{k.period.name}}, Week: {{k.period.week}}, </td>
+        <td>Week: {{k.period.week}} - Period: {{k.period.name}}</td>
         {%endif%}
         <td class="editBtnCol"><button id="assignPeriod" class='btn btn-primary' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button></td>
     </tr>

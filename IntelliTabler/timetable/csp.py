@@ -59,7 +59,7 @@ class CSP():
             for teacher, val in teachers.items():
                 if self.isValidAssignment(teacher, k):
                     if k in val['prefrences']:
-                        if val['prefrences'][k]==4:
+                        if val['prefrences'][k]==3:
                             if k in self.preassigned:
                                 raise ValueError("Multiple teachers have been given a required preference for class " + str(k))
                             self.preassigned[k]=teacher
@@ -73,7 +73,7 @@ class CSP():
                         self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
                 else:
                     if k in val['prefrences']:
-                        if val['prefrences'][k]==4:
+                        if val['prefrences'][k]==3:
                             raise ValueError("A teacher has been assigned a required class, however that assignment is impossible.")
 
         tempDom=self.currDoms[k].copy()

@@ -5,14 +5,14 @@
 <div id="sidebarBody" class="">
     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
 <li class="nav-item">
-    <a id="classWizard" class="nav-link align-middle px-0 sidebar-link" hx-trigger="load" hx-get="{% url 'getSidebar' 'moduleParent' timetable.id  %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader" data-bs-toggle="tooltip" data-bs-placement="top"
+    <a id="classWizard" class="nav-link align-middle px-0 sidebar-link" hx-trigger="load, click" hx-get="{% url 'getSidebar' 'moduleParent' timetable.id  %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader" data-bs-toggle="tooltip" data-bs-placement="top"
       data-bs-title="View Classes"></i><span class="d-none d-sm-inline">  Confirm Class Schedule </span></a>
   </li>
 <li class="nav-item">
   <a id="teacher" class="nav-link align-middle px-0 sidebar-link disabled" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
 </li>
 <li class="nav-item">
-  <a id="calendar" class="nav-link align-middle px-0 sidebar-link disabled" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
+  <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
 </li>
 </ul>
 </div>

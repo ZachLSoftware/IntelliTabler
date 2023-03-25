@@ -399,3 +399,39 @@ def addTimetable(request, yearId):
         form = TimetableForm()
     return render(request, "forms/modalForm.html", {'Operation':'Add Timetable', 'form':form})
     
+def timetableWizard(request, timetableA):
+    timetable=Timetable.objects.get(id=timetableA)
+    tables=Timetable.objects.filter(tableYear=timetable.tableYear).order_by('name')
+    context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables}
+    response=render(request,'forms/timetableWizard.html', context)
+
+    #Creates an event trigger when content is loaded
+    response['HX-Trigger']='dashboardLoaded'
+    return response
+
+def addPreference(request, teacherId, timetableId):
+    teacher=Teacher.objects.get(id=teacherId)
+    moduleparents=ModuleParent.objects.filter(timetable_id=timetableId).order_by('name')
+    parents=[(mp.id, mp.name) for mp in moduleparents]
+    grs=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
+    mods=Module.objects.filter(group__parent__timetable_id=timetableId).order_by('name')
+    groups=[(group.id, group.name) for group in grs]
+    modules=[(mod.id, mod.name) for mod in mods]
+    if request.method=='POST':
+        form=setPreferenceForm(parents, groups, modules, request.POST, request.FILES, teacher=teacherId)
+        if form.is_valid():
+            mod = Module.objects.get(id=form.cleaned_data['module'])
+            if form.cleaned_data['assignToAll']:
+                modules=Module.objects.filter(sharedKey=mod.sharedKey)
+            else: modules=mod
+            for m in modules:
+                p=Preference()
+                p.teacher_id=teacherId
+                p.module=m
+                p.priority=form.cleaned_data['priority']
+                p.save()
+            events={'preferenceChanged': "None"}
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(events)})
+    else:
+        form=setPreferenceForm(parents)
+    return render(request, "forms/modalForm.html", {'Operation':'Set Preference', 'form':form})

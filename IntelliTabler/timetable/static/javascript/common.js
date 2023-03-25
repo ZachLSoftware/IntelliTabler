@@ -13,6 +13,7 @@ var activePage;
 // })
 
 htmx.on("htmx:afterSwap", (e) => {
+    console.log(e.detail.pathInfo.requestPath.split('/')[1]);
     if(e.detail.target.id=="displayChild"){
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
@@ -45,11 +46,16 @@ htmx.on("htmx:afterSwap", (e) => {
 
     //AfterSwap for Modal Handeler
     if(e.detail.target.id == "addForm") {
+        test=e.detail.pathInfo.requestPath.split('/')[1];
+        if(test=="addPreferences"){
+            setGroupChoice();
+        }
         //Enables Tooltips
         enableTooltips();
 
         modal.show();
     }
+    
 })
 
 function enableTooltips(){
@@ -188,6 +194,42 @@ $(document).on('objectDeleted', function(e){
     $("#displayChild").html('');
 });
 
-$(document).on("click", ".rotate", function(){
-    $(this).toggleClass("down"); 
+$(document).on("click", ".rotateLink", function(){
+    $(this).children("i").toggleClass("down"); 
 });
+
+$(document).on("change", "#parentChoice", function(){
+    setGroupChoice();
+    
+})
+
+$(document).on("change", "#groupChoice", function(){
+    setModuleChoice();
+
+})
+
+function setGroupChoice(){
+    
+    $.get('/getGroups/' + $("#parentChoice").val(), function(data){
+        $('#groupChoice').empty()
+        var options=''
+        data.choices.forEach(element => {
+            options+= '<option value="' + element[0] +'">' + element[1] +'</option>';
+        });
+        $('#groupChoice').html(options);
+        $('#groupChoice').prop('disabled',false)
+
+        setModuleChoice();
+    })
+}
+function setModuleChoice(){
+    $.get('/getModulesJson/' + $('#groupChoice').val(), function(data){
+        $('#moduleChoice').empty()
+        var options=''
+        data.choices.forEach(element => {
+            options+= '<option value="' + element[0] +'">' + element[1] +'</option>';
+        });
+        $('#moduleChoice').html(options);
+        $('#moduleChoice').prop('disabled',false)
+    })
+}

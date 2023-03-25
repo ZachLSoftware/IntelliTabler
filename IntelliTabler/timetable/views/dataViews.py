@@ -339,3 +339,23 @@ def cspTest(request, timetableA):
         return HttpResponse(status=502)
     # return render(request, 'forms/timetableWizard.html', {'timetable':t})
     
+def teacherPreferences(request, teacherId, timetableId):
+    preferences=Preference.objects.filter(teacher_id=teacherId, module__group__parent__timetable_id=timetableId).order_by("priority")
+    context={'preferences':preferences, 'teacherId':teacherId, 'timetableId':timetableId}
+    return render(request, 'data/preferences.html', context)
+
+def getGroups(request, parentId):
+    groups=ModuleGroup.objects.filter(parent_id=parentId).order_by('session')
+    choices=[]
+    for group in groups:
+        choices.append((group.id, group.name))
+    
+    return JsonResponse({'choices':choices})
+
+def getModulesJson(request, groupId):
+    modules=Module.objects.filter(group_id=groupId).order_by('lesson')
+    choices=[]
+    for mod in modules:
+        choices.append((mod.id, mod.name))
+    
+    return JsonResponse({'choices':choices})

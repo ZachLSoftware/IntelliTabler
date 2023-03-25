@@ -169,3 +169,34 @@ class TimetableForm(BaseModelForm):
         model=Timetable
         exclude=("id","user","tableYear")
 
+
+class setPreferenceForm(BaseForm):
+    choices=[(3,"REQUIRED"),(2,"HIGH"),(1,"MEDIUM"),(0,"NEUTRAL")]
+    moduleParent=forms.ChoiceField(label="class", choices=[('None','None')], widget=forms.Select(attrs={'id': 'parentChoice'}))
+    group=forms.ChoiceField(choices=[('Select Class','Select Class')], widget=forms.Select(attrs={'id': 'groupChoice'}))
+    module=forms.ChoiceField(choices=[('Select Group','Select Group')], widget=forms.Select(attrs={'id': 'moduleChoice'}))
+    priority=forms.ChoiceField(choices=choices)
+    assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    def __init__(self, parents,groups=[],modules=[],*args, **kwargs):
+        self.teacher = kwargs.pop('teacher', None)
+        super().__init__(*args, **kwargs)
+        if(parents==[]):
+            self.fields['class'].choices=[('None', 'None'),]
+        elif(groups==[] or modules==[]):
+            self.fields['moduleParent'].choices = parents
+            self.fields['group'].choices=[('Select Group','Select Group')]
+            self.fields['module'].choices=[('Select Group','Select Group')]
+            self.fields['group'].widget.attrs['disabled']=True
+            self.fields['module'].widget.attrs['disabled']=True
+        else:
+            self.fields['moduleParent'].choices = parents
+            self.fields['group'].choices = groups
+            self.fields['module'].choices = modules
+            self.fields['group'].widget.attrs['disabled']=True
+            self.fields['module'].widget.attrs['disabled']=True
+
+    def clean(self):
+        cleaned_data=super().clean()
+        if Preference.objects.filter(teacher_id=self.teacher, module_id=cleaned_data['module']).exists():
+            self.add_error("module","This teacher already has a preference set for this module.")

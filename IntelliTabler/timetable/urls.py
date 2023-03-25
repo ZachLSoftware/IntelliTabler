@@ -55,5 +55,10 @@ urlpatterns = [
     path('getSidebar/<str:type>/<int:timetableId>', dataViews.getSidebar, name='getSidebar'),
     path('changeTheme/<str:theme>', formViews.changeTheme, name='changeTheme'),
     path('addTimetable/<int:yearId>', formViews.addTimetable, name="addTimetable"),
-    path('cspTest/<int:timetableA>', dataViews.cspTest, name='cspTest')
+    path('wizard/<int:timetableA>', formViews.timetableWizard, name='timetableWizard'),
+    path('cspTest/<int:timetableA>', dataViews.cspTest, name='cspTest'),
+    path('preferences/<int:teacherId>/<int:timetableId>', dataViews.teacherPreferences, name='preferences'),
+    path('addPreferences/<int:teacherId>/<int:timetableId>', formViews.addPreference, name='addPreference'),
+    path('getGroups/<int:parentId>', dataViews.getGroups, name="getGroups"),
+    path('getModulesJson/<int:groupId>', dataViews.getModulesJson, name="getModulesJson")
 ]

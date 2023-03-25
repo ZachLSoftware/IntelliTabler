@@ -236,10 +236,10 @@ def cloneModules(sender, instance, created, **kwargs):
 
 class Preference(models.Model):
     class Priority(models.IntegerChoices):
-        REQUIRED=4
-        HIGH=3
-        MEDIUM=2
-        NEUTRAL=1
+        REQUIRED=3
+        HIGH=2
+        MEDIUM=1
+        NEUTRAL=0
 
     priority = models.IntegerField(choices=Priority.choices, default=Priority.NEUTRAL)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
