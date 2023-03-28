@@ -9,12 +9,39 @@
       data-bs-title="View Classes"></i><span class="d-none d-sm-inline">  Confirm Class Schedule </span></a>
   </li>
 <li class="nav-item">
-  <a id="teacher" class="nav-link align-middle px-0 sidebar-link disabled" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
+  <a id="teacher" class="nav-link align-middle px-0 sidebar-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
 </li>
 <li class="nav-item">
   <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
 </li>
+<li class="nav-item">
+  <a class="nav-link align-middle px-0 sidebar-link" data-bs-toggle="modal" data-bs-target="#confirmModal"><i class="fa-regular fa-square-plus"></i><span class="d-none d-sm-inline">  Generate Timetable</span></a>
+</li>
 </ul>
 </div>
 </div>
+
+
+
+
 {%endblock%}
+
+{% block extraModals %}
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModal">Confirmation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <p>Are you sure all details are correct and ready to generate a new timetable?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a type="button" class="btn btn-primary" href="{% url "cspTest" timetable.id %}">Generate</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

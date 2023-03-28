@@ -66,7 +66,7 @@ function enableTooltips(){
 
 htmx.on("htmx:beforeSwap", (e) => {
 
-    if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request')){
+    if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request') && e.detail.requestConfig.verb!="delete"){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
         }
@@ -190,7 +190,7 @@ $(document).on('click', '#infoBtnGroup button', function(){
     $("#teacherInfoCont .collapse").collapse('hide');
 })
 
-$(document).on('objectDeleted', function(e){
+$(document).on('TeacherDeleted', function(e){
     $("#displayChild").html('');
 });
 
@@ -233,3 +233,4 @@ function setModuleChoice(){
         $('#moduleChoice').prop('disabled',false)
     })
 }
+

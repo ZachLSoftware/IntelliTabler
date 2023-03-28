@@ -14,6 +14,15 @@ from pathlib import Path
 import environ
 import os
 from django.forms.renderers import TemplatesSetting
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 env = environ.Env()
 

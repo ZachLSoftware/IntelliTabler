@@ -308,7 +308,7 @@ def deleteObject(request, type, id):
         except Type.DoesNotExist:
             obj=None
     trigger = type[0].lower()+type[1:]+"Change"
-    events='{\"'+trigger+'\": "Deleted", "objectDeleted": "ObjectDeleted"}'
+    events='{\"'+trigger+'\": "Deleted", \"'+type+'Deleted\":"Object Deleted"}'
     return HttpResponse(status=204, headers={"HX-Trigger": events})
 
 def addModuleCalendar(request, day, week, timetableId, teacher=0):
@@ -423,11 +423,12 @@ def addPreference(request, teacherId, timetableId):
             mod = Module.objects.get(id=form.cleaned_data['module'])
             if form.cleaned_data['assignToAll']:
                 modules=Module.objects.filter(sharedKey=mod.sharedKey)
-            else: modules=mod
+            else: modules=[mod]
             for m in modules:
                 p=Preference()
                 p.teacher_id=teacherId
                 p.module=m
+                p.timetable_id=timetableId
                 p.priority=form.cleaned_data['priority']
                 p.save()
             events={'preferenceChanged': "None"}

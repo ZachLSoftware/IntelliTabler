@@ -118,6 +118,7 @@ class Module(RandomIDModel):
     group=models.ForeignKey(ModuleGroup, on_delete=models.CASCADE)
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
     sharedKey=models.CharField(max_length=36, default=uuid.uuid4)
+    lessonNum = models.IntegerField()
 
 # class TimetableRow(models.Model):
 #     timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
@@ -133,14 +134,16 @@ def createModules(sender, instance, created, **kwargs):
         except:
             timetable=None
         mSharedKey={}
+        lessonNum=1
         for i in range(1, instance.numPeriods+1):
             group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance, session=i)
             for j in range(1, instance.numClasses+1):
                 if i==1:
-                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, lessonNum=lessonNum, group=group)
                     mSharedKey[j]=mod.sharedKey
                 else:
-                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group, sharedKey=mSharedKey[j])
+                    mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, lessonNum=lessonNum, group=group, sharedKey=mSharedKey[j])
+                lessonNum+=1
                 
 
                 # if timetable is not None:
@@ -244,5 +247,6 @@ class Preference(models.Model):
     priority = models.IntegerField(choices=Priority.choices, default=Priority.NEUTRAL)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    timetable = models.ForeignKey(Timetable, on_delete=models.CASCADE)
 
 

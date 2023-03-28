@@ -97,3 +97,10 @@ html, body {
   -webkit-transform: rotate(180deg);
   transform: rotate(180deg);
 }
+
+#messageWrapper {
+  position: fixed; 
+  top: 0;
+  left: 50%; 
+  z-index: 1050;
+}

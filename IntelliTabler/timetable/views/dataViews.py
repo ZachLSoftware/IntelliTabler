@@ -8,6 +8,7 @@ from ..serializers import *
 from rest_framework.renderers import JSONRenderer
 from ..csp import *
 from django.http import HttpResponse
+from django.contrib import messages
 
 
 ###Default Landing Page###
@@ -325,18 +326,24 @@ def cspTest(request, timetableA):
     try:
         csp1=CSP(sched, teach, tA.tableYear.department.format.numWeeks)
     except ValueError as msg:
-        return msg
+        t.delete()
+        messages.error(request,str(msg))
+        return redirect('dashboard')
+
+
 
     if csp1.checkPossible():
         count=0
         while count<3:
             if (csp1.assignTeacher()):
-                for c, t in csp1.class_assignments.items():
-                    Module.objects.filter(id=c).update(teacher_id=t)
-                return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
+                for c, teacher in csp1.class_assignments.items():
+                    Module.objects.filter(id=c).update(teacher_id=teacher)
+                messages.success(request, f"New Timetable {t.name} has been generated")
+                return redirect('dashboard')
             count+=1
         t.delete()
-        return HttpResponse(status=502)
+        messages.error(request, "No valid solution was found.")
+        return redirect('dashboard')
     # return render(request, 'forms/timetableWizard.html', {'timetable':t})
     
 def teacherPreferences(request, teacherId, timetableId):

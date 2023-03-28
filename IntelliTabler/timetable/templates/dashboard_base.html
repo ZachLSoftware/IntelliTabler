@@ -26,6 +26,18 @@
     
   </head>
   <body class="body bg-{{request.user.theme}}" id="body">
+    {% block messages %}
+    <div id="messageWrapper">
+    {% for message in messages %}
+    <div id="responseMessages" class="alert {{ message.tags }} alert-dismissible" role="alert">
+      <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
+        <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      </button>
+      {{ message }}
+    </div>
+  {% endfor %}
+  </div>
+    {% endblock %} 
   {% block navbar %}
     <nav id="titleBar"class="navbar navbar-expand-lg navbar-{{request.user.theme}} shadow fixed-top">
       <div id="navContainer" class="container-fluid" >
@@ -34,8 +46,6 @@
     </nav>
 
     {% endblock %}
-    {% block messages %}
-    {% endblock %} 
     <div id="bodyContainer" class="container-fluid shadow ">
       <div class="row flex-nowrap ">
       {% comment %} <div class="offcanvas offcanvas-start bg-dark text-bg-dark" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasLabel">
@@ -171,3 +181,6 @@
       </script>
     </body>
 </html>
+
+{%block extraModals%}
+{%endblock%}

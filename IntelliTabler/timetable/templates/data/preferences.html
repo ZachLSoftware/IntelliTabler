@@ -7,9 +7,10 @@
     <tbody>
         {% for preference in preferences %}
         <tr>
-            <td>{{preference.module.group.name}}
+            <td style="background-color: {{preference.module.group.parent.color}}">{{preference.module.group.name}}
             <td>{{preference.module.name}}</td>
             <td>{{preference.priority}}</td>
+            <td><button class="btn btn-warning" hx-delete="{% url "deleteObject" "Preference" preference.id %}" hx-confirm="Confirm Delete?">Delete Preference</button></td>
         </tr>
         {% empty %}
         <tr>

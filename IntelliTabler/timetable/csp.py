@@ -7,7 +7,19 @@ def createNewGeneratedTimetable(year, user, name, timetableA):
     for i in range(len(mgB)):
         mgB[i].period=mgA[i].period
         mgB[i].save()
+    clonePreferences(timetableA, t)
     return t
+
+def clonePreferences(timetableA, timetableB):
+    prefs = Preference.objects.filter(timetable=timetableA)
+    for pref in prefs:
+        clonedPref=Preference()
+        clonedPref.teacher=pref.teacher
+        clonedPref.module=Module.objects.get(name=pref.module.name, lesson=pref.module.lesson, lessonNum=pref.module.lessonNum, group__parent__timetable=timetableB)
+        clonedPref.priority=pref.priority
+        clonedPref.timetable=timetableB
+        clonedPref.save()
+    
 
 def getClassSchedule(timetable):
     modules=Module.objects.filter(group__parent__timetable=timetable).order_by('group', 'name')
@@ -37,7 +49,7 @@ def getTeacherDomains(timetable):
         load={}
         for w in range(1,w+1):
             load[w]=teacher.load
-        t_dict={'availability':availability, 'load':load, 'dLoad':teacher.load, 'prefrences':pdict}
+        t_dict={'availability':availability, 'load':load, 'dLoad':teacher.load, 'preferences':pdict}
         teacher_dict[teacher.id]=t_dict
         count+=1
     return teacher_dict
@@ -46,7 +58,7 @@ class CSP():
 
     def __init__(self, schedule, teachers, weeks):
         self.schedule=schedule  #Classes and Periods
-        self.teachers=teachers  #Teachers and prefrences
+        self.teachers=teachers  #Teachers and preferences
         self.weeks=weeks #Number of weeks (Helps with checking Load)
         self.unassigned=list(schedule.keys())  #Get variable list
         self.class_assignments={id:None for id in schedule.keys()} #Create assignments dict
@@ -54,32 +66,39 @@ class CSP():
         self.teacher_splitClass={teacher: {} for teacher in teachers.keys()} #Create Dict to track like classes
         self.assignedPeriods={v['period']:set() for k,v in schedule.items()} #Dict to track which periods a teacher is already in. Helps for quick constraint checking.
         self.currDoms={cl: {} for cl in schedule.keys()}
-        
+        toDelete=[]
         for k,v in self.currDoms.items():
             for teacher, val in teachers.items():
                 if self.isValidAssignment(teacher, k):
-                    if k in val['prefrences']:
-                        if val['prefrences'][k]==3:
+                    if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
+                        self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
+                    if k in val['preferences']:
+                        if val['preferences'][k]==3:
                             if k in self.preassigned:
                                 raise ValueError("Multiple teachers have been given a required preference for class " + str(k))
                             self.preassigned[k]=teacher
-                            del self.currDoms[k]
+                            self.class_assignments[k]=teacher
+                            self.teachers[teacher]['load'][self.schedule[k]['period'].week]-=1
                             self.unassigned.remove(k)
+                            self.assignedPeriods[self.schedule[k]['period']].add(teacher)
+                            toDelete.append(k)
+                            self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']].add(k)
                         else:
-                            self.currDoms[k][teacher]={'base_pref':val['prefrences'][k], 'sharedKey_pref':0}
+                            self.currDoms[k][teacher]={'base_pref':val['preferences'][k], 'sharedKey_pref':0}
                     else:
                         self.currDoms[k][teacher]={'base_pref':0, 'sharedKey_pref':0}
-                    if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
-                        self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
+
                 else:
-                    if k in val['prefrences']:
-                        if val['prefrences'][k]==3:
+                    if k in val['preferences']:
+                        if val['preferences'][k]==3:
                             raise ValueError("A teacher has been assigned a required class, however that assignment is impossible.")
 
         tempDom=self.currDoms[k].copy()
         self.currDoms[k].clear()
         self.currDoms[k] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
-        
+        for k in toDelete:
+            del self.currDoms[k]
+
     def isComplete(self):
         return all(teacher is not None for teacher in self.class_assignments.values())
 
@@ -157,8 +176,8 @@ class CSP():
                     changed=True
             else:
                 if self.isValidAssignment(teacherId, nextCl):
-                    if nextCl in self.teachers[teacherId]['prefrences']:
-                        base=self.teachers[teacherId]['prefrences'][nextCl]
+                    if nextCl in self.teachers[teacherId]['preferences']:
+                        base=self.teachers[teacherId]['preferences'][nextCl]
                     else: base=0
                     self.currDoms[nextCl][teacherId] = {'base_pref': base, 'sharedKey_pref': len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})}
                     changed=True

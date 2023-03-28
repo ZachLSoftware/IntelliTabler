@@ -54,7 +54,7 @@
                 {{teacher.roomNum}}
             </div>
         </div>
-        <div id="preferences" hx-trigger="from:body preferenceChanged" hx-get="{% url 'preferences' teacher.id timetable %}" class="row justify-content-center mt-3 collapse">
+        <div id="preferences" hx-trigger="preferenceChange from:body" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="this" class="row justify-content-center mt-3 collapse">
         </div>
         <div id="assignments" class="row justify-content-center mt-3 collapse">
             {% comment %} <div class="btn-group" role="group"> {% endcomment %}
