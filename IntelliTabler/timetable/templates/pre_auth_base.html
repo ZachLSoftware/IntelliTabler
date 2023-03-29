@@ -1,0 +1,45 @@
+!DOCTYPE html>
+<html>
+  <head>
+    {% block title %}<title>IntelliTabler</title>{% endblock %}
+    {% load static %}
+    <script src="https://kit.fontawesome.com/7a2ab1cb1a.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script type="text/javascript" src="{% static 'javascript/htmx.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'javascript/bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/jquery-3.6.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/jquery-ui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/combing.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'javascript/common.js' %}" defer></script>
+    <script type="text/javascript" src="{% static 'javascript/registration_pre_validation.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'css/lightStyle.css' %}">
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+
+    {% block js %}
+    {% endblock %}
+    
+  </head>
+  <body class="body bg-light" id="body">
+    {% block messages %}
+    <div id="messageWrapper">
+    {% for message in messages %}
+    <div id="responseMessages" class="alert {{ message.tags }} alert-dismissible" role="alert">
+      <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
+        <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      </button>
+      {{ message }}
+    </div>
+  {% endfor %}
+  </div>
+    {% endblock %} 
+  {% block navbar %}
+    <nav id="titleBar"class="navbar navbar-expand-lg navbar-{{request.user.theme}} shadow fixed-top">
+      <div id="navContainer" class="container-fluid" >
+        <a class="text-decoration-none" href="{% url 'login' %}"><h5 class="navbar-brand">IntelliTabler</h5></a>
+      </div>
+    </nav>
+
+    {% endblock %}
+    {% block content %}
+    {%endblock%}

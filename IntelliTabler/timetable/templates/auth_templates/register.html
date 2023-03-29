@@ -1,4 +1,4 @@
-{% extends "base_template.html" %}
+{% extends "pre_auth_base.html" %}
 
 {% load widget_tweaks %}
 {% block js %}
@@ -6,8 +6,7 @@
     <script type="text/javascript" src="{% static 'javascript/registration_pre_validation.js' %}" defer></script>
 {% endblock %}
 {% block content %}
-    <h1>Register Page</h1>
-    <div class="d-flex justify-content-center">
+<div id="bodyContainer" class="d-flex justify-content-center">
     <form method="POST">
         {% csrf_token %}
         <fieldset>
@@ -37,7 +36,10 @@
             </div>
         </fieldset>
         <button class="btn btn-primary mt-3 mb-3" type="submit">Create account</button>
+    </br>
+        <a href={% url 'login' %}>Return to Login</a>
     </form>
+    
 </div>
 
 {% endblock content %}

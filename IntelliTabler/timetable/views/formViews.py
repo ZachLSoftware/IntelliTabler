@@ -1,13 +1,15 @@
 from django.urls import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from ..forms import *
 from ..models import *
 from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.apps import apps
 import json
+from ..csp import createNewGeneratedTimetable
 from ..serializers import *
 from ..scripts import *
+from django.contrib import messages
 
 # Create your views here.
 def addDepartment(request):
@@ -23,7 +25,9 @@ def addDepartment(request):
             dep.user=request.user
             dep.save()
             format.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'departmentChange'})
+            table=Timetable.objects.filter(tableYear__department=dep).first()
+            event={'departmentAdded': {'tableId': table.id, 'departmentTitle':dep.name +" "+ str(table.tableYear.year)}}
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
     else:
         form=DepartmentForm()
     context={
@@ -298,6 +302,20 @@ def calendarPeriodDrop(request, day, week, groupId):
 
 def deleteObject(request, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)
+    if type=="Timetable":
+        t=Timetable.objects.get(id=id)
+        year=t.tableYear
+        if t==year.defaultTimetable:
+            tables=Timetable.objects.filter(tableYear=year).exclude(id=id)
+            if len(tables)>=1:
+                year.defaultTimetable=tables.first()
+                year.save()
+            else:
+                error = {"error": "Cannot delete the default timetable if it is the only table."}
+                return JsonResponse(error, status="400")
+        objId=str(year.defaultTimetable.id)
+    else:
+        objId=id
     if(Type==ModuleParent):
         objs=Type.objects.filter(sharedId=id)
         for obj in objs:
@@ -307,8 +325,9 @@ def deleteObject(request, type, id):
             obj = Type.objects.get(id=id).delete()
         except Type.DoesNotExist:
             obj=None
+    
     trigger = type[0].lower()+type[1:]+"Change"
-    events='{\"'+trigger+'\": "Deleted", \"'+type+'Deleted\":"Object Deleted"}'
+    events='{\"'+trigger+'\": "Deleted", \"'+type+'Deleted\":'+objId+'}'
     return HttpResponse(status=204, headers={"HX-Trigger": events})
 
 def addModuleCalendar(request, day, week, timetableId, teacher=0):
@@ -394,7 +413,8 @@ def addTimetable(request, yearId):
                 y=Year.objects.get(id=yearId)
                 y.defaultTimetable=table
                 y.save()
-            return HttpResponse(204, headers={"HX-Trigger":"yearChange"})
+            events={'timetableAdded': str(table.id)}
+            return HttpResponse(204, headers={"HX-Trigger":json.dumps(events)})
     else:
         form = TimetableForm()
     return render(request, "forms/modalForm.html", {'Operation':'Add Timetable', 'form':form})

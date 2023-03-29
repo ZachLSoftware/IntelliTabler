@@ -4,7 +4,7 @@
 {% load widget_tweaks %}
 
 
-<div id="bodyContainer">
+
   {% if next %}
     {% if user.is_authenticated %}
       <p>Your account doesn't have access to this page. To proceed,
@@ -15,7 +15,6 @@
   {% endif %}
 
   <div class="container-fluid justify-content-center mt-5 border" style="max-width: 50%">
-    <h1>Login</h1>
   <form method="post" action="{% url 'login' %}">
     {% csrf_token %}
     {{form}}
@@ -29,10 +28,9 @@
 
   {# Assumes you setup the password_reset view in your URLconf #}
   <div id="accountBtns" class="m-3">
-    <a type="button" class="btn-sm btn-secondary" href="{% url "register" %}">Register a new account</a>
+    <a type="button" class="btn-sm btn-secondary" href="{% url "register" %}">Register</a>
     <a type="button" class="btn-sm btn-secondary" href="{% url "passwordReset" %}">Forgot Password?</a>
   </div>
 </div>
 </br>
-</div>
 {% endblock %}

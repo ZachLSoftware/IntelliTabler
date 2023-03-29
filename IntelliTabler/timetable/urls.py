@@ -6,11 +6,13 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('', dataViews.index, name='index'),
     path('addDepartment', formViews.addDepartment, name='addDepartment'),
-    path('login', auth_views.LoginView.as_view(template_name = 'registration/login.html'), name = 'login'),
+    path('login', auth_views.LoginView.as_view(template_name='auth_templates/login.html'), name = 'login'),
     path('logout', authViews.logout_view, name = 'logout'),
     path('register', authViews.register, name = 'register'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('successPage', authViews.successPage, name="successPage"),
+    path('passwordReset', authViews.passwordReset, name="passwordReset"),
+    path('reset/<uidb64>/<token>', authViews.passwordResetConfirm, name="passwordResetConfirm"),
     path('activate/<uidb64>/<token>', authViews.activate, name='activate'),
     path('departments', dataViews.departments, name="departments"),
     path('departmentChange', dataViews.departmentChange, name="departmentChange"),
@@ -60,5 +62,6 @@ urlpatterns = [
     path('preferences/<int:teacherId>/<int:timetableId>', dataViews.teacherPreferences, name='preferences'),
     path('addPreferences/<int:teacherId>/<int:timetableId>', formViews.addPreference, name='addPreference'),
     path('getGroups/<int:parentId>', dataViews.getGroups, name="getGroups"),
-    path('getModulesJson/<int:groupId>', dataViews.getModulesJson, name="getModulesJson")
-]
+    path('getModulesJson/<int:groupId>', dataViews.getModulesJson, name="getModulesJson"),
+    path('timetableLanding/<int:timetableId>', dataViews.displayTimetableLanding, name="timetableLanding")
+    ]

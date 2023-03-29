@@ -65,7 +65,6 @@ function enableTooltips(){
 
 
 htmx.on("htmx:beforeSwap", (e) => {
-
     if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request') && e.detail.requestConfig.verb!="delete"){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
@@ -84,7 +83,7 @@ htmx.on("htmx:beforeSwap", (e) => {
     }
 
     //Handles Modal hiding
-    if (e.detail.target.id == "addForm" && !e.detail.xhr.response){
+    if (e.detail.target.id == "addForm" && !e.detail.xhr.response || e.detail.xhr.response==204){
         modal.hide();
         e.detail.shouldSwap = false;
     }
@@ -141,9 +140,9 @@ $(document).on("click", ".parentButtons, .childButtons", function(){
     
     });
 
-$(document).on('departmentChange yearChange', function(){
-    location.reload();
-})
+// $(document).on('departmentChange', function(){
+//     location.reload();
+// })
 
 function getClicked(){
     return clicked;
@@ -234,3 +233,43 @@ function setModuleChoice(){
     })
 }
 
+$('#confirmGenerate').click(function(){
+    $('#progressLoaderTitle').html("<h1>Generating Timetable...</h1>");
+    $('#generatingAnimation').addClass("progressLoader");
+    $('#confirmModal').hide()
+
+})
+
+$(document).on("sidebarLoaded", function(e){
+    url='timetableLanding/'+e.detail.value
+    htmx.ajax('GET', url, '#mainContent');
+})
+
+$(document).on("click", "#jquery_click_test", function(){
+    htmx.ajax('GET', "/getSidebar/teacher/154724230151", "#mainContent").then(() => {
+        htmx.ajax('GET', "/getTeacher/700632503056/154724230151", "#displayChild");
+    });
+})
+
+$(document).on("TimetableDeleted timetableAdded", function(e){
+        url="/displayDashboardContent/"+e.detail.value;
+        htmx.ajax('GET',url, "#sidebarBody")
+})
+$(document).on("departmentAdded yearAdded", function(e){
+    url="/displayDashboardContent/"+e.detail.tableId;
+    htmx.ajax('GET',url, "#sidebarBody")
+    $("#departmentSelect").text(e.detail.departmentTitle)
+
+})
+
+htmx.on("htmx:responseError", function(e) {
+    var error = JSON.parse(e.detail.xhr.response);
+    var errorMessage = error.error;
+    var html= `<div class="alert alert-danger alert-dismissible" role="alert">
+    <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+    </button>
+    ${errorMessage}
+    </div>`
+    $('#messageWrapper').append(html)
+});

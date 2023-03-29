@@ -187,24 +187,6 @@ class CSP():
                 self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
                 
 
-
-        # sKey=self.schedule[classId]['sharedKey']
-        # for nextCl in self.unassigned:
-        #     if nextCl==classId:
-        #         continue
-        #     if teacherId in self.currDoms[nextCl]:
-        #         if not self.isValidAssignment(teacherId, nextCl):
-        #            del self.currDoms[nextCl][teacherId]
-        #         else:
-        #             self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
-        #     else:
-        #         if self.isValidAssignment(teacherId, nextCl):
-        #             self.currDoms[nextCl]={teacherId: {'base_pref':0}}
-        #             self.currDoms[nextCl][teacherId]['sharedKey_pref']=len({sk for sk in self.teacher_splitClass[teacherId][self.schedule[nextCl]['sharedKey']]})
-        #     tempDom=self.currDoms[nextCl].copy()
-        #     self.currDoms[nextCl].clear()
-        #     self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
-
     def checkPossible(self):
         loadCheck={}
         availableLoad={}
@@ -222,29 +204,3 @@ class CSP():
             if loadCheck[week]>availableLoad[week]:
                 return False
         return True
-
-    # def forwardCheck(self, assignments, unassigned):
-    #     pruned={}
-    #     partAssign=assignments.copy()
-    #     for cl in unassigned:
-    #         pruned[cl]=set()
-    #         for teacher in self.teachers.keys():
-    #             if self.isValidAssignment(teacher,cl):
-    #                 partAssign[cl]=teacher
-    #                 valid=True
-
-    #                 for nextCl in unassigned:
-    #                     if nextCl==cl:
-    #                         continue
-    #                     dom = [t for t in self.teachers.keys() if self.isValidAssignment(t, nextCl)]
-
-    #                     if not dom:
-    #                         valid=False
-    #                         break
-    #                 if valid:
-    #                     pruned[cl].add(teacher)
-    #                 partAssign[cl]=None
-    #             else:
-    #                 partAssign[cl]=None
-    #     return pruned
-

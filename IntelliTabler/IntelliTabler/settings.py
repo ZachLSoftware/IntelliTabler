@@ -39,7 +39,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.privateemail.com'
+DEFAULT_FROM_EMAIL = 'noreply@intellitabler.co.uk'
+EMAIL_HOST_USER = 'noreply@intellitabler.co.uk'
+EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 LOGIN_REDIRECT_URL = "successPage"
 LOGOUT_REDIRECT_URL = "successPage"
 

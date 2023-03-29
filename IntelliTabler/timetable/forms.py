@@ -1,6 +1,6 @@
 from django import forms
 from .models import *
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm, PasswordResetForm
 from django.forms.widgets import TextInput
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -28,6 +28,21 @@ class RegistrationForm(UserCreationForm):
                 <li id="charLength">Your password must contain at least 8 characters.</li>
                 <li id="numCheck">Your password can’t be entirely numeric.</li>
             </ul>"""
+    
+    def clean(self):
+        cleaned_data=super().clean()
+        email = cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            self.add_error('email', 'A user with that email already exists.')
+
+class changePassword(SetPasswordForm):
+    class Meta:
+        model = get_user_model()
+        fields = ['new_password1', 'new_password2']
+
+
+class passwordResetForm(BaseForm):
+    email = forms.EmailField()
 
 class DepartmentForm(BaseForm):
     name = forms.CharField(max_length=30, label="Department Name")

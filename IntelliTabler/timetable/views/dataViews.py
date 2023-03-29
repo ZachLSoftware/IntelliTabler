@@ -41,8 +41,12 @@ def displayDashboardContent(request, timetableId):
     response=render(request,'data/dashboardNav.html', context)
 
     #Creates an event trigger when content is loaded
-    response['HX-Trigger']='dashboardLoaded'
+    response['HX-Trigger']=json.dumps({"sidebarLoaded":timetableId})
     return response
+
+def displayTimetableLanding(request, timetableId):
+    timetable=Timetable.objects.get(id=timetableId)
+    return render(request, 'data/timetableLandingPage.html', {'timetable':timetable})
 
 ###OLD MAY NEED TO BE REMOVED###
 @login_required
@@ -206,19 +210,20 @@ def combingView(request, timetableId):
     pAssign={}
     mJson={}
     index=1
-    for period in periods:
-        pAssign[period.dayNum]=period
-    # for group in groups:
-    #     if group.period not in periods:
-    #         continue
-    #     else:
-    #         pAssign[index]=group.period
-    #         periods.remove(group.period)
-    #         index+=1
-    # if periods:
-    #     for period in periods:
-    #         pAssign[index]=period
-    #         index+=1
+    # for period in periods:
+    #     pAssign[period.dayNum]=period
+    periods=list(periods)
+    for group in groups:
+        if group.period not in periods:
+            continue
+        else:
+            pAssign[index]=group.period
+            periods.remove(group.period)
+            index+=1
+    if periods:
+        for period in periods:
+            pAssign[index]=period
+            index+=1
     
     for cl in classes:
         if cl.group.period:
@@ -318,15 +323,15 @@ def cspTest(request, timetableA):
     from datetime import datetime
     now = datetime.now()
     tA=Timetable.objects.get(id=timetableA)
-    t=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"-"+now.strftime("%m/%d"), tA)
-    sched=getClassSchedule(t)
+    timetable=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"-"+now.strftime("%d%m%y"), tA)
+    sched=getClassSchedule(timetable)
     if(not sched):
         return HttpResponse(status=502)
-    teach=getTeacherDomains(t)
+    teach=getTeacherDomains(timetable)
     try:
-        csp1=CSP(sched, teach, tA.tableYear.department.format.numWeeks)
+        csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks)
     except ValueError as msg:
-        t.delete()
+        timetable.delete()
         messages.error(request,str(msg))
         return redirect('dashboard')
 
@@ -338,7 +343,7 @@ def cspTest(request, timetableA):
             if (csp1.assignTeacher()):
                 for c, teacher in csp1.class_assignments.items():
                     Module.objects.filter(id=c).update(teacher_id=teacher)
-                messages.success(request, f"New Timetable {t.name} has been generated")
+                messages.success(request, f"New Timetable {timetable.name} has been generated")
                 return redirect('dashboard')
             count+=1
         t.delete()
