@@ -5,8 +5,8 @@
 
 
 <h1>{{teacher.name}} Availability - Hours Remaining: <span id="load"> {{ hours }}</span> </h1>
-<button id="selectAll" type="button" class="btn btn-primary">Select All</button>
-<button id="clearSelect" type="button" class="btn btn-primary">Clear Selection</button>
+<button id="selectAll" type="button" class="btn btn-primary-outline">Select All</button>
+<button id="clearSelect" type="button" class="btn btn-primary-outline">Clear Selection</button>
 <form hx-post="{{ request.path }}" enctype="multipart/form-data" hx-target="#availability">
     {% csrf_token %}
     {% for formset in formsets %}

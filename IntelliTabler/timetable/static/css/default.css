@@ -35,7 +35,21 @@ html, body {
 
   .nav-link:hover {
       filter: brightness(75%);
+      color: white;
     }
+
+  a:hover {
+    color: white;
+    filter: brightness(75%);
+  }
+
+  .table-cell:hover {
+    filter: brightness(75%);
+  }
+
+  .table-cell {
+    text-align: center;
+  }
 
   .nav-link .disabled {
     filter: brightness(50%);
@@ -150,3 +164,12 @@ html, body {
   from { transform: rotate(0turn) }
   to { transform: rotate(1turn) }
 }
+
+.moduleTable td{
+  font-size: x-large;
+}
+
+#infoBtnGroup {
+  max-width: 75%;
+}
+

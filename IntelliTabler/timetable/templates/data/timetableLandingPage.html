@@ -1,5 +1,7 @@
 <h1 id="tableName"> {{timetable.name}} </h1>
 
 <h2 class="landing">Timetable at a Glance </h2>
+<button class="btn btn-primary-outline" hx-get="{% url 'addTimetable' timetable.tableYear.id timetable.id %}" hx-target="#addForm">Edit</button>
+<button class="btn btn-primary-outline" hx-get="{% url 'setDefaultTimetable' timetable.tableYear.id timetable.id %}" hx-target="this">default</button>
 
 <button id="jquery_click_test">teacher click button </button>

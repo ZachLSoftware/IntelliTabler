@@ -7,10 +7,11 @@ function setupChart(){
         setTeacherAllocTotal(cData.teachers, cData.modParents);
         setCombListeners();
         refreshClickListeners();
+        enableTooltips();
     }
 }
 function addCombEvent(mod){
-    $(mod.session).append(`<div id="${mod.id}Div" class="modDiv d-grid">
+    $(mod.session).append(`<div id="${mod.id}Div" session="${mod.session}" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
                                     <button id="${mod.id}" hx-get="/getModules/${mod.group.id}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.group.parent.id}Class week${mod.group.period.week}">${mod.name}</button>
                                 </div>`);
@@ -44,19 +45,19 @@ function addCombEvent(mod){
 };
 
 function refreshClickListeners(){
-    $(".removeMod").click(function(e){
-        if($(this).hasClass('disabled')){
-            $(this).removeClass('disabled');
-            return;
-        }
-        let modId=this.id.split('-')[0];
-        if(confirm('Unassign Teacher?')){
-            htmx.ajax('POST', `/unassignTeacher/${modId}`);
-        }
-    });
     htmx.process(htmx.find("#combingChart"));
 }
 
+$(document).on("click", ".removeMod", function(e){
+    if($(this).hasClass('disabled')){
+        $(this).removeClass('disabled');
+        return;
+    }
+    let modId=this.id.split('-')[0];
+    if(confirm('Unassign Teacher?')){
+        htmx.ajax('POST', `/unassignTeacher/${modId}`);
+    }
+});
 
 function checkAssignment(cellId){
     if($(cellId).find("button").length>1){
@@ -110,19 +111,19 @@ htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody" && activePage=="combing") {
         $('.editBtnCol').remove();
         dataModal.show();
-    }else if(e.detail.target.id == "addForm" && activePage=="combing") {
-        $('#moduleChoice').empty();
-        let select=$('#groupChoice').find(':selected').val()
-        $.each(cData.modChoices[select], function(index, val){
-          $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
-        })
-        $('#groupChoice').change(function(){
-            $('#moduleChoice').empty();
-            let select=$('#groupChoice').find(':selected').val()
-            $.each(cData.modChoices[select], function(index, val){
-              $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
-            })
-        });
+    // }else if(e.detail.target.id == "addForm" && activePage=="combing") {
+    //     $('#moduleChoice').empty();
+    //     let select=$('#groupChoice').find(':selected').val()
+    //     $.each(cData.modChoices[select], function(index, val){
+    //       $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
+    //     })
+    //     $('#groupChoice').change(function(){
+    //         $('#moduleChoice').empty();
+    //         let select=$('#groupChoice').find(':selected').val()
+    //         $.each(cData.modChoices[select], function(index, val){
+    //           $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
+    //         })
+    //     });
         modal.show();
     }
 });
@@ -163,6 +164,8 @@ function setCombListeners(){
         if($(ui.draggable).closest('tr')[0].id==this.id){
             $(ui.draggable).addClass('drag-revert');
         }else
-            htmx.ajax("POST", `/assignTeacherDrop/${teacher}/${mod}`);
+            htmx.ajax("POST", `/assignTeacherDrop/${teacher}/${mod}`).then(() => {
+                checkAssignment($(ui.draggable).attr('session'))
+            })
     }});
 }

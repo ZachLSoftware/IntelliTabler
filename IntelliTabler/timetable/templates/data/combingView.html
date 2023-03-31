@@ -7,7 +7,8 @@
         numP:parseInt({{numPeriods}}),
         modules:{{modules|safe}},
         modChoices:{{modChoices|safe}},
-        numWeeks:{{numWeeks}}
+        numWeeks:{{numWeeks}},
+        combing:"True"
     };
 </script>
 {% endblock %}
@@ -21,9 +22,22 @@
             <div>{{forloop.counter}}</div>
             {% endfor %} {% endcomment %}
 {% if unassigned %}
-<h1>Some classes are not assigned to a timeslot. Please assign these first.</h1>
+<h1>Cannot build chart - Some classes are not assigned to a timeslot. Please assign these first.</h1>
 {% else %}
-<table id="combingChart" class="table">
+{% if teachers %}
+<div class="m-2 row justify-content-center">
+<div id="infoBtnGroup" class="btn-group" role="group">
+<button class="btn btn-primary-outline" hx-get="{% url 'combingView' timetableId  %}" hx-target="#mainContent"
+        data-bs-toggle="tooltip" data-bs-placement="bottom"data-bs-title="Group classes together as close as possible">
+        Group by Class (Default) 
+</button>
+<button class="btn btn-primary-outline" hx-get="{% url 'combingView' timetableId 'False' %}" hx-target="#mainContent"
+    data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Order the chart based on period">
+    Order by Period 
+</button>
+</div>
+</div>
+<table id="combingChart" class="table m-3">
     <th>Teachers</th>
     <th>Load</th>
     {% for k,v in periods.items %}
@@ -31,7 +45,7 @@
     {% endfor %}
     {% for t in teachers %}
     <tr id="{{t.id}}Row" class="teacherRow">
-        <td><button class="btn btn-primary border" hx-get="{% url 'assignTeacherCombing' t.id timetableId %}" hx-target="#addForm">{{t.name}}</button></td>
+        <td><button class="btn btn-primary-outline border" hx-get="{% url 'assignTeacherCombing' t.id timetableId %}" hx-target="#addForm">{{t.name}}</button></td>
         <td>{{t.load}}</td>
         {% for p,v in periods.items %}
         <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>
@@ -39,10 +53,14 @@
     </tr>
     {% endfor %}
 </table>
+{% else %}
+<h1>Cannot build chart - No teachers or classes created</h1>
+{% endif %}
 {% endif %}
 </div>
 <div class="row m-5">
     <div id="moduleAssignments" class="col">
+        {% if parents %}
         <table>
             <th>Class</th>
             <th>Groups</th>
@@ -61,9 +79,13 @@
                 {% endfor %}
             </tbody>
         </table>
+        {%else%}
+        Cannot build table - No classes created
+        {%endif%}
     </div>
 
     <div id="teacherLoad" class="col">
+        {% if teachers and parents %}
         <table id="loadDistTable">
             <th>Teacher</th>
             <th>Load per Week</th>
@@ -71,13 +93,13 @@
             {% for module in parents %}
             <th style="background-color: {{module.color}}">{{module.name}}</th>
             {%endfor%}
+
             {% with weeks=teachers.0.department.format.numWeeks %}
             {% for w in weeks|forRange %}
             <th>Alloc W-{{w}}</th>
             <th>Remaining W-{{w}}</th>
             {% endfor %}
             <tbody>
-                
                 {% for t in teachers %}
                 <tr>
                 <td>{{t.name}}</td>
@@ -94,6 +116,9 @@
                 {%endfor%}
                 {% endwith %}
             </table>
+            {% else %}
+            Cannot build table - No Teachers or no classes created
+            {% endif %}
     </div>
 
 </div>
@@ -109,7 +134,7 @@
                 <div id="modalBody" class="modal-body" hx-trigger="moduleDetailsChange from:body" hx-target="this">
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary-outline" type="button" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>

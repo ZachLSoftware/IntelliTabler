@@ -197,7 +197,9 @@ def getModules(request, groupId=0, timetableId=0):
     context["group"]=groupId
     return render(request, "data/modulesInfo.html", context)
 
-def combingView(request, timetableId):
+def combingView(request, timetableId, groupByClass=True):
+    if groupByClass=='False':
+        groupByClass=False
     context={}
     timetable=Timetable.objects.get(id=timetableId)
     teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
@@ -210,20 +212,22 @@ def combingView(request, timetableId):
     pAssign={}
     mJson={}
     index=1
-    # for period in periods:
-    #     pAssign[period.dayNum]=period
-    periods=list(periods)
-    for group in groups:
-        if group.period not in periods:
-            continue
-        else:
-            pAssign[index]=group.period
-            periods.remove(group.period)
-            index+=1
-    if periods:
+    if not groupByClass:
         for period in periods:
-            pAssign[index]=period
-            index+=1
+            pAssign[period.dayNum]=period
+    else:
+        periods=list(periods)
+        for group in groups:
+            if group.period not in periods:
+                continue
+            else:
+                pAssign[index]=group.period
+                periods.remove(group.period)
+                index+=1
+        if periods:
+            for period in periods:
+                pAssign[index]=period
+                index+=1
     
     for cl in classes:
         if cl.group.period:
@@ -346,7 +350,7 @@ def cspTest(request, timetableA):
                 messages.success(request, f"New Timetable {timetable.name} has been generated")
                 return redirect('dashboard')
             count+=1
-        t.delete()
+        timetable.delete()
         messages.error(request, "No valid solution was found.")
         return redirect('dashboard')
     # return render(request, 'forms/timetableWizard.html', {'timetable':t})
@@ -356,18 +360,27 @@ def teacherPreferences(request, teacherId, timetableId):
     context={'preferences':preferences, 'teacherId':teacherId, 'timetableId':timetableId}
     return render(request, 'data/preferences.html', context)
 
-def getGroups(request, parentId):
-    groups=ModuleGroup.objects.filter(parent_id=parentId).order_by('session')
-    choices=[]
-    for group in groups:
-        choices.append((group.id, group.name))
+def getGroups(request, parentId, combing=False):
+    if not combing:
+        groups=ModuleGroup.objects.filter(parent_id=parentId).order_by('session')
+        choices=[(group.id, group.name) for group in groups]
+    else:
+        mods=Module.objects.filter(group__parent_id=parentId, teacher__isnull=True).order_by('lesson')
+        choices = list(set(mods.values_list('group__id', 'group__name').distinct()))
     
     return JsonResponse({'choices':choices})
 
-def getModulesJson(request, groupId):
-    modules=Module.objects.filter(group_id=groupId).order_by('lesson')
-    choices=[]
-    for mod in modules:
-        choices.append((mod.id, mod.name))
+def getModulesJson(request, groupId, combing=False):
+    if not combing:
+        modules=Module.objects.filter(group_id=groupId).order_by('lesson')
+    else:
+        modules=Module.objects.filter(group_id=groupId, teacher__isnull=True).order_by('lesson')
+    choices=[(mod.id, mod.name) for mod in modules]
     
     return JsonResponse({'choices':choices})
+
+def departmentInfo(request, departmentId):
+    department=Department.objects.get(id=departmentId)
+    timetables=Timetable.objects.filter(tableYear__department=department)
+    context={'department':department, 'timetables':timetables}
+    return render(request, 'data/departmentInfo.html', context)

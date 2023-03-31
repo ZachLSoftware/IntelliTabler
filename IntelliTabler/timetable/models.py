@@ -51,14 +51,55 @@ def createPeriods(sender, instance, created, **kwargs):
             if(count%(instance.numPeriods*5)==0):
                 week+=1
                 i=1
-            
-        '''
-        for i in range(1,instance.numWeeks+1):
-            for day in days:
-                for j in range(1,instance.numPeriods+1):
-                    Period.objects.create(name=day+str(j), dayNum=count, department=instance.department, week=i)
+
+@receiver(pre_save, sender=Format)
+def editPeriods(sender, instance, **kwargs):
+    oldFormat=Format.objects.filter(department=instance.department).first()
+    if not instance._state.adding and oldFormat:
+        if oldFormat.numPeriods<instance.numPeriods:
+            days=["Fri-","Mon-","Tues-","Wed-","Thurs-"]
+            totalPeriods=instance.numPeriods*5*oldFormat.numWeeks
+            i=1
+            week=1
+            for count in range(1, totalPeriods+1):
+                if not Period.objects.filter(name=days[count%5]+str(round(i/5+.4)), department=instance.department, week=week).exists():
+                    Period.objects.create(name=days[count%5]+str(round(i/5+.4)), dayNum=count, department=instance.department, week=week)
+                else:
+                    Period.objects.filter(name=days[count%5]+str(round(i/5+.4)), department=instance.department, week=week).update(dayNum=count)
+                i+=1
+                if(count%(instance.numPeriods*5)==0):
+                    week+=1
+                    i=1
+        if oldFormat.numWeeks<instance.numWeeks:
+            days=["Fri-","Mon-","Tues-","Wed-","Thurs-"]
+            totalPeriods=instance.numPeriods*5*instance.numWeeks
+            starting=oldFormat.numPeriods*5*oldFormat.numWeeks
+            i=1
+            week=oldFormat.numWeeks+1
+            for count in range(starting+1, totalPeriods+1):
+                Period.objects.create(name=days[count%5]+str(round(i/5+.4)), dayNum=count, department=instance.department, week=week)
+                i+=1
+                if(count%(instance.numPeriods*5)==0):
+                    week+=1
+                    i=1
+        if oldFormat.numWeeks>instance.numWeeks:
+            periods=Period.objects.filter(department=instance.department, week__gt=instance.numWeeks)
+            for period in periods:
+                period.delete()
+        if oldFormat.numPeriods>instance.numPeriods:
+            count=1
+            periods=Period.objects.filter(department=instance.department).order_by('dayNum')
+            for period in periods:
+                if int(period.name.split('-')[1])>instance.numPeriods:
+                    period.delete()
+                else:
+                    period.dayNum=count
+                    period.save()
                     count+=1
-        '''
+            
+        
+            
+
     
 
 class Teacher(RandomIDModel):

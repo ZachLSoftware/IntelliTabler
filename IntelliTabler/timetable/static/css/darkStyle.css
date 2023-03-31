@@ -95,3 +95,15 @@ body .form-floating{
 #loadDistTable tr:nth-child(even) {
   background-color: #1a2127;
 }
+
+.btn-primary-outline {
+  color: white;
+  background-color: #3f454b;
+}
+
+.btn-primary-outline:hover {
+  filter:brightness(75%);
+  background-color: #3f454b;
+}
+
+

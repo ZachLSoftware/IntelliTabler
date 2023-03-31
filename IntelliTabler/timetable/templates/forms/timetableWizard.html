@@ -17,6 +17,9 @@
 <li class="nav-item">
   <a class="nav-link align-middle px-0 sidebar-link" data-bs-toggle="modal" data-bs-target="#confirmModal"><i class="fa-regular fa-square-plus"></i><span class="d-none d-sm-inline">  Generate Timetable</span></a>
 </li>
+<li class="nav-item">
+  <a id="cancel" class="nav-link align-middle px-0 sidebar-link" href="{% url 'dashboard'%}"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Cancel</span></a>
+</li>
 </ul>
 </div>
 </div>
@@ -44,6 +47,5 @@
     </div>
   </div>
 </div>
-<div id="progressLoaderTitle"></div>
-<div id="generatingAnimation"></div>
+
 {% endblock %}

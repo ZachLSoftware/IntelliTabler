@@ -159,19 +159,30 @@ class addEventForm(BaseForm):
 
 
 class addTeacherCombingForm(BaseForm):
-    group=forms.ChoiceField(widget=forms.Select(attrs={'id': 'groupChoice'}))
-    module=forms.ChoiceField(widget=forms.Select(attrs={'id': 'moduleChoice'}))
+    moduleParent=forms.ChoiceField(label="class", choices=[('None','None')], widget=forms.Select(attrs={'id': 'parentChoice'}))
+    group=forms.ChoiceField(choices=[('Select Class','Select Class')], widget=forms.Select(attrs={'id': 'groupChoice'}))
+    module=forms.ChoiceField(choices=[('Select Group','Select Group')], widget=forms.Select(attrs={'id': 'moduleChoice'}))
     assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
-    def __init__(self, groups, modules, *args, **kwargs):
+    def __init__(self, parents,groups=[],modules=[],*args, **kwargs):
+        self.teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
-        if(groups==[]):
-            self.fields['group'].choices=[('None', 'None'),]
+        if(parents==[]):
+            self.fields['moduleParent'].choices=[('None', 'None Unassigned'),]
+            self.fields['moduleParent'].widget.attrs['disabled']=True
+            self.fields['group'].widget.attrs['disabled']=True
+            self.fields['module'].widget.attrs['disabled']=True
+            self.fields['assignToAll'].widget.attrs['disabled']=True
+        elif(groups==[] or modules==[]):
+            self.fields['moduleParent'].choices = parents
+            self.fields['group'].choices=[('Select Group','Select Group')]
+            self.fields['module'].choices=[('Select Group','Select Group')]
             self.fields['group'].widget.attrs['disabled']=True
             self.fields['module'].widget.attrs['disabled']=True
         else:
+            self.fields['moduleParent'].choices = parents
             self.fields['group'].choices = groups
-            self.fields['module'].choices= modules
+            self.fields['module'].choices = modules
 
 class changeColorForm(BaseForm):
     color = forms.CharField(max_length=7, help_text="The color you would like the module to appear in calendars and charts.", widget=forms.TextInput(attrs={'type': 'color', 'class':'form-control-color'}))

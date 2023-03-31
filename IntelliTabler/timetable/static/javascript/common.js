@@ -46,8 +46,8 @@ htmx.on("htmx:afterSwap", (e) => {
 
     //AfterSwap for Modal Handeler
     if(e.detail.target.id == "addForm") {
-        test=e.detail.pathInfo.requestPath.split('/')[1];
-        if(test=="addPreferences"){
+        path=e.detail.pathInfo.requestPath.split('/')[1];
+        if(path=="addPreferences" || path=="assignTeacherCombing"){
             setGroupChoice();
         }
         //Enables Tooltips
@@ -59,6 +59,7 @@ htmx.on("htmx:afterSwap", (e) => {
 })
 
 function enableTooltips(){
+    $(".tooltip").remove()
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 }
@@ -90,6 +91,9 @@ htmx.on("htmx:beforeSwap", (e) => {
 
     if(cData.calendarDiv && e.target.id=="mainContent"){
         cleanupCalendar();
+    }
+    if(cData.combing && e.target.id=="mainContent"){
+        cleanupCombing();
     }
 })
 
@@ -125,6 +129,17 @@ function cleanupCalendar(){
         delete cData[k];
     }
     console.log(cData);
+}
+function cleanupCombing(){
+    $(document).off("modUpdate");
+    
+    $(document).off("unassignSuccess");
+    
+    delete dataModal;
+    for(var k in cData){
+        delete cData[k];
+    }
+    console.log(cData);  
 }
 
 htmx.on("hidden.bs.modal", () => {
@@ -209,20 +224,34 @@ $(document).on("change", "#groupChoice", function(){
 
 function setGroupChoice(){
     
-    $.get('/getGroups/' + $("#parentChoice").val(), function(data){
-        $('#groupChoice').empty()
-        var options=''
-        data.choices.forEach(element => {
-            options+= '<option value="' + element[0] +'">' + element[1] +'</option>';
-        });
-        $('#groupChoice').html(options);
-        $('#groupChoice').prop('disabled',false)
+    if($("#parentChoice").val()!="None"){
+        if(activePage=="combing"){
+            var url = '/getGroups/' + $("#parentChoice").val() +'/True';
+        }else{
+            var url = '/getGroups/' + $("#parentChoice").val();
+        }
+        $.get(url, function(data){
+            $('#groupChoice').empty()
+            var options=''
+            data.choices.forEach(element => {
+                options+= '<option value="' + element[0] +'">' + element[1] +'</option>';
+            });
+            $('#groupChoice').html(options);
+            $('#groupChoice').prop('disabled',false)
 
-        setModuleChoice();
-    })
+            setModuleChoice();
+        })
+    }else{
+        $("#formSubmitBtn").prop('disabled', true)
+    }
 }
 function setModuleChoice(){
-    $.get('/getModulesJson/' + $('#groupChoice').val(), function(data){
+    if(activePage=="combing"){
+        var url='/getModulesJson/' + $('#groupChoice').val()+"/True";
+    }else {
+        var url = '/getModulesJson/' + $('#groupChoice').val();
+    }
+    $.get(url, function(data){
         $('#moduleChoice').empty()
         var options=''
         data.choices.forEach(element => {
@@ -234,16 +263,22 @@ function setModuleChoice(){
 }
 
 $('#confirmGenerate').click(function(){
+    html=`<div id="progressLoaderTitle"></div>
+    <div id="generatingAnimation"></div>`;
+    $("body").prepend(html);
     $('#progressLoaderTitle').html("<h1>Generating Timetable...</h1>");
     $('#generatingAnimation').addClass("progressLoader");
-    $('#confirmModal').hide()
-
+    $('#confirmModal').modal('hide');
 })
 
 $(document).on("sidebarLoaded", function(e){
     url='timetableLanding/'+e.detail.value
     htmx.ajax('GET', url, '#mainContent');
 })
+
+$(document).on("DepartmentDeleted", function(){
+    location.reload();
+});
 
 $(document).on("click", "#jquery_click_test", function(){
     htmx.ajax('GET', "/getSidebar/teacher/154724230151", "#mainContent").then(() => {
@@ -270,6 +305,17 @@ htmx.on("htmx:responseError", function(e) {
       <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
     </button>
     ${errorMessage}
+    </div>`
+    $('#messageWrapper').append(html)
+});
+
+$(document).on("successWithMessage", function(e) {
+    var message = e.detail.value;
+    var html= `<div class="alert alert-success alert-dismissible" role="alert">
+    <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+    </button>
+    ${message}
     </div>`
     $('#messageWrapper').append(html)
 });

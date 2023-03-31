@@ -36,6 +36,29 @@ def addDepartment(request):
     }
     return render(request, 'forms/modalForm.html',context)
 
+def editDepartment(request, departmentId):
+    dep=Department.objects.get(id=departmentId)
+    if request.method== "POST":
+        form = DepartmentForm(request.POST)
+        if form.is_valid():
+            dep.name=form.cleaned_data['name']
+            if dep.format.numWeeks!=form.cleaned_data['numWeeks']:
+                dep.format.numWeeks=form.cleaned_data['numWeeks']
+            if dep.format.numPeriods!=form.cleaned_data['numPeriods']:
+                dep.format.numPeriods=form.cleaned_data['numPeriods']
+            dep.save()
+            dep.format.save()
+            return HttpResponse(status=204, headers={'HX-Trigger':"departmentChanged"})
+    else:
+        form=DepartmentForm(initial={'name':dep.name, 'numWeeks': dep.format.numWeeks, 'numPeriods':dep.format.numPeriods})
+    context={
+    "form": form,
+    "Operation": "Edit Department"
+    }
+    return render(request, 'forms/modalForm.html',context)
+
+
+
 def addTeacher(request, department, id=0):
     if request.method=="POST":
         Teacher.objects.filter(pk=0).delete()
@@ -175,7 +198,8 @@ def addYear(request, departmentId=0):
             year=form.save(commit=False)
             year.department_id=form.cleaned_data['department']
             year.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':'yearChange'})
+            event={'yearAdded': {'tableId': year.defaultTimetable.id, 'departmentTitle':year.department.name +" "+ str(year.year)}}
+            return HttpResponse(status=204, headers={'HX-Trigger': json.dumps(event)})
     else:
         form=YearForm(departments)
     context={}
@@ -208,21 +232,17 @@ def assignTeacher(request, departmentId, moduleId):
     return render(request, 'forms/modalForm.html', context)
 
 def assignTeacherCombing(request, teacherId, timetableId):
-    g=ModuleGroup.objects.filter(parent__timetable_id=timetableId)
-    m=Module.objects.filter(group__parent__timetable_id=timetableId)
-    groups=[]
-    moduleChoices=[]
+    mods=Module.objects.filter(group__parent__timetable_id=timetableId, teacher__isnull=True).order_by('name')
+    groups = list(set(mods.values_list('group__id', 'group__name').distinct()))
+    parentChoices = list(set(mods.values_list('group__parent__id', 'group__parent__name').distinct()))
+    modules=[(mod.id, mod.name) for mod in mods]
     newMods=[]
-    for group in g:
-        groups.append((group.id, group.name))
-    for module in m:
-        moduleChoices.append((module.id, module.name))
 
     if request.method=='POST':
         teachers=set()
         parents=set()
         teachers.add(teacherId)
-        form=addTeacherCombingForm(groups,moduleChoices,request.POST,request.FILES)
+        form=addTeacherCombingForm(parentChoices, groups, modules,request.POST,request.FILES)
         if form.is_valid():
             groupId=form.cleaned_data['group']
             modId=form.cleaned_data['module']
@@ -251,7 +271,7 @@ def assignTeacherCombing(request, teacherId, timetableId):
             return render(request, 'forms/modalForm.html', {'form':form})
 
     else:
-        form=addTeacherCombingForm(groups,moduleChoices)
+        form=addTeacherCombingForm(parentChoices,groups,modules)
 
     context={}
     context['form']=form
@@ -401,9 +421,13 @@ def changeTheme(request, theme):
     return redirect('dashboard')
 
 
-def addTimetable(request, yearId):
+def addTimetable(request, yearId, timetableId=0):
+    try:
+        table=Timetable.objects.get(id=timetableId)
+    except:
+        table=Timetable()
     if request.method=="POST":
-        form = TimetableForm(request.POST, request.FILES)
+        form = TimetableForm(request.POST, request.FILES, instance=table)
         if form.is_valid():
             table=form.save(commit=False)
             table.tableYear_id=yearId
@@ -416,8 +440,13 @@ def addTimetable(request, yearId):
             events={'timetableAdded': str(table.id)}
             return HttpResponse(204, headers={"HX-Trigger":json.dumps(events)})
     else:
-        form = TimetableForm()
+        form = TimetableForm(instance=table)
     return render(request, "forms/modalForm.html", {'Operation':'Add Timetable', 'form':form})
+
+def setDefaultTimetable(request, yearId, timetableId):
+    Year.objects.filter(id=yearId).update(defaultTimetable_id=timetableId)
+    return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'Default timetable updated'})})
+
     
 def timetableWizard(request, timetableA):
     timetable=Timetable.objects.get(id=timetableA)

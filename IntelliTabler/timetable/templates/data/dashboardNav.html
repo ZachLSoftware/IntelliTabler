@@ -26,23 +26,36 @@
             </li>
           <hr width="100%">
           <li class="nav-item">
-            <a id="teacher" class="nav-link align-middle px-0 sidebar-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
+            <a id="teacher" class="nav-link align-middle px-0 sidebar-link" aria-current="page" hx-get="{% url 'getSidebar' 'teacher' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-person-chalkboard" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="View Teachers"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
           </li>
           <li class="nav-item">
             <a id="class" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'getSidebar' 'moduleParent' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-book-open-reader" data-bs-toggle="tooltip" data-bs-placement="top"
               data-bs-title="View Classes"></i><span class="d-none d-sm-inline">  Classes</span></a>
           </li>
           <li class="nav-item">
-            <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
+            <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="Calendar View"></i><span class="d-none d-sm-inline">  Calendar</span></a>
           </li>
           <li class="nav-item">
-            <a id="combing" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'combingView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
+            <a id="combing" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'combingView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-chart-gantt"data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="View Combing Chart"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
           </li>
           <li class="nav-item">
-            <a id="generateTest" class="nav-link align-middle px-0 sidebar-link" href="{% url 'timetableWizard' timetable.id %}" ><i class="fa-solid fa-robot"></i><span class="d-none d-sm-inline">  Auto Assignment</span></a>
+            <a id="departmentInfo" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'departmentInfo' timetable.tableYear.department.id %}" hx-target="#mainContent"><i class="fa-solid fa-info" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="View/Edit Department"></i><span class="d-none d-sm-inline">  Department Info</span></a>
           </li>
           <li class="nav-item">
-              <a id="deleteTable" class="nav-link align-middle px-0 sidebar-link" hx-delete="{% url 'deleteObject' 'Timetable' timetable.id %}" hx-confirm="Are you sure you want to delete {{timetable.name}}?"><i class="fa-solid fa-trash-can"></i><span class="d-none d-sm-inline">  Delete Timetable</span></a>
+            <a id="timetableLanding" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'timetableLanding' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-info" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="View/Edit Timetable"></i><span class="d-none d-sm-inline">  Timetable Info</span></a>
+          </li>
+          <li class="nav-item">
+            <a id="generateTest" class="nav-link align-middle px-0 sidebar-link" href="{% url 'timetableWizard' timetable.id %}" ><i class="fa-solid fa-robot" data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="Auto Assign Teachers"></i><span class="d-none d-sm-inline">  Auto Assignment</span></a>
+          </li>
+          <li class="nav-item">
+              <a id="deleteTable" class="nav-link align-middle px-0 sidebar-link" hx-delete="{% url 'deleteObject' 'Timetable' timetable.id %}" hx-confirm="Are you sure you want to delete {{timetable.name}}?"><i class="fa-solid fa-trash-can" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Delete Timetable"></i><span class="d-none d-sm-inline text-danger">  Delete Timetable</span></a>
           </li>
         </ul>
 

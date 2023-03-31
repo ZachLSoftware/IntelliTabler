@@ -14,3 +14,13 @@ body {
     border: 1px solid black;
     color: black;
   }
+
+  .btn-primary-outline {
+    color: black;
+    background-color: #f8f9fa;
+  }
+  
+  .btn-primary-outline:hover {
+    color: rgb(36, 36, 36);
+    background-color: #c2c2c2;
+  }
