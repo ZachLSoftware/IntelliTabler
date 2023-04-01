@@ -1,26 +1,135 @@
 body {
+  background-color: #F6F6F2;
   color: black;
 }
 
-.calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
-    background-color: rgb(132, 175, 255);
-  }
+#mainContent {
+  color: black;
 
-  #sidebar, #titleBar {
-    background-color: #f8f9fa;
-  }
+}
 
-  td, th {
-    border: 1px solid black;
-    color: black;
-  }
+input {
+  color: black;
+}
 
-  .btn-primary-outline {
-    color: black;
-    background-color: #f8f9fa;
-  }
+select, option {
+  color: black;
+}
+
+label {
+  color: black;
+}
+
+.checkboxInput label {
+  color: white;
+  position:absolute;
+  top: 0;
+  left:10%
   
-  .btn-primary-outline:hover {
-    color: rgb(36, 36, 36);
-    background-color: #c2c2c2;
-  }
+}
+
+.checkboxInput, .colorInput {
+  position: relative;
+}
+
+caption {
+  color: white;
+}
+
+
+td{
+  border: 1px solid black;
+  color: black;
+}
+
+
+#modTable td {
+  width: 20%;
+}
+
+.navbar-brand{
+  font-size: x-large;
+  font-weight: bold;
+}
+.nav-link{
+  color: white;
+  font-size: larger;
+}
+.modal-content{
+  background-color: #343a40;
+}
+
+.calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
+  background-color: #C2EDCE;
+}
+
+body .form-floating{
+  color:black;
+}
+
+#sidebar, #titleBar{
+  background-color: #388087;
+}
+
+#profileDropdown, #timetableDropdown{
+  color: white;
+}
+
+#themeDropdown {
+  color: black;
+}
+
+#departmentDropdown i {
+  color: black;
+}
+
+#listObjectsDiv {
+  background-color: #6FB3B8;
+}
+
+
+#loadDistTable tr:nth-child(even), #allocatedTable tr:nth-child(even), #combingChart tr:nth-child(even){
+  background-color: #C2EDCE;
+}
+
+th {
+  background-color: #388087 !important;
+  border: 1px black solid;
+}
+
+.btn-primary-outline {
+  color: black;
+  background-color: #BADFE7;
+}
+
+.btn-primary-outline:hover {
+  filter:brightness(75%);
+  background-color: #BADFE7;
+}
+
+a {
+  color: black;
+}
+
+.dayHeader {
+  border-top: 1px black solid;
+  border-right: 1px black solid;
+  border-bottom: 1px black solid;
+}
+
+.periodColumn {
+  border-left: 1px black solid;
+}
+
+.dayCell, .pRow {
+  border-top: 1px black solid;
+}
+
+#classCard {
+  color: black;
+}
+
+#classCard:hover {
+  color: black;
+  filter: brightness(75%)
+}

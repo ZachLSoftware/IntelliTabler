@@ -107,3 +107,26 @@ body .form-floating{
 }
 
 
+.nav-link:hover {
+  filter: brightness(75%);
+  color: white;
+}
+
+a:hover, #classCard:hover {
+color: white;
+filter: brightness(75%);
+}
+
+.dayHeader {
+  border-top: 1px white solid;
+  border-right: 1px white solid;
+  border-bottom: 1px white solid;
+}
+
+.periodColumn {
+  border-left: 1px white solid;
+}
+
+.dayCell, .pRow {
+  border-top: 1px white solid;
+}

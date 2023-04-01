@@ -41,7 +41,7 @@
     <th>Teachers</th>
     <th>Load</th>
     {% for k,v in periods.items %}
-    <th>{{k}}</th>
+    <th style="text-align:center">{{k}}</th>
     {% endfor %}
     {% for t in teachers %}
     <tr id="{{t.id}}Row" class="teacherRow">
@@ -61,12 +61,12 @@
 <div class="row m-5">
     <div id="moduleAssignments" class="col">
         {% if parents %}
-        <table>
-            <th>Class</th>
-            <th>Groups</th>
-            <th>Periods</th>
-            <th>Total</th>
-            <th>Allocated</th>
+        <table id="allocatedTable" class="table" style="max-width: 75%;">
+            <th >Class</th>
+            <th >Groups</th>
+            <th >Periods</th>
+            <th >Total</th>
+            <th >Allocated</th>
             <tbody>
                 {% for module in parents %}
                 <tr>
@@ -86,18 +86,18 @@
 
     <div id="teacherLoad" class="col">
         {% if teachers and parents %}
-        <table id="loadDistTable">
-            <th>Teacher</th>
-            <th>Load per Week</th>
-            <th>Total Load</th>
+        <table id="loadDistTable" class="table">
+            <th >Teacher</th>
+            <th >Load per Week</th>
+            <th >Total Load</th>
             {% for module in parents %}
-            <th style="background-color: {{module.color}}">{{module.name}}</th>
+            <th  style="background-color: {{module.color}} !important;">{{module.name}}</th>
             {%endfor%}
 
             {% with weeks=teachers.0.department.format.numWeeks %}
             {% for w in weeks|forRange %}
-            <th>Alloc W-{{w}}</th>
-            <th>Remaining W-{{w}}</th>
+            <th >Alloc W-{{w}}</th>
+            <th >Remaining W-{{w}}</th>
             {% endfor %}
             <tbody>
                 {% for t in teachers %}

@@ -26,22 +26,27 @@
 
 <table id={{k.id}} class="table caption-top moduleTable">
     <caption>
-        <h3>
-        <a class="text-decoration-none rotateLink" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
-            {{k.name}} <i class="fa-solid fa-square-caret-down rotate"></i>
-        
-        <span class="m-5">
-        Timeslot: 
-        {% if k.period is null%}
-        None Assigned
-        {%else%}
-        {{k.period.name}} Week-{{k.period.week}} 
-        {%endif%}
-        </a>
-        <button id="assignPeriod" class='btn btn-primary-outline' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button>
-        </span>
-        </h3>
-
+        <div class="row">
+            <div class="col">
+                <h4>
+                <div id="classCard" class="text-decoration-none rotateLink" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
+                    {{k.name}} <i class="fa-solid fa-square-caret-down rotate"></i>
+                
+                <span>
+                Timeslot: 
+                {% if k.period is null%}
+                None Assigned
+                {%else%}
+                {{k.period.name}} Week-{{k.period.week}} 
+                {%endif%}
+                </span>
+                </div>
+            </h4>
+            </div>
+            <div class="col">
+                <button id="assignPeriod" class='btn btn-primary-outline align-end' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button>
+            </div>
+        </div>
 </caption>
 
     <tbody id="table{{k.id}}" class="collapse">

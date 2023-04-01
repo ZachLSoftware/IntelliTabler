@@ -33,16 +33,6 @@ html, body {
     cursor:pointer;
   }
 
-  .nav-link:hover {
-      filter: brightness(75%);
-      color: white;
-    }
-
-  a:hover {
-    color: white;
-    filter: brightness(75%);
-  }
-
   .table-cell:hover {
     filter: brightness(75%);
   }
@@ -173,3 +163,6 @@ html, body {
   max-width: 75%;
 }
 
+#classCard span {
+   text-align: center;
+}

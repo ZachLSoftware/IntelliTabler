@@ -18,11 +18,13 @@ function createCalendar(id){
 
     $(".calendars").each(function(index){
         week=this.id.split('-')[1]
-        $(this).append(`<div id="periodColumn-${week}" class="dayHeader periodColumn border"><div class="calendarHeader"><h3>Period</h3></div></div>`)
+        $(this).append(`<div id="periodColumn-${week}" class="dayHeader periodColumn"><div class="calendarHeader"><h3>Period</h3></div></div>`)
         days.forEach((day) =>{
-            $(this).append(`<div id="${day}Header-${week}" class="dayHeader border"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
+            $(this).append(`<div id="${day}Header-${week}" class="dayHeader"><div class="calendarHeader"><h3>${day}</h3></div></div>`);
             for(let period=1; period<=cData.periods; period++){
-                $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="border dayCell"></div>`);
+                $(`#${day}Header-${week}`).append(`<div id="${day}-${period}-${week}" class="dayCell"></div>`);
+                if(day=="Fri"){$(`#${day}Header-${week}`).addClass("endColumn")}
+
                 $(`#${day}-${period}-${week}`).droppable({accept:".event", drop: function(e, ui){        
                     $(ui.draggable).appendTo(this);
                     $(ui.draggable).css({'top' : 0, 'left' : 0})
@@ -34,7 +36,7 @@ function createCalendar(id){
         });
 
             for(let period=1; period<=cData.periods; period++){
-                $(`#periodColumn-${week}`).append(`<div class="border pRow">${period}</div>`);
+                $(`#periodColumn-${week}`).append(`<div class="pRow">${period}</div>`);
             }
 
         })
