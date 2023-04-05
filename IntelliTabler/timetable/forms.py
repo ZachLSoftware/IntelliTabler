@@ -197,7 +197,7 @@ class TimetableForm(BaseModelForm):
 
 
 class setPreferenceForm(BaseForm):
-    choices=[(3,"REQUIRED"),(2,"HIGH"),(1,"MEDIUM"),(0,"NEUTRAL")]
+    choices=[(3,"REQUIRED"),(2,"HIGH"),(1,"MEDIUM"),(0,"NONE")]
     moduleParent=forms.ChoiceField(label="class", choices=[('None','None')], widget=forms.Select(attrs={'id': 'parentChoice'}))
     group=forms.ChoiceField(choices=[('Select Class','Select Class')], widget=forms.Select(attrs={'id': 'groupChoice'}))
     module=forms.ChoiceField(choices=[('Select Group','Select Group')], widget=forms.Select(attrs={'id': 'moduleChoice'}))
@@ -226,3 +226,14 @@ class setPreferenceForm(BaseForm):
         cleaned_data=super().clean()
         if Preference.objects.filter(teacher_id=self.teacher, module_id=cleaned_data['module']).exists():
             self.add_error("module","This teacher already has a preference set for this module.")
+
+
+class UploadFileForm(BaseForm):
+    file=forms.FileField()
+
+class TemplateChoices(BaseForm):
+    Teachers=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'id':'teacherTemplateCheck', 'type': 'checkbox', 'class': 'form-check-input templateSelectorForm'}))
+    Classes=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'id':'classTemplateCheck', 'type': 'checkbox', 'class': 'form-check-input templateSelectorForm'}))
+    Schedule=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'id':'scheduleTemplateCheck', 'type': 'checkbox', 'class': 'form-check-input templateSelectorForm templatesNoClass'}))
+    Preferences=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'id':'preferenceTemplateCheck', 'type': 'checkbox', 'class': 'form-check-input templateSelectorForm templatesNeither'}))
+    Assignments=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'id':'assignTemplateCheck', 'type': 'checkbox', 'class': 'form-check-input templateSelectorForm templatesNeither'}))

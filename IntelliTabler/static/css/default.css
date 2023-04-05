@@ -104,9 +104,8 @@ html, body {
 
 #messageWrapper {
   position: fixed; 
-  top: 5%;
+  top: 0;
   left: 50%; 
-  transform: translateX(-50%);
   z-index: 1050;
 }
 

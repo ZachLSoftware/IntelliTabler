@@ -10,7 +10,7 @@ from ..csp import createNewGeneratedTimetable
 from ..serializers import *
 from ..scripts import *
 from django.contrib import messages
-
+from ..toExcel import readFromCombing, moduleTeacherWSTemplate, readInExcel
 # Create your views here.
 def addDepartment(request):
     if request.method == "POST":
@@ -485,3 +485,55 @@ def addPreference(request, teacherId, timetableId):
     else:
         form=setPreferenceForm(parents)
     return render(request, "forms/modalForm.html", {'Operation':'Set Preference', 'form':form})
+
+
+def getTemplateFileTest(request, timetableId):
+    timetable=Timetable.objects.get(id=timetableId)
+    if request.method=="POST":
+        form=UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                results = readInExcel(timetable,request.FILES['file'])
+            except Exception as msg:
+                form.add_error('file','There was a problem with reading your file.')
+                return render(request, 'forms/modalForm.html', {'form':form})
+            if not all(val == False for val in results.values()):
+                if all( val == True for val in results.values()):
+                    return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'Timetable has been updated'})})
+                else:
+                    message='Not all worksheets were able to update.\n'
+                    for k,v in results.items():
+                        if v == False:
+                            message=message + 'Worksheet ' + k + ' had invalid data.\n'
+                    return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'warningWithMessage': message})})
+            else:
+                form.add_error('file','There were invalid or missing required values in the upload.')
+    else:
+        form=UploadFileForm()
+    return render(request, 'forms/modalForm.html', {'form':form})
+
+def templateBuilderInstructions(request, timetableId):
+
+    return render(request, 'data/templateInstructions.html', {'timetableId':timetableId})
+def templateBuilder(request, timetableId):
+    if request.method=='POST':
+
+        choices=[]
+        form=TemplateChoices(request.POST)
+        if form.is_valid():
+            for k,v in form.cleaned_data.items():
+                if v:
+                    choices.append(k)
+        download_url = reverse('templateBuilderDownload', args=[timetableId, json.dumps(choices)])
+        return render(request, 'data/downloadFile.html', {'file_url': download_url})
+    else:
+        form=TemplateChoices()
+    return render(request, "forms/modalForm.html", {'form':form, 'Operation':'Template Builder'})
+
+def templateBuilderDownload(request, timetableId, choices):
+        timetable=Timetable.objects.get(id=timetableId)
+        choices=json.loads(choices)
+        template=moduleTeacherWSTemplate(timetable, choices)
+        response = HttpResponse(template,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=timeslot.xlsx'
+        return response

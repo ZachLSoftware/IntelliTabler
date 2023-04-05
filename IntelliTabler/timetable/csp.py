@@ -198,7 +198,7 @@ class CSP():
         
         for teacher, dict in self.teachers.items():
             for i in range(1,self.weeks+1):
-                availableLoad[i]+=dict['load'][i]
+                availableLoad[i]+=dict['dLoad']
        
         for week in range(1,self.weeks+1):
             if loadCheck[week]>availableLoad[week]:

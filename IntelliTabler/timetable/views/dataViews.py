@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from ..csp import *
 from django.http import HttpResponse
 from django.contrib import messages
+from ..toExcel import *
 
 
 ###Default Landing Page###
@@ -384,3 +385,5 @@ def departmentInfo(request, departmentId):
     timetables=Timetable.objects.filter(tableYear__department=department)
     context={'department':department, 'timetables':timetables}
     return render(request, 'data/departmentInfo.html', context)
+
+

@@ -13,7 +13,7 @@ var activePage;
 // })
 
 htmx.on("htmx:afterSwap", (e) => {
-    
+    console.log(e.detail.pathInfo.requestPath.split('/')[1]);
     if(e.detail.target.id=="displayChild"){
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
@@ -66,7 +66,6 @@ function enableTooltips(){
 
 
 htmx.on("htmx:beforeSwap", (e) => {
-    console.log(e);
     if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request') && e.detail.requestConfig.verb!="delete"){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
@@ -89,7 +88,6 @@ htmx.on("htmx:beforeSwap", (e) => {
         modal.hide();
         e.detail.shouldSwap = false;
     }
-    
 
     if(cData.calendarDiv && e.target.id=="mainContent"){
         cleanupCalendar();
@@ -321,39 +319,4 @@ $(document).on("successWithMessage", function(e) {
     </div>`
     $('#messageWrapper').append(html)
 });
-$(document).on("warningWithMessage", function(e) {
-    var message = e.detail.value;
-    var html= `<div class="alert alert-warning alert-dismissible" role="alert">
-    <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
-      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
-    </button>
-    ${message}
-    </div>`
-    $('#messageWrapper').append(html)
-});
 
-
-$(document).on("change", "input[type='checkbox']", function(){
-    // Enable all checkboxes first
-    $("input[type='checkbox']").prop('disabled', false);
-
-    // Check Class checkbox
-    if ($('#classTemplateCheck').prop('checked')) {
-        $("#scheduleTemplateCheck, #preferenceTemplateCheck, #assignTemplateCheck").prop('disabled', true);
-    }
-    
-    // Check Teacher checkbox
-    if ($('#teacherTemplateCheck').prop('checked')) {
-        $("#preferenceTemplateCheck, #assignTemplateCheck").prop('disabled', true);
-    }
-    
-    // Check Schedule checkbox
-    if ($('#scheduleTemplateCheck').prop('checked')) {
-        $("#classTemplateCheck").prop('disabled', true);
-    }
-    
-    // Check Preference or Assign checkbox
-    if ($('#preferenceTemplateCheck').prop('checked') || $('#assignTemplateCheck').prop('checked')) {
-        $("#classTemplateCheck, #teacherTemplateCheck").prop('disabled', true);
-    }
-});

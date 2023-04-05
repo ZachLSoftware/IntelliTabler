@@ -71,4 +71,8 @@ urlpatterns = [
     path('departmentInfo/<int:departmentId>', dataViews.departmentInfo, name='departmentInfo'),
     path('editDepartment/<int:departmentId>', formViews.editDepartment, name='editDepartment'),
     path('setDefaultTimetable/<int:yearId>/<int:timetableId>', formViews.setDefaultTimetable, name="setDefaultTimetable"),
+    path('templateBuilder/<int:timetableId>', formViews.templateBuilder, name='templateBuilder'),
+    path('templateBuilderInstructions/<int:timetableId>', formViews.templateBuilderInstructions, name='templateBuilderInstructions'),
+    path('templateBuilderDownload/<int:timetableId>/<str:choices>', formViews.templateBuilderDownload, name='templateBuilderDownload'),
+    path('uploadTest/<int:timetableId>', formViews.getTemplateFileTest, name="uploadTest")
     ]

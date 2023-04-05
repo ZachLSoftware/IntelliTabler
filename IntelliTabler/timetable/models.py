@@ -219,30 +219,49 @@ def updateModuleParent(sender, instance, **kwargs):
         g=ModuleGroup.objects.filter(parent=oldInstance).order_by('session').first()
         for mod in Module.objects.filter(group=g):
             mSharedKey[mod.lesson]=mod.sharedKey
+        
+        # if oldInstance.name!=instance.name:
+        #     groups=
         if oldInstance.numClasses<instance.numClasses:
             groups = ModuleGroup.objects.filter(parent=oldInstance, session__lte=instance.numPeriods)
             i=1
             for group in groups:
                 for j in range(oldInstance.numClasses+1, instance.numClasses+1):
                     if j not in mSharedKey.keys():
-                        mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                        mod = Module.objects.create(name=instance.name+"-"+str(j), lessonNum=1, lesson=j, group=group)
                         mSharedKey[j]=mod.sharedKey
                     else:
-                        mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group, sharedKey=mSharedKey[j])
+                        mod = Module.objects.create(name=instance.name+"-"+str(j), lessonNum=1, lesson=j, group=group, sharedKey=mSharedKey[j])
 
                 i+=1
+            lessonNum=1
+            mods=Module.objects.filter(group__parent_id=instance.id).order_by('group','group__session', 'lesson')
+            for mod in mods:
+                mod.lessonNum=lessonNum
+                lessonNum+=1
+                mod.save()
+
+
         if oldInstance.numPeriods<instance.numPeriods:
+            lessonNum=oldInstance.numPeriods*oldInstance.numClasses+1
             for i in range(oldInstance.numPeriods+1, instance.numPeriods+1):
                 group = ModuleGroup.objects.create(name=instance.name+" Lesson " + str(i), parent=instance, session=i)
                 for j in range(1, instance.numClasses+1):
-                    mod=Module.objects.create(name=instance.name+"-"+str(j), lesson=j, group=group)
+                    mod=Module.objects.create(name=instance.name+"-"+str(j), lessonNum=lessonNum, lesson=j, group=group)
                     mSharedKey[j]=mod.sharedKey
+                    lessonNum+=1
+
         if oldInstance.name!=instance.name:
             group=ModuleGroup.objects.filter(parent=oldInstance)
             for g in group:
-                split=g.name.split()
-                g.name=instance.name+ " " + split[1] + " " + split[2]
+                split=g.name.split(" Lesson ")
+                g.name=instance.name+ "  Lesson " + str(g.session)
                 g.save()
+                for module in Module.objects.filter(group=g):
+                    suffix=module.name.split(oldInstance.name)
+                    module.name=instance.name+suffix[1]
+                    module.save()
+
         if oldInstance.repeat!=instance.repeat:
             if instance.repeat:
                 sessions=instance.numPeriods/oldInstance.timetable.tableYear.department.format.numWeeks
@@ -283,9 +302,9 @@ class Preference(models.Model):
         REQUIRED=3
         HIGH=2
         MEDIUM=1
-        NEUTRAL=0
+        NONE=0
 
-    priority = models.IntegerField(choices=Priority.choices, default=Priority.NEUTRAL)
+    priority = models.IntegerField(choices=Priority.choices, default=Priority.NONE)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     timetable = models.ForeignKey(Timetable, on_delete=models.CASCADE)
