@@ -47,7 +47,10 @@ def displayDashboardContent(request, timetableId):
 
 def displayTimetableLanding(request, timetableId):
     timetable=Timetable.objects.get(id=timetableId)
-    return render(request, 'data/timetableLandingPage.html', {'timetable':timetable})
+    teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
+    classes=ModuleParent.objects.filter(timetable=timetable)
+    context={'timetable':timetable, 'teachers':teachers, 'classes':classes}
+    return render(request, 'data/timetableLandingPage.html', context)
 
 ###OLD MAY NEED TO BE REMOVED###
 @login_required
@@ -357,7 +360,7 @@ def cspTest(request, timetableA):
     # return render(request, 'forms/timetableWizard.html', {'timetable':t})
     
 def teacherPreferences(request, teacherId, timetableId):
-    preferences=Preference.objects.filter(teacher_id=teacherId, module__group__parent__timetable_id=timetableId).order_by("priority")
+    preferences=Preference.objects.filter(teacher_id=teacherId, module__group__parent__timetable_id=timetableId).order_by("module__group__parent","module__group__session")
     context={'preferences':preferences, 'teacherId':teacherId, 'timetableId':timetableId}
     return render(request, 'data/preferences.html', context)
 

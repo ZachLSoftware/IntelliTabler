@@ -480,7 +480,7 @@ def addPreference(request, teacherId, timetableId):
                 p.timetable_id=timetableId
                 p.priority=form.cleaned_data['priority']
                 p.save()
-            events={'preferenceChanged': "None"}
+            events={'preferenceChange': "None"}
             return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(events)})
     else:
         form=setPreferenceForm(parents)

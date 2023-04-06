@@ -1,10 +1,46 @@
 <h1 id="tableName"> {{timetable.name}} </h1>
 
 <h2 class="landing">Timetable at a Glance </h2>
-<button class="btn btn-primary-outline" hx-get="{% url 'addTimetable' timetable.tableYear.id timetable.id %}" hx-target="#addForm">Edit</button>
-<button class="btn btn-primary-outline" hx-get="{% url 'setDefaultTimetable' timetable.tableYear.id timetable.id %}" hx-target="this">default</button>
-<a class="btn btn-primary-outline" hx-get="{% url 'templateBuilderInstructions' timetable.id %}" hx-target="#addForm">test</a>
-<button class="btn btn-primary-outline" hx-get="{% url 'uploadTest' timetable.id %}" hx-target="#addForm" >test Upload</button>
-<a class="btn btn-primary-outline" href="{% url 'exportCalendar' timetable.id %}">CalendarTest</a>
+<div class="row justify-content-center">
+    <div id="infoBtnGroup" class="btn-group" role="group">
+        <button class="btn btn-primary-outline" hx-get="{% url 'addTimetable' timetable.tableYear.id timetable.id %}" hx-target="#addForm">Edit Timetable</button>
+        <button class="btn btn-primary-outline" hx-post="{% url 'setDefaultTimetable' timetable.tableYear.id timetable.id %}" 
+                hx-confirm="Set {{timetable.name}} as Default Timetable for {{timetable.tableYear.department.name}} {{timetable.tableYear.year}}?" 
+                hx-target="this">Set As Default Calendar
+        </button>
+        <button class="btn btn-primary-outline" hx-get="{% url 'templateBuilderInstructions' timetable.id %}" hx-target="#addForm">Export Excel Template</button>
+        <button class="btn btn-primary-outline" hx-get="{% url 'uploadTest' timetable.id %}" hx-target="#addForm" >Upload Excel Template</button>
+        <a class="btn btn-primary-outline" href="{% url 'exportCalendar' timetable.id %}">Export Calendar to Excel</a>
+    </div>
+</div>
 
-<button id="jquery_click_test">teacher click button </button>
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div id="teacherColumnLanding" class="col-2 justify-content-center">
+            <h1>Teachers</h1>
+            <div id="teacherBtnGroup" class="btn-group-vertical" role="group">
+        {% for teacher in teachers %}
+            <button class="btn btn-primary-outline teacherLanding" teacherId={{teacher.id}} timetableId={{timetable.id}}>{{teacher.name}}</button>
+        {% empty %}
+        <div class="row">
+            No teachers assigned
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+    <div id="classColumnLanding" class="col-2 justify-content-center">
+        <h1>Classes</h1>
+        <div id="classBtnGroup" class="btn-group-vertical" role="group">
+    {% for class in classes %}
+        <button class="btn btn-primary-outline classLanding" classId={{class.id}} timetableId={{timetable.id}}>{{class.name}}</button>
+    {% empty %}
+    <div class="row">
+        No teachers assigned
+    </div>
+    {% endfor %}
+    </div>
+</div>
+    </div>
+</div>
+
+{% comment %} <button id="jquery_click_test">teacher click button </button> {% endcomment %}

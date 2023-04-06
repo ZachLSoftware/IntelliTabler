@@ -380,47 +380,57 @@ def readFromCombing(timetable, ws):
     return True
 
 def exportCalendar(timetable, teacher=None):
-    if teacher:
-        classes=Module.objects.filter(group__parent__timetable=timetable, teacher=teacher, group__period__isnull=False, group__period__week=1).order_by('group', 'group__session', 'lesson')
-    else:
-        classes=ModuleGroup.objects.filter(parent__timetable=timetable, period__isnull=False, period__week=1).order_by('session')
-
     numPeriods=timetable.tableYear.department.format.numPeriods
-    
+    weeks=timetable.tableYear.department.format.numWeeks
     calendar = io.BytesIO()
     workbook=xlsxwriter.Workbook(calendar)
-    
 
-    worksheet=workbook.add_worksheet("Week 1")
-    x={'Mon':1, 'Tues':2, 'Wed':3, 'Thurs':4, 'Fri':5}
-    #worksheet.write_row(0, 1, header)
+    for week in range(1, weeks+1):
+        title=timetable.name + " Week " + str(week)
+        if teacher:
+            classes=Module.objects.filter(group__parent__timetable=timetable, teacher=teacher, group__period__isnull=False, group__period__week=week).order_by('group', 'group__session', 'lesson')
+            title=teacher.name + " - " + title
+        else:
+            classes=ModuleGroup.objects.filter(parent__timetable=timetable, period__isnull=False, period__week=week).order_by('session')
+        offset=3
+        
 
-    write_dict={}
-    wrap = workbook.add_format({'text_wrap': True})
-    if teacher:
+        worksheet=workbook.add_worksheet("Week "+str(week))
+        xLookup={'Mon':1, 'Tues':2, 'Wed':3, 'Thurs':4, 'Fri':5}
+        header_format = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
+
+        write_dict={}
+        cell_format = workbook.add_format({'font_size': 14, 'text_wrap': True,'align': 'center', 'valign': 'vcenter'})
+     
         for cl in classes:
-            coord=cl.group.period.name.split('-')
-            write_dict.setdefault((int(coord[1]),x[coord[0]]),'')
-            write_dict[(int(coord[1]),x[coord[0]])]+=(cl.name+'\n')
-    else:
-        for cl in classes:
-            coord=cl.period.name.split('-')
-            write_dict.setdefault((int(coord[1]),x[coord[0]]),'')
-            write_dict[(int(coord[1]),x[coord[0]])]+=(cl.name+'\n')
-    for k,v in write_dict.items():
-        worksheet.write(k[0],k[1], v, wrap)
-    for i in range(2,numPeriods+2):
-        row='A'+str(i)
-        worksheet.write_formula(row, str(i-1))
+            if teacher:
+                coord=cl.group.period.name.split('-')
+            else:
+                coord=cl.period.name.split('-')
+            y=int(coord[1])+offset
+            x=xLookup[coord[0]]+offset
+            write_dict.setdefault((y,x),'')
+            write_dict[(y,x)]+=(cl.name+'\n\n')
 
-    worksheet.set_column('B:F', 30)
-    worksheet.add_table('A1:F6', {'columns': [{'header': 'Period'},
-                                          {'header': 'Mon'},
-                                          {'header': 'Tues'},
-                                          {'header': 'Wed'},
-                                          {'header': 'Thurs'},
-                                          {'header': 'Fri'},
-                                          ]})
+        for k,v in write_dict.items():
+            worksheet.write(k[0],k[1], v, cell_format)
+        for i in range(1,numPeriods+1):
+            row=i+offset
+            worksheet.write_formula(row, offset, str(i), header_format)
+        
+        headers=[{'header': 'Period', 'header_format': header_format},
+                {'header': 'Mon', 'header_format': header_format},
+                {'header': 'Tues', 'header_format': header_format},
+                {'header': 'Wed', 'header_format': header_format},
+                {'header': 'Thurs','header_format': header_format},
+                {'header': 'Fri', 'header_format': header_format},
+                ]
+
+        title_format = workbook.add_format({'bold': True, 'font_size': 16, 'align': 'center', 'valign': 'vcenter', 'border': 1})
+        worksheet.merge_range(offset-2, offset, offset-2, offset+5, title, title_format)
+        worksheet.set_column(offset+1, offset+5, 30)
+        worksheet.set_row(offset-2, 30)
+        worksheet.add_table(offset,offset, offset+numPeriods, offset+5, {'columns': headers, 'autofilter':False, 'first_column':True, 'name':'CalWeek'+str(week)})
     
     workbook.close()
     return calendar.getvalue()

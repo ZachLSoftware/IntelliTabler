@@ -1,19 +1,26 @@
 const modal = new bootstrap.Modal(document.getElementById("addFormModal"));
 var cData ={};
 var activePage;
-// $(document).on("click", ".childButtons", function(){
-//     if($(this).hasClass("childButtons")){
-//         $(".childButtons").removeClass("active");
-//     }
-//     else{
-//         $("button").not(".parentButtons").not(".childButtons").removeClass("active");
-//     }
-    
-//     $(this).addClass("active");
-// })
+var classToggle=new Set();
+var currentClass;
+
+$(document).on("htmx:afterSettle", "#displayChild", (e) =>{
+    if(e.detail.pathInfo.requestPath.split('/')[1]=="getModules"){
+        if(e.detail.requestConfig.elt.id!="displayChild"){
+            classToggle= new Set();
+        }
+        classToggle.forEach(key => {
+            var id=key.id.split("Toggle")[0];
+            $(key).attr('aria-expanded','true');
+            $(`#table${id}`).addClass("show");
+            $(`#${id}Icon`).addClass("down");
+        });
+    }
+
+});
 
 htmx.on("htmx:afterSwap", (e) => {
-    
+  
     if(e.detail.target.id=="displayChild"){
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
@@ -66,7 +73,8 @@ function enableTooltips(){
 
 
 htmx.on("htmx:beforeSwap", (e) => {
-    console.log(e);
+    $('#progressLoaderTitle').fadeOut(250, function() {$('#progressLoaderTitle').remove();});
+    $('#generatingAnimation').fadeOut(250, function() {$('#generatingAnimation').remove(); $('#mainContent').fadeIn(250);});
     if(e.detail.target.id=="displayChild" && !$(e.detail.target).hasClass('htmx-request') && e.detail.requestConfig.verb!="delete"){
         if($('#displayChild').hasClass('show')){
             htmx.config.defaultSwapDelay=500;
@@ -100,13 +108,21 @@ htmx.on("htmx:beforeSwap", (e) => {
 })
 
 htmx.on('htmx:beforeSend', (e) => {
+    if($(e.detail.requestConfig.elt).hasClass("sidebar-link")){
+        $("#mainContent").hide();
+        html=`<div id="progressLoaderTitle"></div>
+        <div id="generatingAnimation"></div>`;
+        $("body").prepend(html);
+        $('#progressLoaderTitle').html("<h1>Loading...</h1>");
+        $('#generatingAnimation').addClass("progressLoader");
+    }
     if(($(e.target).hasClass('yearItem'))){
         $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
         $("#offcanvasLabel").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
     }
     if($(e.target).hasClass('childButtons')){
         if($(e.target).hasClass('moduleButtons')){
-            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('.')[0]+"/"+currentTimetable);
+            $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('Button')[0]+"/"+currentTimetable);
 
         }else{
             $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]+"/"+currentTimetable);
@@ -130,7 +146,6 @@ function cleanupCalendar(){
     for(var k in cData){
         delete cData[k];
     }
-    console.log(cData);
 }
 function cleanupCombing(){
     $(document).off("modUpdate");
@@ -141,7 +156,6 @@ function cleanupCombing(){
     for(var k in cData){
         delete cData[k];
     }
-    console.log(cData);  
 }
 
 htmx.on("hidden.bs.modal", () => {
@@ -170,10 +184,24 @@ function getChild(){
 }
 
 $(document).on("click", ".sidebar-link", function(){
-    activePage=this.id;
+    sidebarActiveLine(this);
+});
+
+$(document).on("click", ".list-link", function(){
+    listActiveLine(this);
+});
+
+
+function sidebarActiveLine(el){
+    activePage=el.id;
     $(".sidebar-link").parent().removeClass("border-bottom");
-    $(this).parent().addClass("border-bottom");
-})
+    $(el).parent().addClass("border-bottom");
+}
+
+function listActiveLine(el){
+    $(".list-link").parent().removeClass("border-bottom");
+    $(el).parent().addClass("border-bottom");
+}
 
 let prevWidth = 0;
 sidebar= document.getElementById("sidebar")
@@ -282,10 +310,22 @@ $(document).on("DepartmentDeleted", function(){
     location.reload();
 });
 
-$(document).on("click", "#jquery_click_test", function(){
-    htmx.ajax('GET', "/getSidebar/teacher/154724230151", "#mainContent").then(() => {
-        htmx.ajax('GET', "/getTeacher/700632503056/154724230151", "#displayChild");
+$(document).on("click", ".teacherLanding", function(){
+    var timetableId=$(this).attr('timetableId')
+    var teacherId=$(this).attr('teacherId')
+    htmx.ajax('GET', `/getSidebar/teacher/${timetableId}`, "#mainContent").then(() => {
+        htmx.ajax('GET', `/getTeacher/${teacherId}/${timetableId}`, "#displayChild").then(() => {listActiveLine($(`#${teacherId}Button`))});
     });
+    sidebarActiveLine($('#teacher'))
+})
+
+$(document).on("click", ".classLanding", function(){
+    var timetableId=$(this).attr('timetableId')
+    var classId=$(this).attr('classId')
+    htmx.ajax('GET', `/getSidebar/moduleParent/${timetableId}`, "#mainContent").then(() => {
+        htmx.ajax('GET', `/getModules/${classId}/${timetableId}`, "#displayChild").then(() => {listActiveLine($(`#${classId}Button`))});
+    });
+    sidebarActiveLine($('#class'))
 })
 
 $(document).on("TimetableDeleted timetableAdded", function(e){
@@ -355,5 +395,14 @@ $(document).on("change", "input[type='checkbox']", function(){
     // Check Preference or Assign checkbox
     if ($('#preferenceTemplateCheck').prop('checked') || $('#assignTemplateCheck').prop('checked')) {
         $("#classTemplateCheck, #teacherTemplateCheck").prop('disabled', true);
+    }
+});
+
+$(document).on("click", ".classCard", function(){
+    if($(this).hasClass("collapsed")){
+        classToggle.delete(this);
+    }
+    else{
+        classToggle.add(this);
     }
 });

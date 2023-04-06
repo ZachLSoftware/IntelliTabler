@@ -319,4 +319,3 @@ $(document).on("successWithMessage", function(e) {
     </div>`
     $('#messageWrapper').append(html)
 });
-

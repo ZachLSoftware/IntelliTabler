@@ -1,11 +1,11 @@
 {% load customTags %}
 <ul id="contentSidebar" class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
 <li class="nav-item">
-  <a id='new{{type}}' class="nav-link align-middle px-0 sidebar-link" hx-get="{% url addPath addId %}" hx-target="#addForm">New {{type}}</a>
+  <a id='new{{type}}' class="nav-link align-middle px-0 list-link" hx-get="{% url addPath addId %}" hx-target="#addForm">New {{type}}</a>
 </li>
 {% for t in objects %}
 <li class="nav-item">
-  <a id="{{t.id}}.button"  hx-get="{% url detailPath t.id timetable.id %}" hx-target="#displayChild" class="nav-link align-middle px-0 sidebar-link childButtons {{type}}Buttons">{{t.name}}</a>
+  <a id="{{t.id}}Button"  hx-get="{% url detailPath t.id timetable.id %}" hx-target="#displayChild" class="nav-link align-middle px-0 list-link childButtons {{type}}Buttons">{{t.name}}</a>
 </li>
 {%endfor%}
 </ul>

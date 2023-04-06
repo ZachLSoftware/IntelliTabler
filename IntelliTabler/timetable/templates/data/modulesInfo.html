@@ -29,9 +29,8 @@
         <div class="row">
             <div class="col">
                 <h4>
-                <div id="classCard" class="text-decoration-none rotateLink" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
-                    {{k.name}} <i class="fa-solid fa-square-caret-down rotate"></i>
-                
+                <div id="{{k.id}}Toggle" class="text-decoration-none rotateLink classCard" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
+                    {{k.name}} <i id="{{k.id}}Icon" class="fa-solid fa-square-caret-down rotate"></i>
                 <span>
                 Timeslot: 
                 {% if k.period is null%}
