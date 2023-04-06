@@ -74,5 +74,7 @@ urlpatterns = [
     path('templateBuilder/<int:timetableId>', formViews.templateBuilder, name='templateBuilder'),
     path('templateBuilderInstructions/<int:timetableId>', formViews.templateBuilderInstructions, name='templateBuilderInstructions'),
     path('templateBuilderDownload/<int:timetableId>/<str:choices>', formViews.templateBuilderDownload, name='templateBuilderDownload'),
-    path('uploadTest/<int:timetableId>', formViews.getTemplateFileTest, name="uploadTest")
+    path('uploadTest/<int:timetableId>', formViews.getTemplateFileTest, name="uploadTest"),
+    path('exportCalendar/<int:timetableId>', dataViews.exportCalendarView, name='exportCalendar'),
+    path('exportCalendar/<int:timetableId>/<int:teacherId>', dataViews.exportCalendarView, name='exportCalendar'),
     ]

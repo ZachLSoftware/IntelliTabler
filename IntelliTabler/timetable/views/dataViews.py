@@ -386,4 +386,13 @@ def departmentInfo(request, departmentId):
     context={'department':department, 'timetables':timetables}
     return render(request, 'data/departmentInfo.html', context)
 
-
+def exportCalendarView(request, timetableId, teacherId=None):
+        timetable=Timetable.objects.get(id=timetableId)
+        if teacherId:
+            teacher=Teacher.objects.get(id=teacherId)
+        else:
+            teacher=None
+        calendar=exportCalendar(timetable, teacher)
+        response = HttpResponse(calendar,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=calendar.xlsx'
+        return response
