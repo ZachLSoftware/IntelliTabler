@@ -109,12 +109,14 @@ htmx.on("htmx:beforeSwap", (e) => {
 
 htmx.on('htmx:beforeSend', (e) => {
     if($(e.detail.requestConfig.elt).hasClass("sidebar-link")){
-        $("#mainContent").hide();
-        html=`<div id="progressLoaderTitle"></div>
-        <div id="generatingAnimation"></div>`;
-        $("body").prepend(html);
-        $('#progressLoaderTitle').html("<h1>Loading...</h1>");
-        $('#generatingAnimation').addClass("progressLoader");
+        if($('#progressLoaderTitle').length < 1){
+            $("#mainContent").hide();
+            html=`<div id="progressLoaderTitle"></div>
+            <div id="generatingAnimation"></div>`;
+            $("body").prepend(html);
+            $('#progressLoaderTitle').html("<h1>Loading...</h1>");
+            $('#generatingAnimation').addClass("progressLoader");
+        }
     }
     if(($(e.target).hasClass('yearItem'))){
         $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());

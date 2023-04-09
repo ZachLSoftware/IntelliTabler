@@ -6,6 +6,7 @@
             <button type="button" class="btn btn-primary-outline border" hx-get="{% url 'setAvailability' teacher.id %}" hx-target="#availability">Set Availability</button>
             <button type="button" class="btn btn-primary-outline border" data-bs-toggle="collapse" data-bs-target="#preferences" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="#preferences">Set Preferences</button>
             <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#teacherCal" aria-expanded="false" aria-controls="teacherCal">View Calendar</button>
+            <a class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable teacher.id %}">Export Calendar to Excel</a>
             <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#assignments" aria-expanded="false" aria-controls="assignments">View Modules</button>
             <a type="button" class="btn btn-danger border" hx-delete="{% url 'deleteObject' 'Teacher' teacher.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Teacher</a>
         </div>
@@ -84,6 +85,8 @@
             </table>
         </div>
         <div id="availability" class="collapse"></div>
-        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this"></div>
+        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this">
+            
+        </div>
             
 {% endif %}

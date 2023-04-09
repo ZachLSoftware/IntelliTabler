@@ -116,21 +116,15 @@
               </span>
             </a>
             <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-
+    
               {% if user.is_authenticated %}
-                <li class="dropdown-item dropdown">
-                    <a id="themeDropdown" class="dropdown-item dropdown-toggle align-middle px-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Change theme
-                    </a>
-                    <ul class="dropdown-menu dropdown-submenu" aria-labelledby="themeDropdown">
+
                         <li>
-                            <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light</a>
+                            <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light Theme</a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark</a>
+                            <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark Theme</a>
                         </li>
-                    </ul>
-                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" id="Logout" href="{% url 'logout' %}">Logout</a></li>
               {% else %}

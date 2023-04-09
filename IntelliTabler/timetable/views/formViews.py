@@ -513,8 +513,9 @@ def getTemplateFileTest(request, timetableId):
     return render(request, 'forms/modalForm.html', {'form':form})
 
 def templateBuilderInstructions(request, timetableId):
-
     return render(request, 'data/templateInstructions.html', {'timetableId':timetableId})
+
+
 def templateBuilder(request, timetableId):
     if request.method=='POST':
 

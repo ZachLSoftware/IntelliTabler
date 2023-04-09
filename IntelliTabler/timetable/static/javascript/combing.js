@@ -9,6 +9,10 @@ function setupChart(){
         refreshClickListeners();
         enableTooltips();
     }
+
+    $(".combingTableMod").each(function(){
+        $(this).css("color", getTextColor($(this).attr("bgcolor")));
+    });
 }
 function addCombEvent(mod){
     $(mod.session).append(`<div id="${mod.id}Div" session="${mod.session}" class="modDiv d-grid">

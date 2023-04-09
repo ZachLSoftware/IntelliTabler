@@ -70,7 +70,7 @@
             <tbody>
                 {% for module in parents %}
                 <tr>
-                <td style="background-color: {{module.color}}">{{module.name}}</td>
+                <td class="combingTableMod" bgcolor="{{module.color}}" style="background-color: {{module.color}}">{{module.name}}</td>
                 <td>{{module.numPeriods}}</td>
                 <td>{{module.numClasses}}</td>
                 <td id="{{module.id}}Total">{{module.numPeriods|mul:module.numClasses}}</td>
@@ -91,7 +91,7 @@
             <th >Load per Week</th>
             <th >Total Load</th>
             {% for module in parents %}
-            <th  style="background-color: {{module.color}} !important;">{{module.name}}</th>
+            <th  class="combingTableMod" bgcolor="{{module.color}}" style="background-color: {{module.color}} !important;">{{module.name}}</th>
             {%endfor%}
 
             {% with weeks=teachers.0.department.format.numWeeks %}
