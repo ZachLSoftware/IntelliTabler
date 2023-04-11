@@ -75,13 +75,15 @@
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
     
                   {% if user.is_authenticated %}
-
+                      {% if user.theme == "dark" %}
                             <li>
                                 <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light Theme</a>
                             </li>
+                      {% else %}
                             <li>
                                 <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark Theme</a>
                             </li>
+                      {% endif %}
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" id="Logout" href="{% url 'logout' %}">Logout</a></li>
                   {% else %}

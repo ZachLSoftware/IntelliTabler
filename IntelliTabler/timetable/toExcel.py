@@ -2,6 +2,7 @@ from .models import *
 import tempfile
 import pandas as pd
 from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 import xlsxwriter
 import io
 import numpy as np
@@ -274,7 +275,7 @@ def assignmentsTemplateReader(timetable, assignmentDF):
                 continue
     return True
 
-def combingTemplate(timetable):
+def combingTemplateBuilder(timetable):
     import os
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     file_path = os.path.join(BASE_DIR, 'static', 'excel_templates', 'combingTemplate.xlsx')
@@ -298,9 +299,12 @@ def combingTemplate(timetable):
     
     for cl in classes:
         classes_sheet.append([cl.name, cl.numPeriods, cl.numClasses])
-
+        
     for mod in modules:
         assignments_sheet.append([mod.teacher.name, mod.group.period.dayNum, mod.name])
+        cell=assignments_sheet.cell(row=assignments_sheet.max_row, column=3)
+        cell.fill=PatternFill(fill_type='solid', start_color=mod.group.parent.color.split('#')[1])
+        
 
     file = io.BytesIO()
     workbook.save(file)

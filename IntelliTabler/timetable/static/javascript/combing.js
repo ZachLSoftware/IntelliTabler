@@ -14,6 +14,7 @@ function setupChart(){
         $(this).css("color", getTextColor($(this).attr("bgcolor")));
     });
 }
+
 function addCombEvent(mod){
     $(mod.session).append(`<div id="${mod.id}Div" session="${mod.session}" class="modDiv d-grid">
                                     <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
@@ -72,6 +73,15 @@ function checkAssignment(cellId){
 function setTeacherAllocTotal(teachers, parents){
     updateSet=new Set();
     teachers.forEach(function(teacher){
+        let modTotal=$(`#${teacher}Row`).find(`.mod`).length
+        let tLoad=parseInt($(`#${teacher}TotalLoad`).text())
+        $(`#${teacher}LoadChart`).text(tLoad-modTotal);
+        if((tLoad-modTotal)<0){
+            $(`#${teacher}LoadChart`).addClass("bg-danger");
+        }
+        else{
+            $(`#${teacher}LoadChart`).removeClass("bg-danger");
+        }
         parents.forEach(function(parent){
             let cTotal=$(`#${teacher}Row`).find(`.${parent}Class`).length
             $(`#${teacher}alloc${parent}`).text(cTotal);
@@ -79,12 +89,19 @@ function setTeacherAllocTotal(teachers, parents){
         })
         
         for(let i=1; i<=cData.numWeeks; i++){
-        tTotal=$(`#${teacher}Row`).find(`.week${i}`).length
-        load=parseInt($(`#${teacher}Load`).text());
-        $(`#${teacher}Allocated-${i}`).text(tTotal);
-        $(`#${teacher}Rem-${i}`).text(load-tTotal);
-        updateSet.add(`#${teacher}Rem-${i}`);
-        updateSet.add(`#${teacher}Allocated-${i}`);
+            tTotal=$(`#${teacher}Row`).find(`.week${i}`).length
+            load=parseInt($(`#${teacher}Load`).text());
+            if((load-tTotal)<0){
+                $(`#${teacher}Rem-${i}`).addClass("bg-danger");
+            }
+            else{
+                $(`#${teacher}Rem-${i}`).removeClass("bg-danger");
+            }
+
+            $(`#${teacher}Allocated-${i}`).text(tTotal);
+            $(`#${teacher}Rem-${i}`).text(load-tTotal);
+            updateSet.add(`#${teacher}Rem-${i}`);
+            updateSet.add(`#${teacher}Allocated-${i}`);
         }
     
     });

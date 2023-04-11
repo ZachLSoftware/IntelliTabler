@@ -101,11 +101,11 @@ html, body {
   transition: all .25s linear;
 }
 
-.rotate.down{
-  -ms-transform: rotate(180deg);
-  -moz-transform: rotate(180deg);
-  -webkit-transform: rotate(180deg);
-  transform: rotate(180deg);
+.rotate.expand{
+  -ms-transform: rotate(-180deg);
+  -moz-transform: rotate(-180deg);
+  -webkit-transform: rotate(-180deg);
+  transform: rotate(-180deg);
 }
 
 #messageWrapper {
@@ -163,7 +163,7 @@ html, body {
 }
 
 .moduleTable td{
-  font-size: x-large;
+  font-size: large;
 }
 
 #infoBtnGroup {
@@ -175,6 +175,10 @@ html, body {
   padding-right: 10%;
 }
 
-/* #teacherColumnLanding {
-  padding-right: 25%;
-} */
+.classItems.hideClass {
+  display:none;
+}
+
+.classHeader {
+  cursor: pointer;
+}

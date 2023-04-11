@@ -1,4 +1,5 @@
 {% load mathfilters %}
+{% load customTags %}
 {%if teacher is not None %}
     <div class="row justify-content-center">
         <div id="infoBtnGroup" class="btn-group" role="group">
@@ -6,83 +7,118 @@
             <button type="button" class="btn btn-primary-outline border" hx-get="{% url 'setAvailability' teacher.id %}" hx-target="#availability">Set Availability</button>
             <button type="button" class="btn btn-primary-outline border" data-bs-toggle="collapse" data-bs-target="#preferences" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="#preferences">Set Preferences</button>
             <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#teacherCal" aria-expanded="false" aria-controls="teacherCal">View Calendar</button>
-            <a class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable teacher.id %}">Export Calendar to Excel</a>
-            <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#assignments" aria-expanded="false" aria-controls="assignments">View Modules</button>
+            <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#assignments" aria-expanded="false" aria-controls="assignments">View Classes</button>
             <a type="button" class="btn btn-danger border" hx-delete="{% url 'deleteObject' 'Teacher' teacher.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Teacher</a>
         </div>
     </div>
-    <div id="teacherInfoCont" class="container">
-    <div class="row justify-content-center mt-2">
-        <div class="col-4 border border-end-0">
-            Teacher:
-        </div>
-        <div class="col-4 border border-start-0">
-            {{teacher.name}}
-        </div>
-        </div>
+    <div id="teacherInfoCont" class="container" >
         <div class="row justify-content-center">
-        <div class="col-4 border border-end-0">
-            Total Load:
-        </div>
-        <div class="col-4 border border-start-0">
-            {{teacher.load}}
-        </div>
+        <div id="infoTable" class="col-4 pt-4">
+        <table class="table table-sm">
+            <th colspan="2" class="rotateLink" data-bs-toggle="collapse" data-bs-target="#teacherInfoBody" role="button" aria-expanded="true" aria-controls="teacherInfoBody">
+                Teacher Information <i id="infoIcon" class="fa-solid fa-angle-down rotate expand"></i>
+            </th>
+            <tbody id="teacherInfoBody" class="collapse show">
+            <tr>
+                <td>
+                Teacher:
+                </td>
+            <td>
+                {{teacher.name}}
+            </td>
+            </tr>
+            <tr>
+            <td>
+                Load Per Week:
+            </td>
+            <td>
+                {{ teacher.load }}
+            </td>
+            </tr>
+            <tr>
+            <td>
+                Total Load:
+            </td>
+            <td>
+                {{ teacher.load|mul:teacher.department.format.numWeeks }}
+            </td>
+        </tr>
+        {% with modules|length as assigned %}
+        <tr>
+            <td>
+                Total Assigned Load:
+            </td>
+            <td>
+                {{assigned}}
+            </td>
+        </tr>
+            <tr>
+            <td>
+                Remaining Load:
+            </td>
+            <td>
+                {{teacher.load|mul:teacher.department.format.numWeeks|sub:assigned}}
+                
+            </td>
+        </tr>
+        {% endwith %}
+            <tr>
+                <td>
+                    Room:
+                </td>
+                <td>
+                    {{teacher.roomNum}}
+                </td>
+            </tr>
+        </body>
+        </table>
     </div>
-    {% with modules|length as assigned %}
+</div>
+<div class="row justify-content-center">
     <div class="row justify-content-center">
-        <div class="col-4 border border-end-0">
-            Total Assigned Load:
-        </div>
-        <div class="col-4 border border-start-0">
-            {{assigned}}
-        </div>
-    </div>
-        <div class="row justify-content-center">
-        <div class="col-4 border border-end-0">
-            Remaining Load:
-        </div>
-        <div class="col-4 border border-start-0">
-            {{teacher.load|sub:assigned}}
-            
-        </div>
-    </div>
-    {% endwith %}
-        <div class="row justify-content-center">
-            <div class="col-4 border border-end-0">
-                Room:
-            </div>
-            <div class="col-4 border border-start-0">
-                {{teacher.roomNum}}
-            </div>
-        </div>
+    <div class="col">
         <div id="preferences" hx-trigger="preferenceChange from:body" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="this" class="row justify-content-center mt-3 collapse">
         </div>
+    </div>
+</div>
         <div id="assignments" class="row justify-content-center mt-3 collapse">
-            {% comment %} <div class="btn-group" role="group"> {% endcomment %}
-            {% comment %} {% for year, mods in modules.items %}
-            <button class="btn btn-primary-outline" data-bs-toggle="collapse" data-bs-target="#table{{year}}" >{{year}}</button>
-            {% endfor %}
-            </div>
-            {% for year, mods in modules.items %}
-            <div id="table{{year}}" class="collapse" data-bs-parent="#assignments">
-            <a type="button" class="btn btn-primary-outline m-2" href="{% url 'calendarView' mods.0.group.parent.year.id teacher.id %}">View Calendar for {{year}}</a> {% endcomment %}
+            <div class="col-4">
             <table class="table">
-                <th>Assigned Modules</th>
-                <th>Week</th>
-                <th>Period</th>
-                {% for mod in modules %}
-                <tr>
+                <thead>
+                    <th>Assigned Modules</th>
+                    <th>Week</th>
+                    <th>Period</th>
+                </thead>
+                <tbody>
+                {% for k,v in modules.items %}
+                    <tr>
+                        <td class="classHeader rotateLink" data-target="#{{k.id}}Classes" colspan="3"
+                        style="background-color: {{k.color}}; color: {{k.color|getTextColor}};">
+                            {{k.name}} <i id="infoIcon" class="fa-solid fa-angle-down rotate"></i>
+                        </td>
+                        <td style="border: none;">
+                            <a class="btn btn-primary-outline border classLanding" classId={{k.id}} timetableId={{timetable}}>Class Info</button>
+                        </td>
+                    </tr>
+                <tbody id="{{k.id}}Classes" class="classItems hideClass">
+                {% for mod in v %}
+                <tr >
                     <td>{{mod.name}}</td>
                     <td>{{mod.group.period.week}}</td>
                     <td>{{mod.group.period.name}}</td>
                 </tr>
+                {% endfor %}
+            </tbody>
+            </tbody>
                 
                 {% empty %}
                 <tr>
                     <td>None assigned</td>
                 </tr>
                 {% endfor %}
+            </tbody>
             </table>
+        </div>
         </div>
         <div id="availability" class="collapse"></div>
         <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this">

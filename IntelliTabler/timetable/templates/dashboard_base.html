@@ -118,13 +118,15 @@
             <ul class="dropdown-menu" aria-labelledby="profileDropdown">
     
               {% if user.is_authenticated %}
-
-                        <li>
-                            <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light Theme</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark Theme</a>
-                        </li>
+                {% if user.theme == "dark" %}
+                  <li>
+                      <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light Theme</a>
+                  </li>
+                  {% else %}
+                  <li>
+                      <a class="dropdown-item" href='{% url "changeTheme" "dark"%}'>Dark Theme</a>
+                  </li>
+                {% endif %}
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" id="Logout" href="{% url 'logout' %}">Logout</a></li>
               {% else %}
@@ -146,7 +148,11 @@
 
         {% block content %}
         <div id="mainContent" class="me-auto ">
-          Please select a department
+          <div class="container text-center">
+            <h1> Intellitabler </h1>
+            <h3> Welcome {{request.user.username}} </h3>
+            <p>Please select a department to get started Timetabling!</p>
+          </div>
         </div>
         {% endblock %}
 

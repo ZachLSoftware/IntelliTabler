@@ -21,16 +21,17 @@
     </div>
     </div>
 </div>
-<div id="classTables" class="container justify-content-center"> 
+<div id="classTables" class="container"> 
+    <div class="row justify-content-center">
 {% for k,v in modules.items %}
 
-<table id={{k.id}} class="table caption-top moduleTable">
+
+<table id={{k.id}} class="table caption-top moduleTable" style="max-width:70%;">
     <caption>
         <div class="row">
-            <div class="col">
-                <h4>
+            <div class="col-8 text-end fs-4">
                 <div id="{{k.id}}Toggle" class="text-decoration-none rotateLink classCard" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
-                    {{k.name}} <i id="{{k.id}}Icon" class="fa-solid fa-square-caret-down rotate"></i>
+                    {{k.name}} <i id="{{k.id}}Icon" class="fa-solid fa-angle-down rotate"></i>
                 <span>
                 Timeslot: 
                 {% if k.period is null%}
@@ -40,10 +41,9 @@
                 {%endif%}
                 </span>
                 </div>
-            </h4>
             </div>
-            <div class="col">
-                <button id="assignPeriod" class='btn btn-primary-outline align-end' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> add/edit Period</button>
+            <div class="col-2">
+                <button class='btn btn-primary-outline' hx-get="{% url 'assignPeriod' k.parent.department.id k.id %}" hx-target="#addForm"> Edit Period</button>
             </div>
         </div>
 </caption>
@@ -58,9 +58,12 @@
         {% if mod.teacher is null %}
         <td>None</td>
         {% else %}
-        <td>{{mod.teacher.name}}</td>
+        <td>
+            <button class="btn btn-primary-outline border teacherLanding" teacherId={{mod.teacher.id}} timetableId={{parent.timetable.id}}
+            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View {{mod.teacher.name}} Information">{{mod.teacher.name}}</button>
+        </td>
         {% endif %}
-        <td class="editBtnCol"><button class='btn btn-primary-outline' hx-get="{% url 'assignTeacher' mod.group.parent.department.id mod.id %}" hx-target="#addForm"> add/edit Teacher</button></td>
+        <td class="editBtnCol"><button class='btn btn-primary-outline' hx-get="{% url 'assignTeacher' mod.group.parent.department.id mod.id %}" hx-target="#addForm"> Edit Teacher</button></td>
     </tr>
     {% endfor %}
 </tbody>
@@ -68,4 +71,5 @@
 {%empty%}
 No modules
 {%endfor%}
+</div>
 </div>

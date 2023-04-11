@@ -13,14 +13,14 @@ $(document).on("htmx:afterSettle", "#displayChild", (e) =>{
             var id=key.id.split("Toggle")[0];
             $(key).attr('aria-expanded','true');
             $(`#table${id}`).addClass("show");
-            $(`#${id}Icon`).addClass("down");
+            $(`#${id}Icon`).addClass("expand");
         });
     }
 
 });
 
 htmx.on("htmx:afterSwap", (e) => {
-  
+    enableTooltips();
     if(e.detail.target.id=="displayChild"){
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
@@ -241,7 +241,7 @@ $(document).on('TeacherDeleted', function(e){
 });
 
 $(document).on("click", ".rotateLink", function(){
-    $(this).children("i").toggleClass("down"); 
+    $(this).children("i").toggleClass("expand"); 
 });
 
 $(document).on("change", "#parentChoice", function(){
@@ -334,6 +334,7 @@ $(document).on("TimetableDeleted timetableAdded", function(e){
         url="/displayDashboardContent/"+e.detail.value;
         htmx.ajax('GET',url, "#sidebarBody")
 })
+
 $(document).on("departmentAdded yearAdded", function(e){
     url="/displayDashboardContent/"+e.detail.tableId;
     htmx.ajax('GET',url, "#sidebarBody")
@@ -407,4 +408,9 @@ $(document).on("click", ".classCard", function(){
     else{
         classToggle.add(this);
     }
+});
+
+$(document).on("click", ".classHeader", function(){
+    target=$(this).attr("data-target");
+    $(target).toggleClass("hideClass");
 });

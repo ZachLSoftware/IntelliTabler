@@ -7,8 +7,29 @@
         teacher:parseInt({{teacher}})
     }
 </script>
-<h1 style="text-align:center">{{title}}</h1>
-<h1 id="title" style="text-align: center">Calendar </h1>
+<div class="container">
+    <div class="row text-center">
+        <div class="col">
+        <h1>{{title}} </h1>
+        </div>
+    </div>
+    <div class="row text-center">
+        {% if teacher %}
+        <div class="col">
+            <button class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable teacher%}">Export Calendar to Excel</button>
+        </div>
+        {% else %}
+        <div class="col">
+            <button class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable %}">Export Calendar to Excel</button>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row text-center">
+        <div class="col">
+        <h1 id="title">Calendar </h1>
+        </div>
+    </div>
+</div>
 <button id="previous" class='fas fa-arrow-alt-circle-left m-4 arrows' style='width: 40px; font-size:36px; float: left;'></button>
 <button id="next" class='fas fa-arrow-alt-circle-right m-4 arrows' style='width: 40px; font-size:36px; float: right;'></button>
 <div id="calendarWrapper">

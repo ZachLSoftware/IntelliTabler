@@ -13,7 +13,7 @@ var activePage;
 // })
 
 htmx.on("htmx:afterSwap", (e) => {
-    console.log(e.detail.pathInfo.requestPath.split('/')[1]);
+    
     if(e.detail.target.id=="displayChild"){
         $('#displayChild').collapse('show');
         htmx.config.defaultSwapDelay=0;
@@ -51,8 +51,6 @@ htmx.on("htmx:afterSwap", (e) => {
             setGroupChoice();
         }
         //Enables Tooltips
-        enableTooltips();
-
         modal.show();
     }
     

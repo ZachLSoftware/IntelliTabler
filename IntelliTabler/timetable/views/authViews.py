@@ -11,15 +11,23 @@ from django.utils.encoding import force_bytes, force_str
 from ..tokens import account_activation_token
 from django.contrib import messages
 
+
+"""Registration Page. Creates an 
+   activation token and emails after registration."""
 def register(request):
+
     context={}
     
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
+
+            #Create a user and deactivate account
             user = form.save(commit=False)
             user.is_active=False
             user.save()
+
+            #Get details for activation email
             current_site = get_current_site(request)
             mail_subject = 'Activate your IntelliTabler account.'
             message = render_to_string('auth_templates/acc_active_email.html', {
@@ -29,16 +37,24 @@ def register(request):
                 'token':account_activation_token.make_token(user),
                 'protocol': 'https' if request.is_secure() else 'http'
             })
+
+            #Email the activation email
             to_email = form.cleaned_data.get('email')
             email = EmailMessage(
                         mail_subject, message, to=[to_email]
             )
+
+            #If successful
             if email.send():
                 username = form.cleaned_data.get('username')
                 messages.success(request, f"{username}, Please check your email for to confirm your account.")
+            
+            #Else report error to user
             else:
                 message.error(request, f'Problem sending email')
             return redirect('login')
+        
+        #If form errors send form back to user
         else:
             context["form"] = form
     else:
@@ -46,21 +62,27 @@ def register(request):
         context['form']=form
     return render(request, 'auth_templates/register.html', context)
 
+"""Activation View. Checks token from link and activates corresponding user account"""
 def activate(request, uidb64, token):
+
+    #Try decoding activation token and get user
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+    
+    #If user exists and token is valid, activate account
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
-        # return redirect('home')
+
         messages.success(request, 'Thank you for your email confirmation. Now you can login your account.')
         return redirect('login')
     else:
         messages.error(request, "Activation Link is Invalid")
         return redirect('index')
+
 
 def logout_view(request):
     logout(request)
@@ -76,13 +98,17 @@ def successPage(request):
         messages.info(request, "You have successfully Logged Out.")
     return render(request, 'index.html')
 
-
+"""Password reset view. Takes an email from a user, if user exists an email will be sent"""
 def passwordReset(request):
     if request.method=="POST":
         form = passwordResetForm(request.POST)
         if form.is_valid():
+
+            #Check if user exists with email
             user_email = form.cleaned_data['email']
             user= User.objects.filter(email=user_email).first()
+
+            #Create email and send
             if user:
                 current_site = get_current_site(request)
                 mail_subject = 'Reset your IntelliTabler account password.'
@@ -101,12 +127,15 @@ def passwordReset(request):
                     pass
                 else:
                     message.error(request, f'Problem sending email')
+
+        #Never sends error message to avoid someone checking for accounts that exist.
         messages.success(request, "If your account exists, you will recieve a link to reset your password.")
         return redirect('login')
     form = passwordResetForm()
     return render(request, "auth_templates/password_reset.html", {"form":form})
 
 
+"""Recieves token from url and allows user to reset their password."""
 def passwordResetConfirm(request, uidb64, token):
     uid = force_str(urlsafe_base64_decode(uidb64))
     try:

@@ -21,3 +21,28 @@
 /* td, th {
     width: 50px;
 } */
+
+
+#combingChart {
+    border-collapse: separate;
+    border-spacing: 0px;
+}
+.firstCol {
+    position:sticky;
+    left:0;
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+    z-index:100;
+}
+
+
+.secCol
+{
+    position:sticky;
+    width:55px;
+    min-width:55px;
+    max-width:55px;   
+    left: 85px;
+    z-index:100;
+}

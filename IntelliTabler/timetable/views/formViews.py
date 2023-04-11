@@ -416,9 +416,12 @@ def changeColor(request, parentId):
     return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
 
 def changeTheme(request, theme):
-    request.user.theme=theme
-    request.user.save()
-    return redirect('dashboard')
+    if theme != request.user.theme:
+        request.user.theme=theme
+        request.user.save()
+        return redirect('dashboard')
+    else:
+        return HttpResponse(status=204)
 
 
 def addTimetable(request, yearId, timetableId=0):

@@ -35,23 +35,26 @@
     data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Order the chart based on period">
     Order by Period 
 </button>
+<a class="btn btn-primary-outline border" href="{% url 'exportCombing' timetableId %}">Export to Excel</a>
 </div>
 </div>
 <table id="combingChart" class="table m-3">
-    <th>Teachers</th>
-    <th>Load</th>
+    <th class="firstCol">Teachers</th>
+    <th class="secCol">Load</th>
     {% for k,v in periods.items %}
     <th style="text-align:center">{{k}}</th>
     {% endfor %}
+    <tbody>
     {% for t in teachers %}
     <tr id="{{t.id}}Row" class="teacherRow">
-        <td><button class="btn btn-primary-outline border" hx-get="{% url 'assignTeacherCombing' t.id timetableId %}" hx-target="#addForm">{{t.name}}</button></td>
-        <td>{{t.load}}</td>
+        <td class="firstCol"><button class="btn btn-primary-outline border" hx-get="{% url 'assignTeacherCombing' t.id timetableId %}" hx-target="#addForm">{{t.name}}</button></td>
+        <td id="{{t.id}}LoadChart" class="secCol">{{t.load|mul:numWeeks}}</td>
         {% for p,v in periods.items %}
         <td id="{{t.id}}x{{v.name}}-{{v.week}}" class="cell"></td>
         {% endfor %}
     </tr>
     {% endfor %}
+</tbody>
 </table>
 {% else %}
 <h1>Cannot build chart - No teachers or classes created</h1>
@@ -59,7 +62,7 @@
 {% endif %}
 </div>
 <div class="row m-5">
-    <div id="moduleAssignments" class="col">
+    <div id="moduleAssignments" class="col overflow-scroll">
         {% if parents %}
         <table id="allocatedTable" class="table" style="max-width: 75%;">
             <th >Class</th>
@@ -104,7 +107,7 @@
                 <tr>
                 <td>{{t.name}}</td>
                 <td id="{{t.id}}Load">{{t.load}}</td>
-                <td id="{{t.id}}Load">{{t.load|mul:weeks }}</td>
+                <td id="{{t.id}}TotalLoad">{{t.load|mul:weeks }}</td>
                 {% for module in parents %}
                 <td id="{{t.id}}alloc{{module.id}}">0</td>
                 {%endfor%}
@@ -123,7 +126,9 @@
 
 </div>
 
-<script>setupChart();</script>
+<script>
+    setupChart();
+</script>
 
 <div id="viewDataModal" class="modal fade">
     <div id="module" class="modal-dialog" hx-target="this">

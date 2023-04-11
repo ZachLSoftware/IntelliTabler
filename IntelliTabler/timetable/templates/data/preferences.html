@@ -1,3 +1,4 @@
+{% load customTags %}
 <h1>Preferences</h1>
 <a id='newPreference' class="btn btn-primary-outline" hx-get="{% url 'addPreference' teacherId timetableId %}" hx-target="#addForm">New Preference</a>
 <table class="table">
@@ -7,7 +8,7 @@
     <tbody>
         {% for preference in preferences %}
         <tr>
-            <td style="background-color: {{preference.module.group.parent.color}}">{{preference.module.group.name}}
+            <td style="background-color: {{preference.module.group.parent.color}}; color: {{preference.module.group.parent.color|getTextColor}}">{{preference.module.group.name}}
             <td>{{preference.module.name}}</td>
             <td>{{preference.priority}}</td>
             <td><button class="btn btn-warning" hx-delete="{% url "deleteObject" "Preference" preference.id %}" hx-confirm="Confirm Delete?">Delete Preference</button></td>

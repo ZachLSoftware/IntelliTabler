@@ -56,7 +56,7 @@ td{
   font-size: larger;
 }
 .modal-content{
-  background-color: #343a40;
+  background-color: #F6F6F2;
 }
 
 .calendarHeader, .dayCell:nth-child(odd), .pRow:nth-child(odd){
@@ -89,6 +89,10 @@ body .form-floating{
 
 
 #loadDistTable tr:nth-child(even), #allocatedTable tr:nth-child(even), #combingChart tr:nth-child(even){
+  background-color: #C2EDCE;
+}
+
+.classItems tr:nth-child(even){
   background-color: #C2EDCE;
 }
 
@@ -132,4 +136,16 @@ a {
 #classCard:hover {
   color: black;
   filter: brightness(75%)
+}
+
+#combingChart .firstCol {
+    border: 1px solid black;
+    background-color: #388087;
+}
+
+
+#combingChart .secCol {
+    background-color: #388087;
+    border: 1px solid black;
+
 }

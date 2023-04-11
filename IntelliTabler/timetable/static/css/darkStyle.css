@@ -15,6 +15,11 @@ label {
   color: black;
 }
 
+th {
+  background-color: #32373b !important;
+  border: 1px black solid;
+}
+
 .checkboxInput label {
   color: white;
   position:absolute;
@@ -96,6 +101,10 @@ body .form-floating{
   background-color: #1a2127;
 }
 
+.classItems tr:nth-child(even){
+  background-color: #1a2127;
+}
+
 .btn-primary-outline {
   color: white;
   background-color: #3f454b;
@@ -129,4 +138,15 @@ filter: brightness(75%);
 
 .dayCell, .pRow {
   border-top: 1px white solid;
+}
+
+#combingChart .firstCol {
+    border: 1px white solid;
+    background-color: #32373b;
+}
+
+
+#combingChart .secCol {
+    background-color: #32373b;
+    border: 1px white solid;
 }

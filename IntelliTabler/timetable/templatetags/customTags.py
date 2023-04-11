@@ -30,3 +30,17 @@ def getCheckBoxId(period, pcounter):
 @register.filter
 def forRange(val):
     return [*range(1, val+1)]
+
+@register.filter
+def dict_lookup(dict, key):
+    return dict[key]
+
+#Filter version of javascript function
+@register.filter
+def getTextColor(color):
+    rgb = [int(color[i:i+2], 16) for i in range(1, len(color), 2)]
+    r, g, b = rgb[0], rgb[1], rgb[2]
+    if (r*0.299 + g*0.587 + b*0.114) > 150:
+        return '#000000'
+    else:
+        return '#ffffff'

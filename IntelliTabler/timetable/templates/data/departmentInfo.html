@@ -1,21 +1,26 @@
 {% load mathfilters %}
-<h1>{{department.name}}</h1>
-<button class="btn btn-primary" hx-get="{% url "editDepartment" department.id %}" hx-target="#addForm">Edit</button>
-<a id="deleteDepartment" class="nav-link align-middle px-0 sidebar-link" hx-delete="{% url 'deleteObject' 'Department' department.id %}" hx-confirm="Are you sure you want to delete {{department.name}}?"><i class="fa-solid fa-trash-can"></i><span class="d-none d-sm-inline">  Delete Department</span></a>
+<div class="container text-center">
+    <h1>{{department.name}}</h1>
+    <div class="row justify-content-center" >
+        <div id="infoBtnGroup" class="btn-group" role="group" style="max-width:35%">
+            <button class="btn btn-primary-outline border" hx-get="{% url "editDepartment" department.id %}" hx-target="#addForm">Edit Department</button>
+            <a id="deleteDepartment" class="btn btn-danger border" hx-delete="{% url 'deleteObject' 'Department' department.id %}" hx-confirm="Are you sure you want to delete {{department.name}}?">Delete Department</a>
+        </div>
+    </div>
+    <div class="row justify-content-center pt-4">
+        <table class="table caption-top" style="width:35%">
+            <caption>
+                <h1>Department Format</h1>
+            </caption>
+            <tr><td>Number of Periods per Week</td>
+                <td>{{department.format.numPeriods}}</td>
+            </tr>
 
-<table class="table" style="width:25%">
-    <tr><td>Number of Periods per Week</td>
-        <td>{{department.format.numPeriods}}</td>
-    </tr>
-
-    <tr><td>Number of weeks</td>
-        <td>{{department.format.numWeeks}}</td>
-    </tr>
-    <tr><td>Total number of periods</td>
-        <td>{{department.format.numPeriods|mul:5|mul:department.format.numWeeks}}</td>
-    </tr>
-</table>
-
-{%for timetable in timetables %}
-<p>{{timetable.name}}</p>
-{%endfor%}
+            <tr><td>Number of weeks (Repeating)</td>
+                <td>{{department.format.numWeeks}}</td>
+            </tr>
+            <tr><td>Total number of periods</td>
+                <td>{{department.format.numPeriods|mul:5|mul:department.format.numWeeks}}</td>
+            </tr>
+        </table>
+    </div>
