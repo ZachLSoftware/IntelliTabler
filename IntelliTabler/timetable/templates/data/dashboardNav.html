@@ -77,11 +77,11 @@
                   {% if user.is_authenticated %}
                       {% if user.theme == "dark" %}
                             <li>
-                                <a class="dropdown-item" href='{% url "changeTheme" "light" %}'>Light Theme</a>
+                                <a class="dropdown-item" href='{% url "changeTheme" "light" timetable.id %}'>Light Theme</a>
                             </li>
                       {% else %}
                             <li>
-                                <a class="dropdown-item" href='{% url "changeTheme" "dark" %}'>Dark Theme</a>
+                                <a class="dropdown-item" href='{% url "changeTheme" "dark" timetable.id %}'>Dark Theme</a>
                             </li>
                       {% endif %}
                     <li><hr class="dropdown-divider"></li>

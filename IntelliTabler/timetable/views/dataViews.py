@@ -10,6 +10,7 @@ from ..csp import *
 from django.http import HttpResponse
 from django.contrib import messages
 from ..toExcel import *
+from ..scripts import getCalendar
 
 
 ###Default Landing Page###
@@ -28,6 +29,14 @@ def dashboard(request):
     ds=Department.objects.filter(user=request.user).order_by('name')
     context['departments']={d:Year.objects.filter(department_id=d.id).order_by('year') for d in ds}
     context['template']="dashboard_"+request.user.theme+".html"
+    timetableId=request.session.get('timetableId', 0)
+    if timetableId:
+        table=get_object_or_404(Timetable, pk=timetableId)
+        context['departmentTitle']=table.tableYear.department.name +" "+ str(table.tableYear.year)
+        del request.session['timetableId']
+    else:
+        context['departmentTitle']=0
+    context['timetableId']=timetableId
     return render(request, "dashboard.html", context)
 
 """Sets the current timetable and gets all available timetables for the year.
@@ -107,187 +116,193 @@ def getList(request, type, timetableId):
     context["objects"]=objects
     return render(request, "data/buttonSidebar.html", context)
 
-#Creates the necessary elements for the Teacher and Module page to list items
+"""Recieves type of object and timetable.
+Returns the sidebar template page with either
+teacher or module objects in a list.
+"""
 def getSidebar(request, type, timetableId):
     timetable=Timetable.objects.get(id=timetableId)
+
+    #Fill in necessary object details
     context={
         'type':type, 
         'infoType': type,
         'timetable': timetable,
         'detailPath': 'getTeacher',
     }
+
+    #Special details for modules
     if type.upper()=='MODULEPARENT':
         context['infoType']='module'
         context['detailPath']='getModules'
     return render(request, 'data/sidebarTemplate.html', context)
 
+"""Accepts a teacher Id and a timetable Id.
+Gets the teachers assigned modules, and the teacher object.
+Returns an organized dictionary of classes, with the parent as the key
+"""
+def getTeacher(request, id, timetableId):
 
-def getTeacher(request, id=0, timetableId=0):
-    if id==0:
-        id=request.GET.get('id', 0)
-    try: 
-        teacher=Teacher.objects.get(id=id)
-    except:
-        teacher=None
+    #Try to get the teacher object or return 404
+    teacher=get_object_or_404(Teacher, pk=id)
+
+    #Get any modules that are assigned to the teacher in this timetable
     mods=Module.objects.filter(teacher=teacher, group__parent__timetable_id=timetableId).order_by('name', 'group__period')
     parents=ModuleParent.objects.filter(timetable_id=timetableId).order_by('name')
-    context={}
+    
+    #Use dictionary and list comprehension to sort modules into lists with the parent as the key
+    #Used for drop down organization in teacher info.
     modules={key: [mod for mod in mods if mod.group.parent==key] for key in parents if any(mod.group.parent == key for mod in mods)}
+
+    context={}
     context['modules']=modules
     context["teacher"]=teacher
-    context["timetable"]=timetableId
+    context["timetableId"]=timetableId
     return render(request, "data/teacherInfo.html", context)
 
-def getModules(request, groupId=0, timetableId=0):
+
+def getModules(request, groupId, timetableId=0):
+
+    #Checks if the requesting page is a calendar
     calendar=request.GET.get('calendar',0)
-    if groupId==0:
-        groupId=request.GET.get('groupId', 0) 
+
+    #If calendar, we are getting the modules based on group else, we are getting from parent
     if calendar:
         moduleList=Module.objects.filter(group_id=groupId).order_by('lesson')
     else:      
         moduleList=Module.objects.filter(group__parent_id=groupId).order_by('group__session','lesson')
     context={}
+
+    #Dictionary Comprehension to group modules by group
     modules={}
-    for mod in moduleList:
-        if mod.group not in modules:
-            modules[mod.group]=[]
-        modules[mod.group].append(mod)
+    modules = {mod.group: [m for m in moduleList if m.group == mod.group] for mod in moduleList if mod.group not in modules}
     context["modules"]=modules
     context["parent"]=moduleList[0].group.parent
     context["group"]=groupId
     return render(request, "data/modulesInfo.html", context)
 
 def combingView(request, timetableId, groupByClass=True):
+
+    #If user has requested group by period
     if groupByClass=='False':
         groupByClass=False
+
     context={}
-    timetable=Timetable.objects.get(id=timetableId)
+    
+    #Trye to get timetable, return 404 if else
+    timetable=get_object_or_404(Timetable, pk=timetableId)
+
+    #Get details requred for chart
     teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
     periods=Period.objects.filter(department=timetable.tableYear.department)
     groups=ModuleGroup.objects.filter(parent__timetable=timetable).order_by('name', 'session')
     classes=Module.objects.filter(group__parent__timetable=timetable)
-    unassigned = False
-    modules=[]
-    parents=set()
-    pAssign={}
-    mJson={}
-    index=1
-    if not groupByClass:
-        for period in periods:
-            pAssign[period.dayNum]=period
-    else:
-        periods=list(periods)
-        for group in groups:
-            if group.period not in periods:
-                continue
-            else:
-                pAssign[index]=group.period
-                periods.remove(group.period)
-                index+=1
-        if periods:
-            for period in periods:
-                pAssign[index]=period
-                index+=1
-    
-    for cl in classes:
-        if cl.group.period:
-            parents.add(cl.group.parent)
-            if cl.group.id not in mJson:
-                mJson[cl.group.id]=[]
-            mJson[cl.group.id].append((cl.id,cl.name))
-            if cl.teacher:
-                module_ser=ModuleSerializer(cl)
-                module=module_ser.data
-                module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
-                module["teacher"]=cl.teacher.id
-                
-            
-                modules.append(module)
-        else:
-            unassigned=True
-            modules=[]
-            break
-    
-
-    
-    context['modules']=json.dumps(modules)
-    context['teachers']=teachers
-    context['periods']=pAssign
-    context['numPeriods']=len(periods)
-    context['unassigned']=unassigned
-    context['parents']=parents
+    parents=ModuleParent.objects.filter(timetable=timetable)
     context['timetableId']=timetableId
     context['numWeeks']=timetable.tableYear.department.format.numWeeks
-    context['modChoices']=json.dumps(mJson)
+    context['teachers']=teachers
+    context['parents']=parents
+    
+    #Set flag to check if some classes aren't assigned a time slot.
+    unassigned = len(Module.objects.filter(group__parent__timetable=timetable, group__period__isnull=True))>0
+    context['unassigned']=unassigned
+
+    if not unassigned:
+        #Set items
+        modules=[]
+        pAssign={}
+        mJson={}
+        index=1
+
+        #If user sorts by period
+        if not groupByClass:
+            pAssign={period.dayNum:period for period in periods}
+
+        #Creates a dictionary of periods by index sorted so classes are
+        #grouped as closely as possible.
+        else:
+            periods=list(periods)
+            for group in groups:
+                if group.period not in periods:
+                    continue
+
+                else:
+                    pAssign[index]=group.period
+                    periods.remove(group.period)
+                    index+=1
+
+            if periods:
+                for period in periods:
+                    pAssign[index]=period
+                    index+=1
+        
+
+        #Loop through classes and retrieve necessary details
+        #Not using list or dictionary comprehension as multiple steps are required per class
+        for cl in classes:
+            
+            #Creates a key with an empty list if key doesn't exist, and appends to that list
+            mJson.setdefault(cl.group.id, []).append((cl.id, cl.name))
+
+            #If the class has been assigned a teacher, get details
+            if cl.teacher:
+                #Serialize class ready to add to chart
+                module_ser=ModuleSerializer(cl)
+                module=module_ser.data
+                #Create the session id (allows for correct placement on chart)
+                module["session"]="#" + str(cl.teacher.id) +"x" + cl.group.period.name + "-"+ str(cl.group.period.week)
+                module["teacher"]=cl.teacher.id
+                modules.append(module)
+        
+        #Set items ready for adding ot the chart
+        context['modules']=json.dumps(modules)
+        context['periods']=pAssign
+        context['numPeriods']=len(periods)
+        context['modChoices']=json.dumps(mJson)
     return render(request, 'data/combingView.html', context)
 
-def calendarView(request, timetableId, teacher=0):
-    t=Timetable.objects.get(id=timetableId)
-    if teacher:
-        title=Teacher.objects.get(id=teacher).name + " - "   + t.tableYear.department.name + " - "+ str(t.name)
+
+"""Accepts a timetable id and teacher. If teacher, modules are the teachers assigned classes.
+Returns details to build the calendar.
+"""
+def calendarView(request, timetableId, teacherId=0):
+    t=get_object_or_404(Timetable, pk=timetableId)
+
+    #If Teacher, set title
+    if teacherId:
+        teacher=get_object_or_404(Teacher, pk=teacherId)
+        title=teacher.name + " - "   + t.tableYear.department.name + " - "+ str(t.name)
     else:
        title = t.tableYear.department.name + " - " + str(t.name)
-    context=getCalendar(timetableId, teacher)
+    
+    #Get calendar data
+    context=getCalendar(timetableId, teacherId)
     context['title']=title
     return render(request, 'data/calendarView.html', context)
 
-def getCalendar(timetableId, teacher=0):
-    events={}
-    modules=[]
-    context={}
-    if teacher:
-        classes=Module.objects.filter(teacher_id=teacher, group__parent__timetable_id=timetableId).order_by('name')
-        for cl in classes:
-            if cl.group.period:
-                module_ser=ModuleSerializer(cl)
-                module=module_ser.data
-                module['parent']=module['group']['parent']
-                module['period']=module['group']['period']
-                module['groupid']=module['group']['id']
-                module.pop('group', None)
-                module.pop('teacher', None)
-                
-                modules.append(module)
-    else:
-        classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
-        for cl in classes:
-            if cl.period:
-                module_ser=ModuleGroupSerializer(cl)
-                module=module_ser.data
-                module['groupid']=module_ser.data['id']
-                modules.append(module)
-
-    events["modules"]=modules
-    format=Format.objects.get(department=Timetable.objects.get(id=timetableId).tableYear.department)
-    context['periods']=format.numPeriods
-    context['weeks']=format.numWeeks
-
-    context['events']=json.dumps(events)
-    context['timetable']=timetableId
-    context['teacher']=teacher
-    return context
-
-def getCalendarData(timetableId):
-    classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
-    events={}
-    modules=[]
-    for cl in classes:
-        if cl.period:
-            module_ser=ModuleGroupSerializer(cl)
-            module=module_ser.data
-            module['groupid']=module_ser.data['id']
-            modules.append(module)
-    events["modules"]=modules
-    context={}
-    context['events']=events
-    return JsonResponse(events)
+"""CHECK IF NEEDED"""
+# def getCalendarData(timetableId):
+#     classes=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
+#     events={}
+#     modules=[]
+#     for cl in classes:
+#         if cl.period:
+#             module_ser=ModuleGroupSerializer(cl)
+#             module=module_ser.data
+#             module['groupid']=module_ser.data['id']
+#             modules.append(module)
+#     events["modules"]=modules
+#     context={}
+#     context['events']=events
+#     return JsonResponse(events)
 
 
-def cspTest(request, timetableA):
+def cspAutoAssign(request, timetableA):
     from datetime import datetime
     now = datetime.now()
     tA=Timetable.objects.get(id=timetableA)
-    timetable=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +"-"+now.strftime("%d%m%y"), tA)
+    uniqueId = uuid.uuid4().hex[:3]
+    timetable=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +" - "+now.strftime("%d/%m") + " - " + str(uniqueId), tA)
     sched=getClassSchedule(timetable)
     if(not sched):
         return HttpResponse(status=502)
@@ -308,6 +323,7 @@ def cspTest(request, timetableA):
                 for c, teacher in csp1.class_assignments.items():
                     Module.objects.filter(id=c).update(teacher_id=teacher)
                 messages.success(request, f"New Timetable {timetable.name} has been generated")
+                request.session['timetableId']=timetable.id
                 return redirect('dashboard')
             count+=1
         timetable.delete()

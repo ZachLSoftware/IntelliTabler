@@ -126,8 +126,6 @@ class CSP():
 
         
         #Get list of teachers by highest remaining load
-        teachers = sorted(domain, key=lambda t: (domain[t]['sharedKey_pref'], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True)
-        print('\n****START****\n', teachers, '\n*****END*****\n')
         for teacher in sorted(domain, key=lambda t: (domain[t]['base_pref'], domain[t]['sharedKey_pref'], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True):
             if teacher not in domain.keys():
                 continue

@@ -415,11 +415,13 @@ def changeColor(request, parentId):
     form=changeColorForm(initial={'color':p.color})
     return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
 
-def changeTheme(request, theme):
+def changeTheme(request, theme, timetableId=0):
     if theme != request.user.theme:
         request.user.theme=theme
         request.user.save()
-        return redirect('dashboard')
+        response = redirect('dashboard')
+        request.session['timetableId']=timetableId
+        return response
     else:
         return HttpResponse(status=204)
 

@@ -15,7 +15,7 @@
 {% load mathfilters %}
 {% load customTags %}
 
-<div class="row overflow-scroll">
+
     {% comment %} <div id="combingWrapper">
 
             {% for p in periods %}
@@ -38,6 +38,7 @@
 <a class="btn btn-primary-outline border" href="{% url 'exportCombing' timetableId %}">Export to Excel</a>
 </div>
 </div>
+<div class="row overflow-scroll">
 <table id="combingChart" class="table m-3">
     <th class="firstCol">Teachers</th>
     <th class="secCol">Load</th>

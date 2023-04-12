@@ -16,6 +16,10 @@
     <script type="text/javascript" src="{% static 'javascript/common.js' %}" defer></script>
     <script type="text/javascript" src="{% static 'javascript/calendar.js' %}" defer></script>
     <script type="text/javascript" src="{% static 'javascript/availability.js' %}" defer></script>
+    <script id="timetableLoad">
+      var timetable={{timetableId}};
+      var departmentTitle="{{departmentTitle}}";
+    </script>
     {% with 'css/'|add:request.user.theme|add:'Style.css' as theme %}
     <link rel="stylesheet" href="{% static theme %}">
     {% endwith %}

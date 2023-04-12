@@ -5,7 +5,7 @@
         <div id="infoBtnGroup" class="btn-group" role="group">
             <a role="button" class="btn btn-primary-outline border" hx-get="{% url 'addTeacher' teacher.department.id teacher.id %}" hx-target="#addForm">Edit Teacher</a>
             <button type="button" class="btn btn-primary-outline border" hx-get="{% url 'setAvailability' teacher.id %}" hx-target="#availability">Set Availability</button>
-            <button type="button" class="btn btn-primary-outline border" data-bs-toggle="collapse" data-bs-target="#preferences" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="#preferences">Set Preferences</button>
+            <button type="button" class="btn btn-primary-outline border" data-bs-toggle="collapse" data-bs-target="#preferences" hx-get="{% url 'preferences' teacher.id timetableId %}" hx-target="#preferences">Set Preferences</button>
             <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#teacherCal" aria-expanded="false" aria-controls="teacherCal">View Calendar</button>
             <button class="btn btn-primary-outline border" type="button" data-bs-toggle="collapse" data-bs-target="#assignments" aria-expanded="false" aria-controls="assignments">View Classes</button>
             <a type="button" class="btn btn-danger border" hx-delete="{% url 'deleteObject' 'Teacher' teacher.id %}" hx-target="#listObjects" hx-confirm="Confirm delete?">Delete Teacher</a>
@@ -77,7 +77,7 @@
 <div class="row justify-content-center">
     <div class="row justify-content-center">
     <div class="col">
-        <div id="preferences" hx-trigger="preferenceChange from:body" hx-get="{% url 'preferences' teacher.id timetable %}" hx-target="this" class="row justify-content-center mt-3 collapse">
+        <div id="preferences" hx-trigger="preferenceChange from:body" hx-get="{% url 'preferences' teacher.id timetableId %}" hx-target="this" class="row justify-content-center mt-3 collapse">
         </div>
     </div>
 </div>
@@ -97,7 +97,7 @@
                             {{k.name}} <i id="infoIcon" class="fa-solid fa-angle-down rotate"></i>
                         </td>
                         <td style="border: none;">
-                            <a class="btn btn-primary-outline border classLanding" classId={{k.id}} timetableId={{timetable}}>Class Info</button>
+                            <a class="btn btn-primary-outline border classLanding" classId={{k.id}} timetableIdId={{timetableId}}>Class Info</button>
                         </td>
                     </tr>
                 <tbody id="{{k.id}}Classes" class="classItems hideClass">
@@ -121,7 +121,7 @@
         </div>
         </div>
         <div id="availability" class="collapse"></div>
-        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetable teacher.id%}" hx-target="this">
+        <div id="teacherCal" class="collapse" hx-trigger="load" hx-get="{% url 'calendarView' timetableId teacher.id%}" hx-target="this">
             
         </div>
             

@@ -4,6 +4,8 @@ var activePage;
 var classToggle=new Set();
 var currentClass;
 
+
+
 $(document).on("htmx:afterSettle", "#displayChild", (e) =>{
     if(e.detail.pathInfo.requestPath.split('/')[1]=="getModules"){
         if(e.detail.requestConfig.elt.id!="displayChild"){
@@ -414,3 +416,12 @@ $(document).on("click", ".classHeader", function(){
     target=$(this).attr("data-target");
     $(target).toggleClass("hideClass");
 });
+
+$(document).ready(function(){
+    if(timetable){
+        url="/displayDashboardContent/"+timetable;
+        htmx.ajax('GET',url, "#sidebarBody")
+        $("#departmentSelect").text(departmentTitle)
+    }
+    $("#timetableLoad").remove();
+})

@@ -4,7 +4,7 @@
         weeks:parseInt({{weeks}}),
         timetable:parseInt({{timetable}}),
         events:{{events|safe}},
-        teacher:parseInt({{teacher}})
+        teacher:parseInt({{teacherId}})
     }
 </script>
 <div class="container">
@@ -14,13 +14,13 @@
         </div>
     </div>
     <div class="row text-center">
-        {% if teacher %}
+        {% if teacherId %}
         <div class="col">
-            <button class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable teacher%}">Export Calendar to Excel</button>
+            <a class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable teacherId%}">Export Calendar to Excel</a>
         </div>
         {% else %}
         <div class="col">
-            <button class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable %}">Export Calendar to Excel</button>
+            <a class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable %}">Export Calendar to Excel</a>
         </div>
         {% endif %}
     </div>
