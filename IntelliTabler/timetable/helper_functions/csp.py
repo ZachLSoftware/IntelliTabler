@@ -1,4 +1,4 @@
-from .models import *
+from ..models import *
 
 def createNewGeneratedTimetable(year, user, name, timetableA):
     t=Timetable.objects.create(name=name, tableYear=year, user=user)

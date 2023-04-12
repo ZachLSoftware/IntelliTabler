@@ -15,8 +15,11 @@ label {
   color: black;
 }
 
-th {
+th:not(.combingTableMod){
   background-color: #32373b !important;
+}
+
+th {
   border: 1px white solid;
 }
 

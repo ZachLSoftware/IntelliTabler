@@ -6,15 +6,21 @@ from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.apps import apps
 import json
-from ..csp import createNewGeneratedTimetable
-from ..serializers import *
-from ..scripts import *
+from ..helper_functions.serializers import *
+from ..helper_functions.scripts import *
 from django.contrib import messages
-from ..toExcel import readFromCombing, moduleTeacherWSTemplate, readInExcel
-# Create your views here.
+from ..helper_functions.toExcel import readFromCombing, moduleTeacherWSTemplate, readInExcel
+
+
+"""
+Form handling for adding a new Department
+"""
 def addDepartment(request):
+
     if request.method == "POST":
-        form = DepartmentForm(request.POST, request.FILES)
+        form = DepartmentForm(request.POST)
+
+        #If valid, save new department from form data, return httpresponse to trigger evenet
         if form.is_valid():
             dep=Department()
             dep.name=form.cleaned_data['name']
@@ -26,18 +32,26 @@ def addDepartment(request):
             dep.save()
             format.save()
             table=Timetable.objects.filter(tableYear__department=dep).first()
+
+            #Create event and return
             event={'departmentAdded': {'tableId': table.id, 'departmentTitle':dep.name +" "+ str(table.tableYear.year)}}
             return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
+    
     else:
         form=DepartmentForm()
+        
     context={
         "form": form,
         "Operation": "Add Department"
     }
     return render(request, 'forms/modalForm.html',context)
 
+
+"""
+Special view to handle change in department information.
+"""
 def editDepartment(request, departmentId):
-    dep=Department.objects.get(id=departmentId)
+    dep=get_object_or_404(Department, id=departmentId)
     if request.method== "POST":
         form = DepartmentForm(request.POST)
         if form.is_valid():
@@ -48,7 +62,8 @@ def editDepartment(request, departmentId):
                 dep.format.numPeriods=form.cleaned_data['numPeriods']
             dep.save()
             dep.format.save()
-            return HttpResponse(status=204, headers={'HX-Trigger':"departmentChanged"})
+            event={'departmentChanged': {'departmentName':dep.name, 'depId': dep.id}}
+            return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
     else:
         form=DepartmentForm(initial={'name':dep.name, 'numWeeks': dep.format.numWeeks, 'numPeriods':dep.format.numPeriods})
     context={
@@ -58,12 +73,20 @@ def editDepartment(request, departmentId):
     return render(request, 'forms/modalForm.html',context)
 
 
-
+"""
+Add or edit teacher function
+"""
 def addTeacher(request, department, id=0):
     if request.method=="POST":
-        Teacher.objects.filter(pk=0).delete()
-        teacher, created=Teacher.objects.get_or_create(id=id, user=request.user, department_id=department)
-        Teacher.objects.filter(pk=0).delete()
+
+        #Get or create the teacher object for the form
+        try:
+            teacher=Teacher.objects.get(id=id)
+            created=False
+        except:
+            teacher=Teacher.objects.create(user=request.user, department_id=department)
+            created=True
+
         form = TeacherForm(request.POST, instance=teacher)
         if(form.is_valid()):
             print(teacher)
@@ -71,32 +94,39 @@ def addTeacher(request, department, id=0):
             newTeacher["user"]=request.user
             newTeacher["department"]=Department.objects.get(id=department)
             teacher.save()
-            #Teacher.objects.delete(id=0)
+
+            #Return different event based on creation or editing
             if(not created):
-                return HttpResponse(status=204, headers={'HX-Trigger':'teacherDetailsChange', 'Department':department})
+                return HttpResponse(status=204, headers={'HX-Trigger':json.dumps({'teacherDetailsChange':'None', 'teacherChange':'None'}), 'Department':department})
             return HttpResponse(status=204, headers={'HX-Trigger':'teacherChange', 'Department':department})
-            
     else:
         if(id!=0):
             teacher=get_object_or_404(Teacher, pk=id)
             form=TeacherForm(instance=teacher)
         else:     
             form = TeacherForm()
+
     context={'form':form}
     context['Operation']="Add or Edit Teacher"
     return render(request, 'forms/modalForm.html', context)
 
+"""
+Availability Form handler
+"""
 def setAvailability(request, teacherid):
     context={}
-    context['teacher']=Teacher.objects.get(id=teacherid)
+    context['teacher']=get_object_or_404(Teacher, id=teacherid)
     ft=context['teacher'].department.format
     periods=Period.objects.values_list().filter(department=context['teacher'].department)
-    period1=periods[1]
     extra=ft.numPeriods*5
+
     formsets=[]
 
+    #Create Forms
     availabilityFormSet = formset_factory(AvailabilityForm, extra=extra)
     if request.method=='POST':
+
+        #Iterate through each weeks formset
         for w in range(ft.numWeeks):
             formset1 = availabilityFormSet(request.POST, prefix="week-"+str(w))
             if formset1.is_valid():
@@ -116,38 +146,40 @@ def setAvailability(request, teacherid):
                 valid=False
             formsets.append(formset1)
         if valid==True:
-            return HttpResponse(status=204, headers={'HX-Trigger':'availabilitySaved'})
+            return HttpResponse(status=204, headers= {"HX-Trigger": json.dumps({'successWithMessage': context['teacher'].name+" Availability Updated", 'availabilitySaved':'None'})})
     else:
         for w in range(ft.numWeeks):
             formsets.append(availabilityFormSet(prefix="week-"+str(w)))
-        #formset2 = availabilityFormSet(prefix="week2")
     
     currentQuery=Availability.objects.filter(teacher=teacherid)
     current = []
     for c in currentQuery:
         current.append(str(c.period.week)+"-"+c.period.name)
 
-    #hours=Teacher.objects.values_list('totalHours', flat=True).get(id=teacherid)
-    #context['hours']=hours
+    #Render Form context
     context['current']=current
     context['periods']=periods
-    #context['formset1']=formset1
     context['formsets']=formsets
     context['weeks']=ft.numWeeks
     context['offset']=ft.numPeriods
-    #context['formset2']=formset2
     return render(request, 'forms/availabilityForm.html', context)
 
-
+"""
+Add or edit Modules form handler
+"""
 def addModule(request, yearId, parentId=0):
     context={}
     department=Year.objects.get(id=yearId).department
     if request.method=='POST':
+
+        #Try to get object for form, or build a new object
         if parentId!=0:
-            group=get_object_or_404(ModuleParent,pk=parentId)
-            form=ModuleParentForm(request.POST, request.FILES,year=yearId, department=department, edit=True, instance=group)
+            parent=get_object_or_404(ModuleParent,pk=parentId)
+            form=ModuleParentForm(request.POST, request.FILES, year=yearId, department=department, edit=True, instance=parent)
         else:
             form=ModuleParentForm(request.POST, request.FILES,year=yearId, department=department)
+
+        #Check if valid and save
         if form.is_valid():
             if parentId==0:
                 timetables=Timetable.objects.filter(tableYear_id=yearId)
@@ -158,9 +190,13 @@ def addModule(request, yearId, parentId=0):
                     p.department=department
                     p.user=request.user
                     p.save()
+
+                #Trigger event
                 return HttpResponse(status=204, headers={'HX-Trigger':'moduleParentChange'})
+            
+            #If editing existing parent, edit all parents in the same year.
             else:
-                parents=ModuleParent.objects.filter(sharedId=group.sharedId)
+                parents=ModuleParent.objects.filter(sharedId=parent.sharedId)
                 for p in parents:
                     p.name=form.cleaned_data['name']
                     p.numClasses=form.cleaned_data['numClasses']
@@ -169,10 +205,12 @@ def addModule(request, yearId, parentId=0):
                     p.color=form.cleaned_data['color']
                     p.save()
                 return HttpResponse(status=204, headers={'HX-Trigger':'{"moduleDetailsChange":"None", "moduleParentChange": "None"}'})
+            
+    #If request is GET
     else:
         if(parentId!=0):
-            group=get_object_or_404(ModuleParent,pk=parentId)
-            form=ModuleParentForm(year=yearId, department=department, edit=True, instance=group)
+            parent=get_object_or_404(ModuleParent,pk=parentId)
+            form=ModuleParentForm(year=yearId, department=department, edit=True, instance=parent)
             context['Operation']="Edit Modules"
         else:
             form=ModuleParentForm(year=yearId, department=department)
@@ -180,19 +218,18 @@ def addModule(request, yearId, parentId=0):
     context['form']=form
     return render (request, "forms/modalForm.html", context)
 
-def addYear(request, departmentId=0):
 
+"""
+Add a new year to department.
+"""
+def addYear(request, departmentId=0):
     if(departmentId):
         dq=Department.objects.filter(id=departmentId)
     else:
         dq=Department.objects.filter(user=request.user)
-    departments=[]
-    for d in dq:
-        departments.append((d.id,d.name))
+    departments=[(d.id,d.name) for d in dq]
     
     if request.method=='POST':
-
-
         form=YearForm(departments, request.POST, request.FILES,)
         if form.is_valid():
             year=form.save(commit=False)
@@ -208,20 +245,24 @@ def addYear(request, departmentId=0):
     context['Operation']="Add Year"
     return render(request, "forms/modalForm.html", context)
 
+
+"""
+Assign a teacher to a class
+"""
 def assignTeacher(request, departmentId, moduleId):
-    choices=[]
+    #Get teachers for choice
     teachers=Teacher.objects.filter(department_id=departmentId)
-    for teacher in teachers:
-        choices.append((teacher.id, teacher.name))
+    choices=[(teacher.id, teacher.name) for teacher in teachers]
     if request.method=='POST':
         form=AssignTeacherForm(choices, request.POST, request.FILES)
         if form.is_valid():
             module= Module.objects.get(id=moduleId)
+
+            #Check if teacher is assigned to all of the same class
             if form.cleaned_data['assignToAll']:
-                modules=Module.objects.filter(group__parent=module.group.parent, name=module.name)
-                for mod in modules:
-                    mod.teacher_id=int(form.cleaned_data['teacher'])
-                    mod.save()
+                Module.objects.filter(sharedKey=module.sharedKey).update(teacher_id=int(form.cleaned_data['teacher']))
+
+            #Save one class
             else:
                 module.teacher_id=int(form.cleaned_data['teacher'])
                 module.save()
@@ -231,6 +272,10 @@ def assignTeacher(request, departmentId, moduleId):
     context['Operation']="Assign Teacher"
     return render(request, 'forms/modalForm.html', context)
 
+
+"""
+Handles assignment of classes in the combing chart
+"""
 def assignTeacherCombing(request, teacherId, timetableId):
     mods=Module.objects.filter(group__parent__timetable_id=timetableId, teacher__isnull=True).order_by('name')
     groups = list(set(mods.values_list('group__id', 'group__name').distinct()))
@@ -291,11 +336,6 @@ def assignPeriod(request, department, groupId):
         form=AssignPeriodForm(weeks,periods,request.POST,request.FILES)
         if form.is_valid():
             per=form.cleaned_data['day']+"-"+str(form.cleaned_data['period'])
-            # group.period=Period.objects.get(department_id=department, week=form.cleaned_data['week'], name=per)
-            # group.save()
-            # module_ser=ModuleGroupSerializer(group)
-            # module=module_ser.data
-            # module['groupid']=module_ser.data['id']
             modules=updatePeriod(group,per,form.cleaned_data['week'])
             event={"periodUpdate":{"modules":modules}}
             event["moduleDetailsChange"]="Modules Changed"
@@ -309,17 +349,21 @@ def assignPeriod(request, department, groupId):
     context['Operation']="Assign/Edit Period"
     return render(request, 'forms/modalForm.html', context)
 
+
+"""
+Handle when a class is dropped on the calendar
+"""
 def calendarPeriodDrop(request, day, week, groupId):
     group=ModuleGroup.objects.get(id=groupId)
-    # period=Period.objects.get(department=group.parent.department, name=day, week=week)
-  #  group.period=period
-   # group.save()
     modules=updatePeriod(group,day,week)
     current=next(i for i, g in enumerate(modules) if g['id']==groupId)
     del modules[current]
     event={"periodUpdate":{"modules":modules}}
     return HttpResponse(status=204,  headers={'HX-Trigger':json.dumps(event)})
 
+"""
+Handles deletion of objects
+"""
 def deleteObject(request, type, id):
     Type = apps.get_model(app_label='timetable', model_name=type)
     if type=="Timetable":
@@ -346,10 +390,15 @@ def deleteObject(request, type, id):
         except Type.DoesNotExist:
             obj=None
     
+    #Create event based on type deleted
     trigger = type[0].lower()+type[1:]+"Change"
     events='{\"'+trigger+'\": "Deleted", \"'+type+'Deleted\":'+objId+'}'
     return HttpResponse(status=204, headers={"HX-Trigger": events})
 
+
+"""
+Handles adding a module via the calendar
+"""
 def addModuleCalendar(request, day, week, timetableId, teacher=0):
     groups=ModuleGroup.objects.filter(parent__timetable_id=timetableId, period__isnull=True).order_by('name')
     choices=[]
@@ -360,8 +409,6 @@ def addModuleCalendar(request, day, week, timetableId, teacher=0):
         form=addEventForm(choices, request.POST,request.FILES)
         if form.is_valid():
             mod=ModuleGroup.objects.get(id=form.cleaned_data["group"])
-            department=Timetable.objects.get(id=timetableId).tableYear.department
-            #period=Period.objects.get(department=department, name=day, week=week)
             events={}
             modules=updatePeriod(mod,day,week)
             events["addCalendarEvent"]={"modules":modules}
@@ -371,6 +418,10 @@ def addModuleCalendar(request, day, week, timetableId, teacher=0):
     context['Operation']="Assign Module Timeslot"
     return render(request, 'forms/modalForm.html', context)
 
+
+"""
+Handels unassigning a teacher
+"""
 def unassignTeacher(request, modId):
     if request.method=='POST':
         mod=Module.objects.get(id=modId)
@@ -379,6 +430,9 @@ def unassignTeacher(request, modId):
         mod.save()
         return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(event)})
 
+"""
+Handles dropping of module in combing chart
+"""
 def assignTeacherDrop(request, teacherId, modId):
     if request.method=='POST':
         teachers=set()
@@ -401,7 +455,9 @@ def assignTeacherDrop(request, teacherId, modId):
     event={'modUpdate': {'newMods': newMods, 'teachers':list(teachers), 'parents':list(parents)}}
     return HttpResponse(status=204, headers={'HX-Trigger':json.dumps(event)})
 
-
+"""
+Simple color change form
+"""
 def changeColor(request, parentId):
     p=ModuleParent.objects.get(id=parentId)
     if request.method=='POST':
@@ -415,6 +471,9 @@ def changeColor(request, parentId):
     form=changeColorForm(initial={'color':p.color})
     return render(request, "forms/modalForm.html", {'Operation':'Change Color', 'form':form})
 
+"""
+Handles changing from light to dark themes
+"""
 def changeTheme(request, theme, timetableId=0):
     if theme != request.user.theme:
         request.user.theme=theme

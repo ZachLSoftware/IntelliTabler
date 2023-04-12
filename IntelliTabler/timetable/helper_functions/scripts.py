@@ -1,4 +1,4 @@
-from .models import ModuleGroup, Period, Timetable, Format
+from ..models import ModuleGroup, Period, Timetable, Format
 import json
 from django.db.models import F
 from .serializers import *

@@ -131,21 +131,9 @@ function setTeacherAllocTotal(teachers, parents){
 htmx.on("htmx:afterSwap", (e) => {
     if(e.detail.target.id == "modalBody" && activePage=="combing") {
         $('.editBtnCol').remove();
+        $("#modalBody").attr("hx-get",e.detail.pathInfo.requestPath);
+        htmx.process(htmx.find("#modalBody"));
         dataModal.show();
-    // }else if(e.detail.target.id == "addForm" && activePage=="combing") {
-    //     $('#moduleChoice').empty();
-    //     let select=$('#groupChoice').find(':selected').val()
-    //     $.each(cData.modChoices[select], function(index, val){
-    //       $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
-    //     })
-    //     $('#groupChoice').change(function(){
-    //         $('#moduleChoice').empty();
-    //         let select=$('#groupChoice').find(':selected').val()
-    //         $.each(cData.modChoices[select], function(index, val){
-    //           $('#moduleChoice').append(`<option value='${val[0]}'>${val[1]}</option>`)
-    //         })
-    //     });
-        modal.show();
     }
 });
 
@@ -160,7 +148,10 @@ htmx.on("htmx:beforeSwap", (e) => {
     }
 })
 
-
+$(document).on("updateColor", function(e){
+    $(`.${e.detail.parentId}Class`).css("background-color",e.detail.color);
+    $(`.${e.detail.parentId}Class`).css("color",getTextColor(e.detail.color));
+})
 
 function setCombListeners(){
     $(document).on("modUpdate", function(e){
@@ -170,10 +161,8 @@ function setCombListeners(){
         });
         setTeacherAllocTotal(e.detail.teachers, e.detail.parents);
         refreshClickListeners();
-        // $(`#${e.detail.id}`).remove()
-        // addCombEvent(e.detail);
-        // refreshListeners();
-    })
+    });
+    
     $(document).on("unassignSuccess", function(e){
         $(`#${e.detail.modId}Div`).remove();
         setTeacherAllocTotal(e.detail.teacher, e.detail.parent);

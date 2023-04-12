@@ -121,21 +121,16 @@ htmx.on('htmx:beforeSend', (e) => {
         }
     }
     if(($(e.target).hasClass('yearItem'))){
-        $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
-        $("#offcanvasLabel").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ")[0]+" " +$(e.target).text());
+        $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ").slice(0, -1).join(" ")+" " +$(e.target).text());
     }
     if($(e.target).hasClass('childButtons')){
         if($(e.target).hasClass('moduleButtons')){
             $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('Button')[0]+"/"+currentTimetable);
 
         }else{
-            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('.')[0]+"/"+currentTimetable);
+            $("#displayChild").attr("hx-get", "/getTeacher/"+e.target.id.split('Button')[0]+"/"+currentTimetable);
         }
         htmx.process(htmx.find("#displayChild"));
-    }
-    if($(e.target).hasClass('event')){
-        $("#modalBody").attr("hx-get", "/getModules/"+e.target.id+"?calendar=1");
-        htmx.process(htmx.find("#modalBody"));
     }
 })
 
@@ -339,10 +334,17 @@ $(document).on("TimetableDeleted timetableAdded", function(e){
 
 $(document).on("departmentAdded yearAdded", function(e){
     url="/displayDashboardContent/"+e.detail.tableId;
-    htmx.ajax('GET',url, "#sidebarBody")
+    htmx.ajax('GET',url, "#sidebarBody");
     $("#departmentSelect").text(e.detail.departmentTitle)
-
 })
+$(document).on("departmentChanged", function(e){
+    var name = e.detail.departmentName;
+    var current =$("#departmentSelect").text().split(" ");
+    var year = current[current.length-1];
+    $("#departmentSelect").text(name + " " + year);
+    $(`#${e.detail.depId}ddbtn`).text(name+" \u00bb");
+    $("#departmentInfo")[0].click();
+});
 
 htmx.on("htmx:responseError", function(e) {
     var error = JSON.parse(e.detail.xhr.response);

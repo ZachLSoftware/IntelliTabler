@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Module, ModuleGroup, ModuleParent
+from ..models import Module, ModuleGroup, ModuleParent
 
 class ModuleParentSerializer(serializers.ModelSerializer):
     class Meta:

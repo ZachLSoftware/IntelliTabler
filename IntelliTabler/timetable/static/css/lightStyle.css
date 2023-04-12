@@ -96,8 +96,11 @@ body .form-floating{
   background-color: #C2EDCE;
 }
 
-th {
+th:not(.combingTableMod) {
   background-color: #388087 !important;
+}
+
+th {
   border: 1px black solid;
 }
 

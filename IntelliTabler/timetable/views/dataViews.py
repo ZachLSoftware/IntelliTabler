@@ -4,13 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.apps import apps
 import json
 from django.http import JsonResponse
-from ..serializers import *
-from rest_framework.renderers import JSONRenderer
-from ..csp import *
+from ..helper_functions.serializers import *
+from ..helper_functions.csp import *
 from django.http import HttpResponse
 from django.contrib import messages
-from ..toExcel import *
-from ..scripts import getCalendar
+from ..helper_functions.toExcel import *
+from ..helper_functions.scripts import getCalendar
 
 
 ###Default Landing Page###
@@ -18,7 +17,8 @@ def index(request):
     return redirect('dashboard')
 
 
-"""dashboard gets all departments from the user and creates a dictionary
+"""
+dashboard gets all departments from the user and creates a dictionary
 with years as their values.
 """
 @login_required
@@ -39,7 +39,8 @@ def dashboard(request):
     context['timetableId']=timetableId
     return render(request, "dashboard.html", context)
 
-"""Sets the current timetable and gets all available timetables for the year.
+"""
+Sets the current timetable and gets all available timetables for the year.
 Creates the side navbar with the correct links for the timetable.
 """
 def displayDashboardContent(request, timetableId):
@@ -55,7 +56,8 @@ def displayDashboardContent(request, timetableId):
     return response
 
 
-"""Gets necessary elements to display on the timetable information page.
+"""
+Gets necessary elements to display on the timetable information page.
 """
 def displayTimetableLanding(request, timetableId):
     #Get timetable information with teachers and classes
@@ -91,7 +93,8 @@ def displayTimetableLanding(request, timetableId):
              'weeks':weeks}
     return render(request, 'data/timetableLandingPage.html', context)
 
-"""getList gets a type and the current timetableId.
+"""
+getList gets a type and the current timetableId.
 Returns instances of the type in order to create a 
 list of items for the dashboard sidebar.
 """
@@ -116,7 +119,8 @@ def getList(request, type, timetableId):
     context["objects"]=objects
     return render(request, "data/buttonSidebar.html", context)
 
-"""Recieves type of object and timetable.
+"""
+Recieves type of object and timetable.
 Returns the sidebar template page with either
 teacher or module objects in a list.
 """
@@ -137,7 +141,8 @@ def getSidebar(request, type, timetableId):
         context['detailPath']='getModules'
     return render(request, 'data/sidebarTemplate.html', context)
 
-"""Accepts a teacher Id and a timetable Id.
+"""
+Accepts a teacher Id and a timetable Id.
 Gets the teachers assigned modules, and the teacher object.
 Returns an organized dictionary of classes, with the parent as the key
 """
@@ -262,7 +267,8 @@ def combingView(request, timetableId, groupByClass=True):
     return render(request, 'data/combingView.html', context)
 
 
-"""Accepts a timetable id and teacher. If teacher, modules are the teachers assigned classes.
+"""
+Accepts a timetable id and teacher. If teacher, modules are the teachers assigned classes.
 Returns details to build the calendar.
 """
 def calendarView(request, timetableId, teacherId=0):
@@ -297,16 +303,33 @@ def calendarView(request, timetableId, teacherId=0):
 #     return JsonResponse(events)
 
 
+"""
+Auto Assignment function. 
+Accepts a timetable and returns a copy with assignments made if possible.
+"""
 def cspAutoAssign(request, timetableA):
+    #Get date time for naming generated Timetable
     from datetime import datetime
     now = datetime.now()
     tA=Timetable.objects.get(id=timetableA)
-    uniqueId = uuid.uuid4().hex[:3]
+
+    #Get 4 characters from uuid to mark a timetable unique
+    uniqueId = uuid.uuid4().hex[:4]
     timetable=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +" - "+now.strftime("%d/%m") + " - " + str(uniqueId), tA)
+    
+    #Get scheduled classes and check if all assigned to periods.
     sched=getClassSchedule(timetable)
     if(not sched):
-        return HttpResponse(status=502)
+        timetable.delete()
+        messages.error(request,str("Some classes are not scheduled. Assignment is not possible."))
+        return redirect('dashboard')
+    
+    #Get Teachers for the domains
     teach=getTeacherDomains(timetable)
+
+    #Try creating the CSP object, through errors into a message.
+    #Possible errors include assignments from user preferences
+    #that are not possible.
     try:
         csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks)
     except ValueError as msg:
@@ -314,29 +337,42 @@ def cspAutoAssign(request, timetableA):
         messages.error(request,str(msg))
         return redirect('dashboard')
 
-
-
+    #Checks if there is enough teacher load to handle all classes
     if csp1.checkPossible():
+
+        #Tries up to 3 times to run the CSP incase of a bad initial assignment.
         count=0
         while count<3:
+
+            #Run CSP
             if (csp1.assignTeacher()):
+
+                #Save assignments as objects and return new timetable
                 for c, teacher in csp1.class_assignments.items():
                     Module.objects.filter(id=c).update(teacher_id=teacher)
                 messages.success(request, f"New Timetable {timetable.name} has been generated")
                 request.session['timetableId']=timetable.id
                 return redirect('dashboard')
             count+=1
+        
+        #If we haven't found a solution, delete timetable and return.
         timetable.delete()
         messages.error(request, "No valid solution was found.")
         return redirect('dashboard')
-    # return render(request, 'forms/timetableWizard.html', {'timetable':t})
-    
+
+"""
+Returns list of preferences for a teacher.
+"""
 def teacherPreferences(request, teacherId, timetableId):
     preferences=Preference.objects.filter(teacher_id=teacherId, module__group__parent__timetable_id=timetableId).order_by("module__group__parent","module__group__session")
     context={'preferences':preferences, 'teacherId':teacherId, 'timetableId':timetableId}
     return render(request, 'data/preferences.html', context)
 
+"""
+Returns modules for use in dropdown menues
+"""
 def getGroups(request, parentId, combing=False):
+    #Checks if choice is from the combing chart
     if not combing:
         groups=ModuleGroup.objects.filter(parent_id=parentId).order_by('session')
         choices=[(group.id, group.name) for group in groups]
@@ -346,6 +382,9 @@ def getGroups(request, parentId, combing=False):
     
     return JsonResponse({'choices':choices})
 
+"""
+returns a json of module choices
+"""
 def getModulesJson(request, groupId, combing=False):
     if not combing:
         modules=Module.objects.filter(group_id=groupId).order_by('lesson')
@@ -355,26 +394,47 @@ def getModulesJson(request, groupId, combing=False):
     
     return JsonResponse({'choices':choices})
 
+"""
+Returns department information.
+"""
 def departmentInfo(request, departmentId):
     department=Department.objects.get(id=departmentId)
-    timetables=Timetable.objects.filter(tableYear__department=department)
-    context={'department':department, 'timetables':timetables}
+    #timetables=Timetable.objects.filter(tableYear__department=department)
+    context={'department':department}
     return render(request, 'data/departmentInfo.html', context)
 
+
+"""
+Export view for calendar
+"""
 def exportCalendarView(request, timetableId, teacherId=None):
+        
         timetable=Timetable.objects.get(id=timetableId)
+
+        #If teacher, then we get teacher and get calendar events based on teacher assignments
         if teacherId:
             teacher=Teacher.objects.get(id=teacherId)
         else:
             teacher=None
+
+        #Call export function from toExcel.py 
         calendar=exportCalendar(timetable, teacher)
+
+        #Return httpresponse that allows for a download
         response = HttpResponse(calendar,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=calendar.xlsx'
         return response
 
+"""
+Export the combing chart to excel
+"""
 def exportCombingView(request, timetableId):
     timetable=Timetable.objects.get(id=timetableId)
+
+    #Call combing chart export
     chart=combingTemplateBuilder(timetable)
+
+    #Return downloadable httpresponse
     response = HttpResponse(chart,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=combing_chart.xlsx'
     return response
