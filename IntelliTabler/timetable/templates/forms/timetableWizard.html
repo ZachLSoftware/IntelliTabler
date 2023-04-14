@@ -15,6 +15,10 @@
   <a id="calendar" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'calendarView' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-calendar-days"></i><span class="d-none d-sm-inline">  Calendar</span></a>
 </li>
 <li class="nav-item">
+  <a id="preferences" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'preferences' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-star" data-bs-toggle="tooltip" data-bs-placement="top"
+    data-bs-title="View All Preferences"></i><span class="d-none d-sm-inline">  Preferences</span></a>
+</li>
+<li class="nav-item">
   <a class="nav-link align-middle px-0 sidebar-link" data-bs-toggle="modal" data-bs-target="#confirmModal"><i class="fa-regular fa-square-plus"></i><span class="d-none d-sm-inline">  Generate Timetable</span></a>
 </li>
 <li class="nav-item">

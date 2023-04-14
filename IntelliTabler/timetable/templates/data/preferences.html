@@ -1,6 +1,50 @@
 {% load customTags %}
+<div id="preferenceChangeHandler" class="text-center" hx-trigger="preferenceChange from:body" hx-get="{% url 'preferences' timetable.id %}" hx-target="#mainContent">
 <h1>Preferences</h1>
-<a id='newPreference' class="btn btn-primary-outline" hx-get="{% url 'addPreference' teacherId timetableId %}" hx-target="#addForm">New Preference</a>
+<div id="preferenceTables" class="container"> 
+    <div class="row justify-content-center">
+{% for k,v in preferences.items %}
+
+
+<table id={{k.id}} class="table caption-top preferenceTable" style="max-width:70%;">
+    <caption>
+        <div class="row">
+            <div class="col-8 text-start fs-4">
+                <div id="{{k.id}}Toggle" class="text-decoration-none rotateLink classCard" data-bs-toggle="collapse" data-bs-target="#table{{k.id}}" role="button" aria-expanded="false" aria-controls="{{k.id}}">
+                    {{k.name}}'s Preferences<i id="{{k.id}}Icon" class="fa-solid fa-angle-down rotate"></i>
+                </div>
+            </div>
+        </div>
+</caption>
+
+    <tbody id="table{{k.id}}" class="collapse">
+        <th> Group </th>
+        <th> Module </th>
+        <th> Preference </th>
+        <th><a id='newPreference' class="btn btn-success" hx-get="{% url 'addPreference' timetable.id k.id %}" hx-target="#addForm">New Preference</a></th>
+            {% for preference in v %}
+            <tr>
+                <td style="background-color: {{preference.module.group.parent.color}}; color: {{preference.module.group.parent.color|getTextColor}}">{{preference.module.group.name}}
+                <td>{{preference.module.name}}</td>
+                <td>{{preference.priority}}</td>
+                <td><button class="btn btn-warning" hx-delete="{% url "deleteObject" "Preference" preference.id %}" hx-confirm="Confirm Delete?">Delete Preference</button></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td>No Preferences</td>
+            </tr>
+            {% endfor %}
+    </table>
+    <hr>
+{%empty%}
+No modules
+{%endfor%}
+</div>
+</div>
+</div>
+
+{% comment %} <h1>Preferences</h1>
+<a id='newPreference' class="btn btn-primary-outline" hx-get="{% url 'addPreference' timetableId  %}" hx-target="#addForm">New Preference</a>
 <table class="table">
     <th> Group </th>
     <th> Module </th>
@@ -19,4 +63,4 @@
         </tr>
         {% endfor %}
     </tbody>
-</table>
+</table> {% endcomment %}

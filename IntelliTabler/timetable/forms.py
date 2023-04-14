@@ -205,7 +205,7 @@ class setPreferenceForm(BaseForm):
     assignToAll=forms.BooleanField(required=False, label="Assign to all instances of class?",widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     def __init__(self, parents,groups=[],modules=[],*args, **kwargs):
-        self.teacher = kwargs.pop('teacher', None)
+        self.teacherId = kwargs.pop('teacherId', None)
         super().__init__(*args, **kwargs)
         if(parents==[]):
             self.fields['class'].choices=[('None', 'None'),]
@@ -224,7 +224,7 @@ class setPreferenceForm(BaseForm):
 
     def clean(self):
         cleaned_data=super().clean()
-        if Preference.objects.filter(teacher_id=self.teacher, module_id=cleaned_data['module']).exists():
+        if Preference.objects.filter(teacher_id=self.teacherId, module_id=cleaned_data['module']).exists():
             self.add_error("module","This teacher already has a preference set for this module.")
 
 

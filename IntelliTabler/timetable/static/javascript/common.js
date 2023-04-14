@@ -6,9 +6,9 @@ var currentClass;
 
 
 
-$(document).on("htmx:afterSettle", "#displayChild", (e) =>{
-    if(e.detail.pathInfo.requestPath.split('/')[1]=="getModules"){
-        if(e.detail.requestConfig.elt.id!="displayChild"){
+$(document).on("htmx:afterSettle", "#displayChild, #mainContent", (e) =>{
+    if(e.detail.pathInfo.requestPath.split('/')[1]=="getModules" || e.detail.pathInfo.requestPath.split('/')[1]=="preferences"){
+        if(e.detail.requestConfig.elt.id!="displayChild" && e.detail.requestConfig.elt.id!="preferenceChangeHandler"){
             classToggle= new Set();
         }
         classToggle.forEach(key => {

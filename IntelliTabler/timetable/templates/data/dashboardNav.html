@@ -46,6 +46,10 @@
                 data-bs-title="View Combing Chart"></i><span class="d-none d-sm-inline">  Combing Chart</span></a>
             </li>
             <li class="nav-item">
+              <a id="preferences" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'preferences' timetable.id %}" hx-target="#mainContent"><i class="fa-solid fa-star" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="View All Preferences"></i><span class="d-none d-sm-inline">  Preferences</span></a>
+            </li>
+            <li class="nav-item">
               <a id="departmentInfo" class="nav-link align-middle px-0 sidebar-link" hx-get="{% url 'departmentInfo' timetable.tableYear.department.id %}" hx-target="#mainContent"><i class="fa-solid fa-info" data-bs-toggle="tooltip" data-bs-placement="top"
                 data-bs-title="View/Edit Department"></i><span class="d-none d-sm-inline">  Department Info</span></a>
             </li>

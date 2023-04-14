@@ -366,6 +366,15 @@ Returns list of preferences for a teacher.
 def teacherPreferences(request, teacherId, timetableId):
     preferences=Preference.objects.filter(teacher_id=teacherId, module__group__parent__timetable_id=timetableId).order_by("module__group__parent","module__group__session")
     context={'preferences':preferences, 'teacherId':teacherId, 'timetableId':timetableId}
+    return render(request, 'data/teacherPreferences.html', context)
+
+def preferences(request, timetableId):
+    timetable=get_object_or_404(Timetable, id=timetableId)
+    teachers=Teacher.objects.filter(department=timetable.tableYear.department).order_by('name')
+    preferences={}
+    for teacher in teachers:
+        preferences[teacher]=Preference.objects.filter(timetable=timetable, teacher=teacher).order_by("module__group__parent","module__group__session")
+    context={'timetable':timetable, 'preferences':preferences}
     return render(request, 'data/preferences.html', context)
 
 """

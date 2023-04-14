@@ -251,7 +251,7 @@ Assign a teacher to a class
 """
 def assignTeacher(request, departmentId, moduleId):
     #Get teachers for choice
-    teachers=Teacher.objects.filter(department_id=departmentId)
+    teachers=Teacher.objects.filter(department_id=departmentId).order_by('name')
     choices=[(teacher.id, teacher.name) for teacher in teachers]
     if request.method=='POST':
         form=AssignTeacherForm(choices, request.POST, request.FILES)
@@ -522,8 +522,7 @@ def timetableWizard(request, timetableA):
     response['HX-Trigger']='dashboardLoaded'
     return response
 
-def addPreference(request, teacherId, timetableId):
-    teacher=Teacher.objects.get(id=teacherId)
+def addPreference(request, timetableId, teacherId):        
     moduleparents=ModuleParent.objects.filter(timetable_id=timetableId).order_by('name')
     parents=[(mp.id, mp.name) for mp in moduleparents]
     grs=ModuleGroup.objects.filter(parent__timetable_id=timetableId).order_by('name')
@@ -531,7 +530,7 @@ def addPreference(request, teacherId, timetableId):
     groups=[(group.id, group.name) for group in grs]
     modules=[(mod.id, mod.name) for mod in mods]
     if request.method=='POST':
-        form=setPreferenceForm(parents, groups, modules, request.POST, request.FILES, teacher=teacherId)
+        form=setPreferenceForm(parents, groups, modules, request.POST, request.FILES, teacherId=teacherId)
         if form.is_valid():
             mod = Module.objects.get(id=form.cleaned_data['module'])
             if form.cleaned_data['assignToAll']:
