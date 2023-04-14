@@ -57,7 +57,7 @@ class TeacherForm(BaseModelForm):
     roomNum = forms.CharField(max_length=20, label="Room")
     class Meta:
         model=Teacher
-        exclude={"user","department", "id"}
+        exclude={"department", "id"}
 
 class AvailabilityForm(BaseForm):
     checked = forms.BooleanField(required=False)
@@ -71,7 +71,7 @@ class ModuleParentForm(BaseModelForm):
     repeat=forms.BooleanField(required=False, label="Does this class repeat the same schedule each week?", widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
     class Meta:
         model=ModuleParent
-        exclude=("timetable","department", "user", "id", "sharedId")
+        exclude=("timetable","department", "id", "sharedId")
         widgets={
             'color': TextInput(attrs={'type': 'color', 'class':'form-control-color'}),
         }
@@ -193,7 +193,7 @@ class TimetableForm(BaseModelForm):
 
     class Meta:
         model=Timetable
-        exclude=("id","user","tableYear")
+        exclude=("id","tableYear")
 
 
 class setPreferenceForm(BaseForm):

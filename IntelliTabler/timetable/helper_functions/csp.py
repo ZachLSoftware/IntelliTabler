@@ -1,7 +1,7 @@
 from ..models import *
 
-def createNewGeneratedTimetable(year, user, name, timetableA):
-    t=Timetable.objects.create(name=name, tableYear=year, user=user)
+def createNewGeneratedTimetable(year, name, timetableA):
+    t=Timetable.objects.create(name=name, tableYear=year)
     mgA=ModuleGroup.objects.filter(parent__timetable=timetableA).order_by('name')
     mgB=ModuleGroup.objects.filter(parent__timetable=t).order_by('name')
     for i in range(len(mgB)):
@@ -75,7 +75,11 @@ class CSP():
                     if k in val['preferences']:
                         if val['preferences'][k]==3:
                             if k in self.preassigned:
-                                raise ValueError("Multiple teachers have been given a required preference for class " + str(k))
+                                try:
+                                    modName=Module.objects.get(id=k).name
+                                except:
+                                    modName="Unknown"
+                                raise ValueError("Multiple teachers have been given a required preference for class " + modName)
                             self.preassigned[k]=teacher
                             self.class_assignments[k]=teacher
                             self.teachers[teacher]['load'][self.schedule[k]['period'].week]-=1

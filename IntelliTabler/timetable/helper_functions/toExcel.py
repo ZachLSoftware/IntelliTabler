@@ -200,7 +200,6 @@ def moduleParentTemplateReader(timetable, classesDF):
                 cl=ModuleParent()
                 cl.timetable=timetable
                 cl.department=timetable.tableYear.department
-                cl.user=timetable.user
             cl.name=r['Class Name']
             cl.numPeriods=r['Num Periods Taught']
             cl.numClasses=r['Num Class Groups']
@@ -223,7 +222,6 @@ def teacherTemplateReader(timetable, teachersDF):
             if not teacher:
                 teacher=Teacher()
                 teacher.department=timetable.tableYear.department
-                teacher.user=timetable.user
             teacher.name=r['Name']
             teacher.load=r['Load Per Week']
             teacher.roomNum=r['Room']
@@ -332,7 +330,6 @@ def readFromCombing(timetable, ws):
             cl=ModuleParent()
             cl.timetable=timetable
             cl.department=timetable.tableYear.department
-            cl.user=timetable.user
         cl.name=r['Class']
         cl.numPeriods=r['Groups']
         cl.numClasses=r['Periods']
@@ -346,7 +343,6 @@ def readFromCombing(timetable, ws):
         if not teacher:
             teacher=Teacher()
             teacher.department=timetable.tableYear.department
-            teacher.user=timetable.user
         teacher.name=r['Teacher']
         teacher.load=r['Load Per Week']
         teacher.save()

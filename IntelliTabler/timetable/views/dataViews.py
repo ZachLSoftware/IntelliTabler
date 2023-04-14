@@ -315,7 +315,7 @@ def cspAutoAssign(request, timetableA):
 
     #Get 4 characters from uuid to mark a timetable unique
     uniqueId = uuid.uuid4().hex[:4]
-    timetable=createNewGeneratedTimetable(tA.tableYear, request.user, str(tA.tableYear.year) +" - "+now.strftime("%d/%m") + " - " + str(uniqueId), tA)
+    timetable=createNewGeneratedTimetable(tA.tableYear, str(tA.tableYear.year) +" - "+now.strftime("%d/%m") + " - " + str(uniqueId), tA)
     
     #Get scheduled classes and check if all assigned to periods.
     sched=getClassSchedule(timetable)

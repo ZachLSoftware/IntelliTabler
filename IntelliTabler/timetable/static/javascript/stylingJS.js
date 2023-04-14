@@ -41,28 +41,8 @@ htmx.on("htmx:beforeSwap", (e) => {
         $('#displayChild').collapse('hide');
         htmx.config.defaultSwapDelay=500;
     }
-//     console.log(e.detail.target.id);
-//     if(e.detail.target.id=="yearSelectList"){
-//         $("#yearSelect").removeClass('disabled');
-//     }
-
-//     if(e.detail.target.id=="mainContent"){
-//         if($("#mainContent").hasClass('show')){
-//             htmx.config.defaultSwapDelay=500;
-//             }
        $("#mainContent").collapse('hide');
 
-
-//     }
-    // let done = false
-    // let check = setInterval(function(){
-    //     console.log("checking");
-    //     if(!$("#mainContent").hasClass('collapsing')){
-    //         done=true;
-    //         clearInterval(check);
-    //         console.log(check);
-    // }
-    // });
 })
 
 htmx.on('htmx:beforeSend', (e) => {

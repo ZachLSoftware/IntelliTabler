@@ -84,14 +84,12 @@ def addTeacher(request, department, id=0):
             teacher=Teacher.objects.get(id=id)
             created=False
         except:
-            teacher=Teacher.objects.create(user=request.user, department_id=department)
+            teacher=Teacher.objects.create(department_id=department)
             created=True
 
         form = TeacherForm(request.POST, instance=teacher)
         if(form.is_valid()):
-            print(teacher)
             newTeacher=form.cleaned_data
-            newTeacher["user"]=request.user
             newTeacher["department"]=Department.objects.get(id=department)
             teacher.save()
 
@@ -188,7 +186,6 @@ def addModule(request, yearId, parentId=0):
                     p.pk=None
                     p.timetable=table
                     p.department=department
-                    p.user=request.user
                     p.save()
 
                 #Trigger event
@@ -495,7 +492,6 @@ def addTimetable(request, yearId, timetableId=0):
         if form.is_valid():
             table=form.save(commit=False)
             table.tableYear_id=yearId
-            table.user=request.user
             table.save()
             if form.cleaned_data['default']:
                 y=Year.objects.get(id=yearId)

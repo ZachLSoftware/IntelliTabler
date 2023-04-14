@@ -4,7 +4,7 @@ from ..models import Module, ModuleGroup, ModuleParent
 class ModuleParentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModuleParent
-        exclude=('user','sharedId',)
+        exclude=('sharedId',)
 
 
 class ModuleGroupSerializer(serializers.ModelSerializer):

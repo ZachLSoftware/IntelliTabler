@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models import F
 from django.db.models import Q
-# from .scripts import updatePeriod
+
 
 
 class User(AbstractUser):
@@ -96,22 +96,15 @@ def editPeriods(sender, instance, **kwargs):
                     period.dayNum=count
                     period.save()
                     count+=1
-            
-        
-            
-
-    
 
 class Teacher(RandomIDModel):
     name = models.CharField(max_length=50)
     load = models.IntegerField(blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     roomNum = models.CharField(max_length=20, blank=True, null=True)
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
 
 class Availability(models.Model):
     period = models.ForeignKey(Period, on_delete=models.CASCADE)
-    #week = models.IntegerField()
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
 class Year(RandomIDModel):
@@ -127,13 +120,12 @@ class Year(RandomIDModel):
 @receiver(post_save, sender=Year)
 def defaultTimetable(sender, instance, created, **kwargs):
     if created:
-        t=Timetable.objects.create(user=instance.department.user, name=str(instance.year)+" Timetable", tableYear=instance)
+        t=Timetable.objects.create(name=str(instance.year)+" Timetable", tableYear=instance)
         instance.defaultTimetable=t
         instance.save()
 
 class Timetable(RandomIDModel):
     name = models.CharField(max_length=40)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     tableYear = models.ForeignKey(Year, on_delete=models.CASCADE)
     
 class ModuleParent(RandomIDModel):
@@ -142,7 +134,6 @@ class ModuleParent(RandomIDModel):
     numPeriods=models.IntegerField()
     numClasses=models.IntegerField()
     department=models.ForeignKey(Department, on_delete=models.CASCADE)
-    user=models.ForeignKey(User, on_delete=models.CASCADE)
     timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
     color=models.CharField(max_length=7, default="#0275d8")
     repeat=models.BooleanField(null=True, blank=True, default=False)
@@ -160,12 +151,6 @@ class Module(RandomIDModel):
     teacher=models.ForeignKey(Teacher, blank=True, null=True, on_delete=models.SET_NULL)
     sharedKey=models.CharField(max_length=36, default=uuid.uuid4)
     lessonNum = models.IntegerField()
-
-# class TimetableRow(models.Model):
-#     timetable=models.ForeignKey(Timetable, on_delete=models.CASCADE)
-#     module=models.ForeignKey(Module, on_delete=models.CASCADE)
-#     manualTeacher=models.ForeignKey(Teacher, null=True, blank=True, on_delete=models.SET_NULL)
-#     manualPeriod=models.ForeignKey(Period, null=True, on_delete=models.SET_NULL)
 
 @receiver(post_save, sender=ModuleParent)
 def createModules(sender, instance, created, **kwargs):
@@ -268,7 +253,7 @@ def updateModuleParent(sender, instance, **kwargs):
                 groups=ModuleGroup.objects.filter(parent=oldInstance).filter(session__lte=sessions).order_by('session')
                 for group in groups:
                     if group.period:
-                        from .scripts import updatePeriod
+                        from .helper_functions.scripts import updatePeriod
                         updatePeriod(group, group.period.name, group.period.week, True)
 
             
@@ -284,18 +269,6 @@ def cloneModules(sender, instance, created, **kwargs):
             mod.pk=None
             mod.timetable=instance
             mod.save()
-
-# @receiver(post_save, sender=Module)
-# def updateRow(sender, instance, created, **kwargs):
-#     if not created:
-#         try:
-#             timetable=Timetable.objects.get(id=instance.group.department.id*instance.group.year.year)
-#             row=TimetableRow.objects.get(module=instance, timetable=timetable)
-#         except:
-#             return
-#         row.manualTeacher=instance.teacher
-#         row.manualPeriod=instance.period
-#         row.save()
 
 class Preference(models.Model):
     class Priority(models.IntegerChoices):
