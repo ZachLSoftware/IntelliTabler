@@ -32,6 +32,7 @@ environ.Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -161,3 +162,6 @@ class CustomFormRenderer(TemplatesSetting):
     form_template_name=os.path.join(BASE_DIR, 'timetable/templates/forms/form_snippet.html')
 
 FORM_RENDERER = "IntelliTabler.settings.CustomFormRenderer"
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
