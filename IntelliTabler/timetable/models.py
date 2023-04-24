@@ -45,7 +45,6 @@ def createPeriods(sender, instance, created, **kwargs):
         week=1
         for count in range(1, totalPeriods+1):
 
-          
             Period.objects.create(name=days[count%5]+str(round(i/5+.4)), dayNum=count, department=instance.department, week=week)
             i+=1
             if(count%(instance.numPeriods*5)==0):
@@ -155,10 +154,6 @@ class Module(RandomIDModel):
 @receiver(post_save, sender=ModuleParent)
 def createModules(sender, instance, created, **kwargs):
     if created:
-        try:
-            timetable=Timetable.objects.get(id=instance.department.id*instance.tableYear.year)
-        except:
-            timetable=None
         mSharedKey={}
         lessonNum=1
         for i in range(1, instance.numPeriods+1):
@@ -170,24 +165,7 @@ def createModules(sender, instance, created, **kwargs):
                 else:
                     mod = Module.objects.create(name=instance.name+"-"+str(j), lesson=j, lessonNum=lessonNum, group=group, sharedKey=mSharedKey[j])
                 lessonNum+=1
-                
-
-                # if timetable is not None:
-                #     TimetableRow.objects.create(timetable=timetable, module=mod)
-    # else:
-    #     test=kwargs['update_fields']
-    #     print(test)
-        # groups=ModuleGroup.objects.filter(parent=instance.id).order_by('session')
-        # if len(groups)>instance.numPeriods:
-        #     for group in groups:
-        #         if group.session > instance.numPeriods:
-        #             group.delete()
-        #         else:
-        #             mods=Module.objects.filter(group=group)
-        #             for mod in mods:
-        #                 if int(mod.name.split("-")[1])> instance.numClasses:
-        #                     mod.delete()
-
+  
 @receiver(pre_save, sender=ModuleParent)
 def updateModuleParent(sender, instance, **kwargs):
     if not instance._state.adding and ModuleParent.objects.filter(id=instance.id).exists():
@@ -205,8 +183,6 @@ def updateModuleParent(sender, instance, **kwargs):
         for mod in Module.objects.filter(group=g):
             mSharedKey[mod.lesson]=mod.sharedKey
         
-        # if oldInstance.name!=instance.name:
-        #     groups=
         if oldInstance.numClasses<instance.numClasses:
             groups = ModuleGroup.objects.filter(parent=oldInstance, session__lte=instance.numPeriods)
             i=1

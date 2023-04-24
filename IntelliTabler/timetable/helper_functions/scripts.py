@@ -26,15 +26,7 @@ def updatePeriod(group, pName, week, manual=False):
         update.append(module)
         w+=1
     return update
-            # i=0
-            # for week in range(1,weeks):
-            #     if objs[i]==group:
-            #         objs[i].processed=True
-            #     objs[i].processed=True
-            #     objs[i].period=Period.objects.get(department=group.parent.department, name=group.period.name, week=week)
-            #     objs[i].save()
-            #     del group.processed
-            #     i+=1
+            
 
 """Special Function to help get all data for the calendar in a serialized format."""
 def getCalendar(timetableId, teacherId=0):

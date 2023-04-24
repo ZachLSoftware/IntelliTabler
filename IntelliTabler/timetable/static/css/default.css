@@ -133,7 +133,8 @@ html, body {
   display:flex;
   align-items: center;
   justify-content: center;
-  background-color:rgba(0, 0, 0, 0.5)
+  background-color:rgba(0, 0, 0, 0.5);
+  z-index: 10000;  
 }
 #progressLoaderTitle {
   position: fixed;
@@ -144,7 +145,7 @@ html, body {
   display:flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 10001;
 }
 
 .progressLoader::after {
@@ -154,7 +155,8 @@ html, body {
   border: 15px solid #ffffff;
   border-top-color: #17007c;
   border-radius: 50%;
-  animation: generating 1s ease infinite
+  animation: generating 1s ease infinite;
+  z-index: 10000;
 }
 
 @keyframes generating {

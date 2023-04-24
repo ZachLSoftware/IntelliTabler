@@ -1,7 +1,7 @@
 <script>currentTimetable={{timetable.id}}</script>
 <div class="row ">
 <div id="listObjectsDiv" class="col-auto px-sm-2 px-0 shadow position-fixed">
-    <div id="listObjects" hx-trigger="load, {{type}}Change from:body, TeacherDeleted from:body" hx-get="{%url 'getList' type timetable.id %}" hx-target="this" id="{{type}}sidebar" class="d-flex mt-4 justify-content-center ">
+    <div id="listObjects" hx-trigger="load, {{type}}Change from:body, {{type}}Deleted from:body" hx-get="{%url 'getList' type timetable.id %}" hx-target="this" id="{{type}}sidebar" class="d-flex mt-4 justify-content-center ">
     </div>
 </div>
 <div id="displayChild" hx-trigger="{{infoType}}DetailsChange from:body" class="col collapse pt-3" hx-target="this"></div>

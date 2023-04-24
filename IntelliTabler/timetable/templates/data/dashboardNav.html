@@ -15,7 +15,6 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
               {% for t in tables %}
-                {% comment %} <li><a class="dropdown-item departmentDrop" hx-get="{% url 'dashboard2' d.id %}" hx-target="#yearSelectList">{{d.name}}</a></li> {% endcomment %}
                 <li class="depDropDown"><a class="dropdown-item timeDrop" hx-get="{% url 'displayDashboardContent' t.id %}" hx-target="#sidebarBody">{{t.name}}</a></li>
               {% empty %}
               <li>No Timetables</li>

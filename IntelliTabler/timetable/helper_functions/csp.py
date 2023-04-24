@@ -27,7 +27,7 @@ def getClassSchedule(timetable):
     for mod in modules:
         if mod.group.period==None:
             return False
-        schedule[mod.id]={'sharedKey':mod.sharedKey,'period':mod.group.period}
+        schedule[mod.id]={'sharedKey':mod.sharedKey,'period':mod.group.period, 'repeat':mod.group.parent.repeat}
     return schedule
 
 def getTeacherDomains(timetable):
@@ -36,8 +36,6 @@ def getTeacherDomains(timetable):
     w=timetable.tableYear.department.format.numWeeks
     count=0
     for teacher in teachers:
-        # if count == 6:
-        #     break
         av=Availability.objects.filter(teacher=teacher)
         pr=Preference.objects.filter(teacher=teacher)
         pdict={}
@@ -66,9 +64,17 @@ class CSP():
         self.teacher_splitClass={teacher: {} for teacher in teachers.keys()} #Create Dict to track like classes
         self.assignedPeriods={v['period']:set() for k,v in schedule.items()} #Dict to track which periods a teacher is already in. Helps for quick constraint checking.
         self.currDoms={cl: {} for cl in schedule.keys()}
+        self.repeatConstraint=True
+        self.setCurrDom() #Create the Current Domains and prune
+        
+
+    def resetAssignments(self):
+        self.class_assignments={id:None for id in self.schedule.keys()}
+
+    def setCurrDom(self):
         toDelete=[]
         for k,v in self.currDoms.items():
-            for teacher, val in teachers.items():
+            for teacher, val in self.teachers.items():
                 if self.isValidAssignment(teacher, k):
                     if self.schedule[k]['sharedKey'] not in self.teacher_splitClass[teacher]:
                         self.teacher_splitClass[teacher][self.schedule[k]['sharedKey']]=set()
@@ -103,17 +109,24 @@ class CSP():
         for k in toDelete:
             del self.currDoms[k]
 
+
     def isComplete(self):
         return all(teacher is not None for teacher in self.class_assignments.values())
 
     def isValidAssignment(self, teacherId, classId):
         classPeriod=self.schedule[classId]['period']
+        cl = self.schedule[classId]
         if classPeriod not in self.teachers[teacherId]['availability']:
             return False
         if teacherId in self.assignedPeriods[classPeriod]:
             return False
         if self.teachers[teacherId]['load'][self.schedule[classId]['period'].week]<=0:
             return False
+        if self.schedule[classId]['repeat'] and self.repeatConstraint:
+            classes=[c for c,val in self.schedule.items() if (val['sharedKey']==cl['sharedKey'] and val['period'].name == cl['period'].name and c != classId)]
+            for clas in classes:
+                if self.class_assignments[clas] and teacherId != self.class_assignments[clas]:
+                    return False
         return True
 
 
@@ -122,17 +135,15 @@ class CSP():
             return True
         
 
-        self.unassigned.sort(key=lambda cl: (len(self.currDoms[cl]), -self.currDoms[cl][next(iter(self.currDoms[cl]))]['base_pref'] if self.currDoms[cl] else 0))
+        self.unassigned.sort(key=lambda cl: (len(self.currDoms[cl]), (-self.currDoms[cl][next(iter(self.currDoms[cl]))]['base_pref'],-self.currDoms[cl][next(iter(self.currDoms[cl]))]['sharedKey_pref']) if self.currDoms[cl] else (0,0)))
         classId=self.unassigned[0]
         domain=self.currDoms[classId]
         if not domain:
             return False
-
+        domainSave=domain.copy()
         
         #Get list of teachers by highest remaining load
         for teacher in sorted(domain, key=lambda t: (domain[t]['base_pref'], domain[t]['sharedKey_pref'], self.teachers[t]['load'][self.schedule[classId]['period'].week]/self.teachers[t]['dLoad']), reverse=True):
-            if teacher not in domain.keys():
-                continue
             if self.isValidAssignment(teacher, classId):
                 
                 #If valid assignment, assign teacher, reduce load for that week,
@@ -144,7 +155,7 @@ class CSP():
                 self.assignedPeriods[self.schedule[classId]['period']].add(teacher)
                 del self.currDoms[classId]
                 self.teacher_splitClass[teacher][self.schedule[classId]['sharedKey']].add(classId)
-                self.forwardCheck(classId, teacher)
+                self.forwardCheck(teacher)
 
                 #Run recursive step
                 if self.assignTeacher():
@@ -157,6 +168,7 @@ class CSP():
                 self.assignedPeriods[self.schedule[classId]['period']].remove(teacher)
                 self.teacher_splitClass[teacher][self.schedule[classId]['sharedKey']].remove(classId)
                 self.currDoms[classId]=domain
+
             else:
                 del domain[teacher]
                 
@@ -164,12 +176,9 @@ class CSP():
         return False
 
 
-    def forwardCheck(self, classId, teacherId):
-        sKey = self.schedule[classId]['sharedKey']
+    def forwardCheck(self, teacherId):
         for nextCl in self.unassigned:
             changed=False
-            if nextCl == classId:
-                continue
             if teacherId in self.currDoms[nextCl]:
                 if not self.isValidAssignment(teacherId, nextCl):
                     del self.currDoms[nextCl][teacherId]
@@ -187,7 +196,6 @@ class CSP():
                 tempDom=self.currDoms[nextCl].copy()
                 self.currDoms[nextCl].clear()
                 self.currDoms[nextCl] = {teacher: vals for teacher, vals in sorted(tempDom.items(), key=lambda t: (t[1]['base_pref'], t[1]['sharedKey_pref']), reverse=True)}
-                
 
     def checkPossible(self):
         loadCheck={}
@@ -204,5 +212,25 @@ class CSP():
        
         for week in range(1,self.weeks+1):
             if loadCheck[week]>availableLoad[week]:
+                raise ValueError("There are too many classes ("+str(loadCheck[week])+") and not enough teachers to cover ("+ str(availableLoad[week])+").")
+        periodCount={}
+        for module in self.schedule.values():
+            p=module['period']
+            if p not in periodCount:
+                periodCount[p]=1
+            else:
+                periodCount[p]+=1
+        for period,pc in periodCount.items():
+            if pc > len(self.teachers):
+                raise ValueError("Too many classes have been assigned for the period " + period.name + " and there are not enough teachers to cover it.")
+
+        return True
+    
+    def verifyAssignments(self, assignments):
+        for cl in assignments:
+            if not self.isValidAssignment(cl.teacher.id, cl.id):
                 return False
+            self.teachers[cl.teacher.id]['load'][self.schedule[cl.id]['period'].week]-=1
+            self.assignedPeriods[self.schedule[cl.id]['period']].add(cl.teacher.id)
+            
         return True

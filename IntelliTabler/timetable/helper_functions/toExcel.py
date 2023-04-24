@@ -6,7 +6,7 @@ import xlsxwriter
 import io
 import numpy as np
 
-def moduleTeacherWSTemplate(timetable, sheets):
+def templateBuilderMain(timetable, sheets):
     template_builders = {
         'Classes': moduleParentTemplateBuilder,
         'Teachers': teacherTemplateBuilder,
@@ -184,7 +184,7 @@ def readInExcel(timetable, ws):
         
     return results
 
-def moduleParentTemplateReader(timetable, classesDF):
+def moduleParentTemplateReader(timetable, classDF):
     classDF=classDF.replace({0:np.NaN, '':np.NaN, ' ':np.NaN})
     for i, r in classDF.iterrows():
         if not pd.isnull(r['Class Name']) and not pd.isnull(r['Num Periods Taught']) and not pd.isnull(r['Num Class Groups']):

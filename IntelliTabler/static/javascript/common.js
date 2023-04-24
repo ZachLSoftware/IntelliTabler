@@ -300,7 +300,7 @@ htmx.on("htmx:responseError", function(e) {
     var errorMessage = error.error;
     var html= `<div class="alert alert-danger alert-dismissible" role="alert">
     <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
-      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl text-dark"></i>
     </button>
     ${errorMessage}
     </div>`
@@ -311,7 +311,7 @@ $(document).on("successWithMessage", function(e) {
     var message = e.detail.value;
     var html= `<div class="alert alert-success alert-dismissible" role="alert">
     <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
-      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl text-dark"></i>
     </button>
     ${message}
     </div>`

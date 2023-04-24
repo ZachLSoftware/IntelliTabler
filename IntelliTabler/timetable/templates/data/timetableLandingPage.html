@@ -8,10 +8,12 @@
         <button class="btn btn-primary-outline border" hx-get="{% url 'addTimetable' timetable.tableYear.id timetable.id %}" hx-target="#addForm">Edit Timetable</button>
         <button class="btn btn-primary-outline border" hx-post="{% url 'setDefaultTimetable' timetable.tableYear.id timetable.id %}" 
                 hx-confirm="Set {{timetable.name}} as Default Timetable for {{timetable.tableYear.department.name}} {{timetable.tableYear.year}}?" 
-                hx-target="this">Set As Default Calendar
+                hx-target="this">Set As Default Timetable
         </button>
         <button class="btn btn-primary-outline border" hx-get="{% url 'templateBuilderInstructions' timetable.id %}" hx-target="#addForm">Export Excel Template</button>
         <button class="btn btn-primary-outline border" hx-get="{% url 'uploadTest' timetable.id %}" hx-target="#addForm" >Upload Excel Template</button>
+        <button id="verifyTimetableBtn" class="btn btn-primary-outline border" hx-get="{% url 'verifyTimetable' timetable.id %}" hx-target="this">Verify Timetable Assignments</button>
+
         <a class="btn btn-primary-outline border" href="{% url 'exportCalendar' timetable.id %}">Export Calendar to Excel</a>
     </div>
 </div>

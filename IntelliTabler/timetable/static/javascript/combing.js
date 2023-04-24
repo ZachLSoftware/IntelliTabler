@@ -17,11 +17,11 @@ function setupChart(){
 
 function addCombEvent(mod){
     $(mod.session).append(`<div id="${mod.id}Div" session="${mod.session}" class="modDiv d-grid">
-                                    <i id="${mod.id}-Remove" class="fas fa-xmark removeMod"></i>
+                                    <i id="${mod.id}-Remove" class="fas fa-xmark removeMod ${mod.group.parent.id}RemoveIcon"></i>
                                     <button id="${mod.id}" hx-get="/getModules/${mod.group.id}?calendar=1" hx-target="#modalBody" class="mod btn m-1 ${mod.group.parent.id}Class week${mod.group.period.week}">${mod.name}</button>
                                 </div>`);
     $(`#${mod.id}`).css('background-color', mod.group.parent.color);
-    $(`#${mod.id}`).css('color', getTextColor(mod.group.parent.color));
+    $(`#${mod.id}, #${mod.id}-Remove`).css('color', getTextColor(mod.group.parent.color));
     //$(`#${mod.module.teacher}alloc${mod.module.parent}`).text(parseInt($(`#${mod.module.teacher}alloc${mod.module.parent}`).text())+1)
     cData.teachers.add(mod.teacher);
     cData.modParents.add(mod.group.parent.id);
@@ -115,13 +115,6 @@ function setTeacherAllocTotal(teachers, parents){
                 $(`#${parent}Allocated`).removeClass('bg-success');
             }
         });
-        //$(`#${teacher}Rem`).fadeOut8k("slow", function(){$(`#${teacher}Rem`).removeClass("bg-warning", 1000);});
-
-
-    // $(`#${mod.module.teacher}Rem`).text(parseInt($(`#${mod.module.teacher}Rem`).text())-1)
-    // $(`#${mod.module.parent}Allocated`).text(parseInt($(`#${mod.module.parent}Allocated`).text())+1)
-    // $(`#${mod.module.teacher}Allocated`).text(parseInt($(`#${mod.module.teacher}Allocated`).text())+1)
-    // $(`#${mod.module.teacher}Rem`).text(parseInt($(`#${mod.module.teacher}Rem`).text())-1)
 
     updateSet.forEach(function(id){
         $(id).effect("highlight", 1000);
@@ -149,8 +142,8 @@ htmx.on("htmx:beforeSwap", (e) => {
 })
 
 $(document).on("updateColor", function(e){
-    $(`.${e.detail.parentId}Class`).css("background-color",e.detail.color);
-    $(`.${e.detail.parentId}Class`).css("color",getTextColor(e.detail.color));
+    $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader`).css("background-color",e.detail.color);
+    $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader, .${e.detail.parentId}RemoveIcon`).css("color",getTextColor(e.detail.color));
 })
 
 function setCombListeners(){

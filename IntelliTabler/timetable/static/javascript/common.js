@@ -233,7 +233,7 @@ $(document).on('click', '#infoBtnGroup button', function(){
     $("#teacherInfoCont .collapse").collapse('hide');
 })
 
-$(document).on('TeacherDeleted', function(e){
+$(document).on('teacherDeleted moduleParentDeleted', function(e){
     $("#displayChild").html('');
 });
 
@@ -305,7 +305,7 @@ $(document).on("sidebarLoaded", function(e){
     htmx.ajax('GET', url, '#mainContent');
 })
 
-$(document).on("DepartmentDeleted", function(){
+$(document).on("departmentDeleted", function(){
     location.reload();
 });
 
@@ -327,7 +327,7 @@ $(document).on("click", ".classLanding", function(){
     sidebarActiveLine($('#class'))
 })
 
-$(document).on("TimetableDeleted timetableAdded", function(e){
+$(document).on("timetableDeleted timetableAdded", function(e){
         url="/displayDashboardContent/"+e.detail.value;
         htmx.ajax('GET',url, "#sidebarBody")
 })
@@ -362,7 +362,7 @@ $(document).on("successWithMessage", function(e) {
     var message = e.detail.value;
     var html= `<div class="alert alert-success alert-dismissible" role="alert">
     <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
-      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl text-dark"></i>
     </button>
     ${message}
     </div>`
@@ -372,7 +372,7 @@ $(document).on("warningWithMessage", function(e) {
     var message = e.detail.value;
     var html= `<div class="alert alert-warning alert-dismissible" role="alert">
     <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
-      <i class="fa-regular fa-circle-xmark fa-beat fa-xl"></i>
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl text-dark"></i>
     </button>
     ${message}
     </div>`
@@ -427,3 +427,13 @@ $(document).ready(function(){
     }
     $("#timetableLoad").remove();
 })
+
+$(document).on("click","#verifyTimetableBtn", function(e){
+    html=`<div id="progressLoaderTitle"></div>
+    <div id="generatingAnimation"></div>`;
+    $("body").prepend(html);
+    $('#progressLoaderTitle').html("<h1>Verifying Assignments...</h1>");
+    $('#generatingAnimation').addClass("progressLoader");
+    $('#confirmModal').modal('hide');
+
+});

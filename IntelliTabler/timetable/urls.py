@@ -7,6 +7,7 @@ urlpatterns = [
     path('', dataViews.index, name='index'),
     path('addDepartment', formViews.addDepartment, name='addDepartment'),
     path('login', auth_views.LoginView.as_view(template_name='auth_templates/login.html'), name = 'login'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='auth_templates/login.html'), name = 'login'),
     path('logout', authViews.logout_view, name = 'logout'),
     path('register', authViews.register, name = 'register'),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -67,5 +68,6 @@ urlpatterns = [
     path('uploadTest/<int:timetableId>', formViews.getTemplateFileTest, name="uploadTest"),
     path('exportCalendar/<int:timetableId>', dataViews.exportCalendarView, name='exportCalendar'),
     path('exportCalendar/<int:timetableId>/<int:teacherId>', dataViews.exportCalendarView, name='exportCalendar'),
-    path('exportCombing/<int:timetableId>', dataViews.exportCombingView, name="exportCombing")
+    path('exportCombing/<int:timetableId>', dataViews.exportCombingView, name="exportCombing"),
+    path('verifyTimetable/<int:timetableId>', dataViews.cspVerification, name='verifyTimetable')
     ]

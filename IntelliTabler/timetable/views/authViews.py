@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from ..helper_functions.tokens import account_activation_token
+from ..helper_functions.tokens import accountToken
 from django.contrib import messages
 
 
@@ -34,7 +34,7 @@ def register(request):
                 'user': user,
                 'domain': current_site.domain,
                 'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                'token':account_activation_token.make_token(user),
+                'token':accountToken.make_token(user),
                 'protocol': 'https' if request.is_secure() else 'http'
             })
 
@@ -73,7 +73,7 @@ def activate(request, uidb64, token):
         user = None
     
     #If user exists and token is valid, activate account
-    if user is not None and account_activation_token.check_token(user, token):
+    if user is not None and accountToken.check_token(user, token):
         user.is_active = True
         user.save()
 
@@ -81,13 +81,13 @@ def activate(request, uidb64, token):
         return redirect('login')
     else:
         messages.error(request, "Activation Link is Invalid")
-        return redirect('index')
+        return redirect('login')
 
 
 def logout_view(request):
     logout(request)
     messages(request, "You have been logged out")
-    return redirect('index')
+    return redirect('login')
 
 
 def successPage(request):
@@ -96,7 +96,7 @@ def successPage(request):
         return redirect("dashboard")
     else:
         messages.info(request, "You have successfully Logged Out.")
-    return render(request, 'index.html')
+    return redirect('login')
 
 """Password reset view. Takes an email from a user, if user exists an email will be sent"""
 def passwordReset(request):
@@ -116,7 +116,7 @@ def passwordReset(request):
                     'user': user,
                     'domain': current_site.domain,
                     'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token':account_activation_token.make_token(user),
+                    'token':accountToken.make_token(user),
                     'protocol': 'https' if request.is_secure() else 'http'
                 })
                 to_email = form.cleaned_data.get('email')
@@ -142,7 +142,7 @@ def passwordResetConfirm(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except:
         user= None
-    if user is not None and account_activation_token.check_token(user, token):
+    if user is not None and accountToken.check_token(user, token):
         if request.method=='POST':
             form = changePassword(user, request.POST)
             if form.is_valid():

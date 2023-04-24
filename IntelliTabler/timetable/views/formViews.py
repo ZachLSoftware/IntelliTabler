@@ -9,7 +9,7 @@ import json
 from ..helper_functions.serializers import *
 from ..helper_functions.scripts import *
 from django.contrib import messages
-from ..helper_functions.toExcel import readFromCombing, moduleTeacherWSTemplate, readInExcel
+from ..helper_functions.toExcel import readFromCombing, templateBuilderMain, readInExcel
 
 
 """
@@ -86,7 +86,6 @@ def addTeacher(request, department, id=0):
         except:
             teacher=Teacher.objects.create(department_id=department)
             created=True
-
         form = TeacherForm(request.POST, instance=teacher)
         if(form.is_valid()):
             newTeacher=form.cleaned_data
@@ -97,6 +96,9 @@ def addTeacher(request, department, id=0):
             if(not created):
                 return HttpResponse(status=204, headers={'HX-Trigger':json.dumps({'teacherDetailsChange':'None', 'teacherChange':'None'}), 'Department':department})
             return HttpResponse(status=204, headers={'HX-Trigger':'teacherChange', 'Department':department})
+        else:
+            if created:
+                teacher.delete()            
     else:
         if(id!=0):
             teacher=get_object_or_404(Teacher, pk=id)
@@ -208,10 +210,10 @@ def addModule(request, yearId, parentId=0):
         if(parentId!=0):
             parent=get_object_or_404(ModuleParent,pk=parentId)
             form=ModuleParentForm(year=yearId, department=department, edit=True, instance=parent)
-            context['Operation']="Edit Modules"
+            context['Operation']="Edit Classes"
         else:
             form=ModuleParentForm(year=yearId, department=department)
-            context['Operation']="Add Modules"
+            context['Operation']="Add Classes"
     context['form']=form
     return render (request, "forms/modalForm.html", context)
 
@@ -388,9 +390,9 @@ def deleteObject(request, type, id):
             obj=None
     
     #Create event based on type deleted
-    trigger = type[0].lower()+type[1:]+"Change"
-    events='{\"'+trigger+'\": "Deleted", \"'+type+'Deleted\":'+objId+'}'
-    return HttpResponse(status=204, headers={"HX-Trigger": events})
+    trigger = type[0].lower()+type[1:]
+    events={trigger+'Change': "Deleted", trigger+'Deleted':objId}
+    return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(events)})
 
 
 """
@@ -412,7 +414,7 @@ def addModuleCalendar(request, day, week, timetableId, teacher=0):
             return HttpResponse(status=204, headers={"HX-Trigger": json.dumps(events)})
     form=addEventForm(choices)
     context={'form':form}
-    context['Operation']="Assign Module Timeslot"
+    context['Operation']="Assign Class to Period"
     return render(request, 'forms/modalForm.html', context)
 
 
@@ -593,7 +595,7 @@ def templateBuilder(request, timetableId):
 def templateBuilderDownload(request, timetableId, choices):
         timetable=Timetable.objects.get(id=timetableId)
         choices=json.loads(choices)
-        template=moduleTeacherWSTemplate(timetable, choices)
+        template=templateBuilderMain(timetable, choices)
         response = HttpResponse(template,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=timeslot.xlsx'
         return response
