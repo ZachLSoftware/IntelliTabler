@@ -1,7 +1,7 @@
 from ..models import *
 
 def createNewGeneratedTimetable(year, name, timetableA):
-    t=Timetable.objects.create(name=name, tableYear=year)
+    t=Timetable.objects.create(name=name, tableYear=year, generated=True, generating=True)
     mgA=ModuleGroup.objects.filter(parent__timetable=timetableA).order_by('name')
     mgB=ModuleGroup.objects.filter(parent__timetable=t).order_by('name')
     for i in range(len(mgB)):
@@ -54,7 +54,7 @@ def getTeacherDomains(timetable):
 
 class CSP():
 
-    def __init__(self, schedule, teachers, weeks):
+    def __init__(self, schedule, teachers, weeks, verify=False):
         self.schedule=schedule  #Classes and Periods
         self.teachers=teachers  #Teachers and preferences
         self.weeks=weeks #Number of weeks (Helps with checking Load)
@@ -65,7 +65,8 @@ class CSP():
         self.assignedPeriods={v['period']:set() for k,v in schedule.items()} #Dict to track which periods a teacher is already in. Helps for quick constraint checking.
         self.currDoms={cl: {} for cl in schedule.keys()}
         self.repeatConstraint=True
-        self.setCurrDom() #Create the Current Domains and prune
+        if not verify:
+            self.setCurrDom() #Create the Current Domains and prune
         
 
     def resetAssignments(self):

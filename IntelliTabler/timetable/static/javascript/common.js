@@ -107,7 +107,7 @@ htmx.on("htmx:beforeSwap", (e) => {
     if(cData.combing && e.target.id=="mainContent"){
         cleanupCombing();
     }
-})
+});
 
 htmx.on('htmx:beforeSend', (e) => {
     if($(e.detail.requestConfig.elt).hasClass("sidebar-link")){
@@ -229,7 +229,7 @@ function getTextColor(color){
      }
 }
 
-$(document).on('click', '#infoBtnGroup button', function(){
+$(document).on('click', '#teacherInfoBtnGroup button', function(){
     $("#teacherInfoCont .collapse").collapse('hide');
 })
 
@@ -303,6 +303,7 @@ $('#confirmGenerate').click(function(){
 $(document).on("sidebarLoaded", function(e){
     url='timetableLanding/'+e.detail.value
     htmx.ajax('GET', url, '#mainContent');
+    activePage="timetableLanding"
 })
 
 $(document).on("departmentDeleted", function(){
@@ -368,6 +369,29 @@ $(document).on("successWithMessage", function(e) {
     </div>`
     $('#messageWrapper').append(html)
 });
+
+$(document).on("asyncResults", function(e) {
+    console.log(timetable);
+    console.log(activePage);
+    if(activePage=="timetableLanding" && e.detail.timetableId==timetable){
+        url='timetableLanding/'+ timetable
+        htmx.ajax('GET', url, '#mainContent');
+    }
+    var message = e.detail.resultMsg;
+    var html= `<div class="alert alert-${e.detail.result} alert-dismissible" role="alert">
+    <button class="close btn" data-bs-dismiss="alert" aria-label="Close">
+      <i class="fa-regular fa-circle-xmark fa-beat fa-xl text-dark"></i>
+    </button>
+    <a class="messageLink" id="popUp${e.detail.timetableId}" hx-get="/displayDashboardContent/${e.detail.timetableId}" hx-target="#sidebarBody">
+    ${message}
+    </a>
+    </div>`
+    $('#messageWrapper').append(html);
+    htmx.process(htmx.find(`#popUp${e.detail.timetableId}`));
+    $(`#taskId-${e.detail.id}`).remove();
+    enableButtons();
+});
+
 $(document).on("warningWithMessage", function(e) {
     var message = e.detail.value;
     var html= `<div class="alert alert-warning alert-dismissible" role="alert">
@@ -379,6 +403,11 @@ $(document).on("warningWithMessage", function(e) {
     $('#messageWrapper').append(html)
 });
 
+$(document).on("taskStarted", function(e) {
+    var html = `<div id="taskId-${e.detail.value}" hx-get="/taskStatus/${e.detail.value}" hx-trigger="every 5s" hx-target="this"></div>`
+    $(body).append(html);
+    htmx.process(htmx.find(`#taskId-${e.detail.value}`));
+});
 
 $(document).on("change", "input[type='checkbox']", function(){
     // Enable all checkboxes first
@@ -437,3 +466,10 @@ $(document).on("click","#verifyTimetableBtn", function(e){
     $('#confirmModal').modal('hide');
 
 });
+
+function disableButtons(){
+    $(".sidebar-link, .landingLink").not($("#timetableLanding")).addClass('disabled')
+}
+function enableButtons(){
+    $(".sidebar-link, .landingLink").not($("#timetableLanding")).removeClass('disabled')
+}

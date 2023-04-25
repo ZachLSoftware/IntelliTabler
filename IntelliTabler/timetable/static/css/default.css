@@ -41,10 +41,10 @@ html, body {
     text-align: center;
   }
 
-  .nav-link .disabled {
+  .nav-link.disabled {
     filter: brightness(50%);
   }
-  
+
   .navbar-brand{
     font-size: x-large;
     font-weight: bold;
@@ -74,8 +74,13 @@ html, body {
   overflow: visible
  }
 
- .dropdown-item {
+ .dropdown-item, .messageLink{
   cursor: pointer;
+ }
+
+  .messageLink{
+  cursor: pointer;
+  color:black;
  }
 
  #contentSidebar {
@@ -168,7 +173,7 @@ html, body {
   font-size: large;
 }
 
-#infoBtnGroup {
+.infoBtnGroup {
   max-width: 75%;
 }
 

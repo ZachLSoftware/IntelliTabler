@@ -126,6 +126,10 @@ def defaultTimetable(sender, instance, created, **kwargs):
 class Timetable(RandomIDModel):
     name = models.CharField(max_length=40)
     tableYear = models.ForeignKey(Year, on_delete=models.CASCADE)
+    generated = models.BooleanField(default=False)
+    generating = models.BooleanField(default=False)
+    taskId = models.CharField(max_length=100, null=True)
+    latestMsg=models.CharField(max_length=150, null=True)
     
 class ModuleParent(RandomIDModel):
     name=models.CharField(max_length=50)

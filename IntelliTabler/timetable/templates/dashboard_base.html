@@ -30,6 +30,11 @@
     
   </head>
   <body class="body bg-{{request.user.theme}}" id="body">
+    <div id="asyncResultsWrapper">
+      {% for table in generatingTables %}
+      <div id="taskId-{{table.taskId}}" hx-trigger="every 10s" hx-get="{% url 'taskStatus' table.taskId %}" hx-trigger="this"></div>
+      {%endfor%}
+    </div>
     {% block messages %}
     <div id="messageWrapper">
     {% for message in messages %}
@@ -94,7 +99,7 @@
           </div>
       <div id="sidebarBody" class="h-100">
         <div id="sidebarScroll">
-        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" style="filter: brightness(50%)">
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
           <li class="nav-item">
             <a class="nav-link align-middle px-0 disabled"><i class="fa-solid fa-person-chalkboard"></i><Span class="d-none d-sm-inline">  Teachers</span></a>
           </li>

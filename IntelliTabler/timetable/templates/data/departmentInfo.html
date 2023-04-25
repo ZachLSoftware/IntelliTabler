@@ -2,7 +2,7 @@
 <div class="container text-center">
     <h1>{{department.name}}</h1>
     <div class="row justify-content-center" >
-        <div id="infoBtnGroup" class="btn-group" role="group" style="max-width:35%">
+        <div id="depInfoBtnGroup" class="btn-group infoBtnGroup" role="group" style="max-width:35%">
             <button class="btn btn-primary-outline border" hx-get="{% url "editDepartment" department.id %}" hx-target="#addForm">Edit Department</button>
             <a id="deleteDepartment" class="btn btn-danger border" hx-delete="{% url 'deleteObject' 'Department' department.id %}" hx-confirm="Are you sure you want to delete {{department.name}}?">Delete Department</a>
         </div>

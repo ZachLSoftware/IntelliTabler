@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from django.contrib import messages
 from ..helper_functions.toExcel import *
 from ..helper_functions.scripts import getCalendar
+from ..tasks import *
+from celery.result import AsyncResult
 
 
 ###Default Landing Page###
@@ -37,6 +39,7 @@ def dashboard(request):
     else:
         context['departmentTitle']=0
     context['timetableId']=timetableId
+    context['generatingTables']=Timetable.objects.filter(generating=True)
     return render(request, "dashboard.html", context)
 
 """
@@ -106,7 +109,7 @@ def getList(request, type, timetableId):
     #Get items of Type. Sets paths for setting hx-get functions
     if type.upper()=='MODULEPARENT':
         objects=ModuleParent.objects.filter(timetable=timetable).order_by('name')
-        context['type']='module'
+        context['type']='Class'
         context['detailPath']='getModules'
         context['addPath']='addModule'
         context['addId']=timetable.tableYear.id
@@ -316,87 +319,108 @@ def cspAutoAssign(request, timetableA):
     #Get 4 characters from uuid to mark a timetable unique
     uniqueId = uuid.uuid4().hex[:4]
     timetable=createNewGeneratedTimetable(tA.tableYear, str(tA.tableYear.year) +" - "+now.strftime("%d/%m") + " - " + str(uniqueId), tA)
+    task=autoAssign.apply_async(args=[timetable.id], countdown=5)
+    timetable.taskId=task.id
+    timetable.save()
     
-    #Get scheduled classes and check if all assigned to periods.
-    sched=getClassSchedule(timetable)
-    if(not sched):
-        timetable.delete()
-        messages.error(request,str("Some classes are not scheduled. Assignment is not possible."))
-        return redirect('dashboard')
+    # #Get scheduled classes and check if all assigned to periods.
+    # sched=getClassSchedule(timetable)
+    # if(not sched):
+    #     timetable.delete()
+    #     messages.error(request,str("Some classes are not scheduled. Assignment is not possible."))
+    #     return redirect('dashboard')
     
-    #Get Teachers for the domains
-    teach=getTeacherDomains(timetable)
+    # #Get Teachers for the domains
+    # teach=getTeacherDomains(timetable)
 
-    #Try creating the CSP object, through errors into a message.
-    #Possible errors include assignments from user preferences
-    #that are not possible.
-    try:
-        csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks)
-    except ValueError as msg:
-        timetable.delete()
-        messages.error(request,str(msg))
-        return redirect('dashboard')
+    # #Try creating the CSP object, through errors into a message.
+    # #Possible errors include assignments from user preferences
+    # #that are not possible.
+    # try:
+    #     csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks)
+    # except ValueError as msg:
+    #     timetable.delete()
+    #     messages.error(request,str(msg))
+    #     return redirect('dashboard')
 
-    #Checks if there is enough teacher load to handle all classes
-    try:
-        csp1.checkPossible()
-    except ValueError as msg:
-        timetable.delete()
-        messages.error(request,str(msg))
-        return redirect('dashboard')
+    # #Checks if there is enough teacher load to handle all classes
+    # try:
+    #     csp1.checkPossible()
+    # except ValueError as msg:
+    #     timetable.delete()
+    #     messages.error(request,str(msg))
+    #     return redirect('dashboard')
 
-    #Tries up to 2 times to run the CSP incase of a bad initial assignment.
-    count=0
-    while count<2:
+    # #Tries up to 2 times to run the CSP incase of a bad initial assignment.
+    # count=0
+    # while count<2:
 
-        #Run CSP
-        if (csp1.assignTeacher()):
+    #     #Run CSP
+    #     if (csp1.assignTeacher()):
 
-            #Save assignments as objects and return new timetable
-            for c, teacher in csp1.class_assignments.items():
-                Module.objects.filter(id=c).update(teacher_id=teacher)
-            messages.success(request, f"New Timetable {timetable.name} has been generated")
-            request.session['timetableId']=timetable.id
-            return redirect('dashboard')
-        csp1.repeatConstraint=False
-        csp1.resetAssignments()
-        csp1.setCurrDom()
-        count+=1
+    #         #Save assignments as objects and return new timetable
+    #         for c, teacher in csp1.class_assignments.items():
+    #             Module.objects.filter(id=c).update(teacher_id=teacher)
+    #         messages.success(request, f"New Timetable {timetable.name} has been generated")
+    #         request.session['timetableId']=timetable.id
+    #         return redirect('dashboard')
+    #     csp1.repeatConstraint=False
+    #     csp1.resetAssignments()
+    #     csp1.setCurrDom()
+    #     count+=1
     
-    #If we haven't found a solution, delete timetable and return.
-    timetable.delete()
-    messages.error(request, "A valid timetable could not be created. Please verify teacher and class information.")
+    # #If we haven't found a solution, delete timetable and return.
+    # timetable.delete()
+    messages.success(request, f"Auto Assigment for {timetable.name} has started.")
+    request.session['timetableId']=timetable.id
     return redirect('dashboard')
 
 def cspVerification(request, timetableId):
     timetable=get_object_or_404(Timetable, id=timetableId)
-    sched=getClassSchedule(timetable)
-    if(not sched):
-        error = {"error": "Some classes are not scheduled. Please ensure that all classes are scheduled."}
-        return JsonResponse(error, status="400")
-    teach=getTeacherDomains(timetable)
-    try:
-        csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks)
-    except ValueError as msg:
-        error = {"error": msg}
-        return JsonResponse(error, status="400")
-    partial=len(Module.objects.filter(group__parent__timetable=timetable, teacher__isnull=True))>0
-    assignments=Module.objects.filter(group__parent__timetable=timetable, teacher__isnull=False)
-    verify=csp1.verifyAssignments(assignments)
-    if not verify:
-        if partial:
-            error = {"error": "The partial assignments made are invalid, please check them again."}
-            return JsonResponse(error, status="400")
-        else:
-            error = {"error": "The assignments made are invalid, please check them again."}
-            return JsonResponse(error, status="400")
-    else:
-        if partial:
-            return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'The partial assignments are currently valid.'})})
-        else:
-            return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'The timetable assignments are valid.'})})
+    task=verifyTimetable.delay(timetableId)
+    timetable.taskId=task.id
+    timetable.generating=True
+    timetable.save()
+    return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'Verifying timetable assignments...', 'taskStarted':task.id})})
 
+    # timetable=get_object_or_404(Timetable, id=timetableId)
+    # sched=getClassSchedule(timetable)
+    # if(not sched):
+    #     error = {"error": "Some classes are not scheduled. Please ensure that all classes are scheduled."}
+    #     return JsonResponse(error, status="400")
+    # teach=getTeacherDomains(timetable)
+    # try:
+    #     csp1=CSP(sched, teach, timetable.tableYear.department.format.numWeeks, verify=True)
+    # except ValueError as msg:
+    #     error = {"error": msg}
+    #     return JsonResponse(error, status="400")
+    # partial=len(Module.objects.filter(group__parent__timetable=timetable, teacher__isnull=True))>0
+    # assignments=Module.objects.filter(group__parent__timetable=timetable, teacher__isnull=False)
+    # csp1.repeatConstraint=False
+    # verify=csp1.verifyAssignments(assignments)
+    # if not verify:
+    #     if partial:
+    #         error = {"error": "The partial assignments made are invalid, please check them again."}
+    #         return JsonResponse(error, status="400")
+    #     else:
+    #         error = {"error": "The assignments made are invalid, please check them again."}
+    #         return JsonResponse(error, status="400")
+    # else:
+    #     if partial:
+    #         return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'The partial assignments are currently valid.'})})
+    #     else:
+    #         return HttpResponse(204, headers= {"HX-Trigger": json.dumps({'successWithMessage': 'The timetable assignments are valid.'})})
 
+def taskStatus(request, taskId):
+    result = AsyncResult(taskId)
+    if result.state == 'PENDING':
+        return HttpResponse(status=202)
+    if result.ready():
+        msg=result.result['HX-Trigger']['asyncResults']['resultMsg']
+        Timetable.objects.filter(taskId=taskId).update(taskId=None,latestMsg=msg, generating=False)
+        res=result.result
+        result.forget()
+        return HttpResponse(status=204, headers={'HX-Trigger': json.dumps(res['HX-Trigger'])})
 
 """
 Returns list of preferences for a teacher.

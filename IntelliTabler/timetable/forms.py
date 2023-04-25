@@ -193,7 +193,7 @@ class TimetableForm(BaseModelForm):
 
     class Meta:
         model=Timetable
-        exclude=("id","tableYear")
+        exclude=("id","tableYear", "generated", "generating", "taskId", "latestMsg")
 
 
 class setPreferenceForm(BaseForm):

@@ -69,5 +69,6 @@ urlpatterns = [
     path('exportCalendar/<int:timetableId>', dataViews.exportCalendarView, name='exportCalendar'),
     path('exportCalendar/<int:timetableId>/<int:teacherId>', dataViews.exportCalendarView, name='exportCalendar'),
     path('exportCombing/<int:timetableId>', dataViews.exportCombingView, name="exportCombing"),
-    path('verifyTimetable/<int:timetableId>', dataViews.cspVerification, name='verifyTimetable')
+    path('verifyTimetable/<int:timetableId>', dataViews.cspVerification, name='verifyTimetable'),
+    path('taskStatus/<str:taskId>', dataViews.taskStatus, name="taskStatus")
     ]

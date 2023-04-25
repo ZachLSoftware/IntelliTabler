@@ -513,7 +513,7 @@ def setDefaultTimetable(request, yearId, timetableId):
 def timetableWizard(request, timetableA):
     timetable=Timetable.objects.get(id=timetableA)
     tables=Timetable.objects.filter(tableYear=timetable.tableYear).order_by('name')
-    context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables}
+    context={'timetable':timetable, 'department': timetable.tableYear.department, 'tables':tables, 'timetableId':0}
     response=render(request,'forms/timetableWizard.html', context)
 
     #Creates an event trigger when content is loaded
