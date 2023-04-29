@@ -53,16 +53,6 @@ function refreshClickListeners(){
     htmx.process(htmx.find("#combingChart"));
 }
 
-$(document).on("click", ".removeMod", function(e){
-    if($(this).hasClass('disabled')){
-        $(this).removeClass('disabled');
-        return;
-    }
-    let modId=this.id.split('-')[0];
-    if(confirm('Unassign Teacher?')){
-        htmx.ajax('POST', `/unassignTeacher/${modId}`);
-    }
-});
 
 function checkAssignment(cellId){
     if($(cellId).find("button").length>1){
@@ -105,48 +95,60 @@ function setTeacherAllocTotal(teachers, parents){
         }
     
     });
-        parents.forEach(function(parent){
-            let pTotal= $(`.${parent}Class`).length;
-            $(`#${parent}Allocated`).text(pTotal);
-            updateSet.add(`#${parent}Allocated`);
-            if(parseInt($(`#${parent}Allocated`).text())==parseInt($(`#${parent}Total`).text())){
-                $(`#${parent}Allocated`).addClass('bg-success');
-            }else{
-                $(`#${parent}Allocated`).removeClass('bg-success');
-            }
-        });
+    parents.forEach(function(parent){
+        let pTotal= $(`.${parent}Class`).length;
+        $(`#${parent}Allocated`).text(pTotal);
+        updateSet.add(`#${parent}Allocated`);
+        if(parseInt($(`#${parent}Allocated`).text())==parseInt($(`#${parent}Total`).text())){
+            $(`#${parent}Allocated`).addClass('bg-success');
+        }else{
+            $(`#${parent}Allocated`).removeClass('bg-success');
+        }
+    });
 
     updateSet.forEach(function(id){
         $(id).effect("highlight", 1000);
     })
 }
 
-htmx.on("htmx:afterSwap", (e) => {
-    if(e.detail.target.id == "modalBody" && activePage=="combing") {
-        $('.editBtnCol').remove();
-        $("#modalBody").attr("hx-get",e.detail.pathInfo.requestPath);
-        htmx.process(htmx.find("#modalBody"));
-        dataModal.show();
-    }
-});
+// htmx.on("htmx:afterSwap", (e) => {
+//     if(e.detail.target.id == "modalBody" && activePage=="combing") {
+//         $('.editBtnCol').remove();
+//         $("#modalBody").attr("hx-get",e.detail.pathInfo.requestPath);
+//         htmx.process(htmx.find("#modalBody"));
+//         dataModal.show();
+//     }
+// });
 
 
-htmx.on("htmx:beforeSwap", (e) => {
-    if (e.detail.target.id == "modalBody" && !e.detail.xhr.response && activePage=="combing"){
-        dataModal.hide();
-        e.detail.shouldSwap = false;
-    }else if (e.detail.target.id == "addForm" && !e.detail.xhr.response && activePage=="combing"){
-        modal.hide();
-        e.detail.shouldSwap = false;
-    }
-})
+// htmx.on("htmx:beforeSwap", (e) => {
+//     if (e.detail.target.id == "modalBody" && !e.detail.xhr.response && activePage=="combing"){
+//         dataModal.hide();
+//         e.detail.shouldSwap = false;
+//     }else if (e.detail.target.id == "addForm" && !e.detail.xhr.response && activePage=="combing"){
+//         modal.hide();
+//         e.detail.shouldSwap = false;
+//     }
+// })
 
-$(document).on("updateColor", function(e){
-    $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader`).css("background-color",e.detail.color);
-    $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader, .${e.detail.parentId}RemoveIcon`).css("color",getTextColor(e.detail.color));
-})
+
 
 function setCombListeners(){
+    $(document).on("updateColor", function(e){
+        $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader`).css("background-color",e.detail.color);
+        $(`.${e.detail.parentId}Class, .${e.detail.parentId}ClassHeader, .${e.detail.parentId}RemoveIcon`).css("color",getTextColor(e.detail.color));
+    });
+    $(document).on("click", ".removeMod", function(e){
+        if($(this).hasClass('disabled')){
+            $(this).removeClass('disabled');
+            return;
+        }
+        let modId=this.id.split('-')[0];
+        if(confirm('Unassign Teacher?')){
+            htmx.ajax('POST', `/unassignTeacher/${modId}`);
+        }
+    });
+
     $(document).on("modUpdate", function(e){
         $.each(e.detail.newMods, function(i,val){
             $(`#${val.id}Div`).remove();

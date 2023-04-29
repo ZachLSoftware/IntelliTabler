@@ -59,7 +59,6 @@ def getCalendar(timetableId, teacherId=0):
     format=Format.objects.get(department=Timetable.objects.get(id=timetableId).tableYear.department)
     context['periods']=format.numPeriods
     context['weeks']=format.numWeeks
-
     context['events']=json.dumps(events)
     context['timetable']=timetableId
     context['teacherId']=teacherId

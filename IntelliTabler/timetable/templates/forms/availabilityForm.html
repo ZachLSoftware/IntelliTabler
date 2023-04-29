@@ -4,7 +4,7 @@
     <script>list = {{current|safe}}</script>
 
 
-<h1>{{teacher.name}} Availability - Hours Remaining: <span id="load"> {{ hours }}</span> </h1>
+<h1>{{teacher.name}} Availability</h1>
 <button id="selectAll" type="button" class="btn btn-primary-outline">Select All</button>
 <button id="clearSelect" type="button" class="btn btn-primary-outline">Clear Selection</button>
 <form hx-post="{{ request.path }}" enctype="multipart/form-data" hx-target="#availability">
@@ -15,11 +15,11 @@
         <thead>
             <tr>
                 <th>Period</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
+                <th>Monday - <input id="{{forloop.counter}}-Mon" class="form-check-input fullDayCheck " type="checkbox"></input></th>
+                <th>Tuesday - <input id="{{forloop.counter}}-Tues" class="form-check-input fullDayCheck" type="checkbox"></input></th>
+                <th>Wednesday - <input id="{{forloop.counter}}-Wed" class="form-check-input fullDayCheck" type="checkbox"></input></th>
+                <th>Thursday - <input id="{{forloop.counter}}-Thur" class="form-check-input fullDayCheck" type="checkbox"></input></th>
+                <th>Friday - <input id="{{forloop.counter}}-Fri" class="form-check-input fullDayCheck" type="checkbox"></input></th>
             </tr>
         </thead>
         

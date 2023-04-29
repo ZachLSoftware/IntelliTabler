@@ -53,8 +53,8 @@ class DepartmentForm(BaseForm):
 
 class TeacherForm(BaseModelForm):
     name = forms.CharField(label="Teacher Name")
-    load = forms.IntegerField(label="Contracted Hours", validators=[validate_positive])
-    roomNum = forms.CharField(max_length=20, label="Room")
+    load = forms.IntegerField(label="Contracted Hours per week", validators=[validate_positive], help_text="The number of hours per week this teacher can work.")
+    roomNum = forms.CharField(max_length=20, label="Room", help_text="The office or class room of the teacher.")
     class Meta:
         model=Teacher
         exclude={"department", "id"}
@@ -66,8 +66,8 @@ class AvailabilityForm(BaseForm):
 
 class ModuleParentForm(BaseModelForm):
     name = forms.CharField(label="Class Name")
-    numPeriods=forms.IntegerField(label="Number of periods for class", validators=[validate_positive])
-    numClasses=forms.IntegerField(label="Number of class groups", validators=[validate_positive])
+    numPeriods=forms.IntegerField(label="Number of periods for class per timetable", validators=[validate_positive], help_text="The number of total periods for the length of the timetable.")
+    numClasses=forms.IntegerField(label="Number of class groups", validators=[validate_positive], help_text="The number of class groups for each Lesson.")
     repeat=forms.BooleanField(required=False, label="Does this class repeat the same schedule each week?", widget=forms.CheckboxInput(attrs={'type': 'checkbox', 'class': 'form-check-input'}))
     class Meta:
         model=ModuleParent
@@ -93,12 +93,12 @@ class ModuleParentForm(BaseModelForm):
         return repeat
 
     def clean(self):
-        #if not self.edit:
-        cleaned_data=super().clean()
-        name=cleaned_data['name']
-        year=Year.objects.filter(id=self.year)[0]
-        if(ModuleParent.objects.filter(name=name, timetable=year.defaultTimetable, department=self.department).exclude(id=self.instance.id).exists()):
-            self.add_error('name', _('Module: {} already exists for Year: {}').format(name, year.year))
+        if not self.edit:
+            cleaned_data=super().clean()
+            name=cleaned_data['name']
+            year=Year.objects.filter(id=self.year)[0]
+            if(ModuleParent.objects.filter(name=name, timetable=year.defaultTimetable, department=self.department).exclude(id=self.instance.id).exists()):
+                self.add_error('name', _('Module: {} already exists for Year: {}').format(name, year.year))
 
 class YearForm(BaseModelForm):
     department = forms.ChoiceField()

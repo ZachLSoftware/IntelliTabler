@@ -597,5 +597,5 @@ def templateBuilderDownload(request, timetableId, choices):
         choices=json.loads(choices)
         template=templateBuilderMain(timetable, choices)
         response = HttpResponse(template,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=timeslot.xlsx'
+        response['Content-Disposition'] = 'attachment; filename=TimetableDataTemplate.xlsx'
         return response

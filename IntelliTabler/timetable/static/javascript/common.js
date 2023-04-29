@@ -53,6 +53,19 @@ htmx.on("htmx:afterSwap", (e) => {
         tempObserver.observe(listSidebar);
     }
 
+    if(e.detail.target.id == "modalBody" && activePage=="combing") {
+        $('.editBtnCol').remove();
+        $("#modalBody").attr("hx-get",e.detail.pathInfo.requestPath);
+        htmx.process(htmx.find("#modalBody"));
+        dataModal.show();
+    }
+    if(e.detail.target.id == "modalBody") {
+        if (cData.teacher){
+            $(".editBtnCol").remove()
+        }
+        dataModal.show();
+    }
+
     //AfterSwap for Modal Handeler
     if(e.detail.target.id == "addForm") {
         path=e.detail.pathInfo.requestPath.split('/')[1];
@@ -84,18 +97,20 @@ htmx.on("htmx:beforeSwap", (e) => {
         $('#displayChild').collapse('hide');
 
     }
-    // if(e.detail.target.id=="mainContent"){
-    //     if($('#mainContent').hasClass('show')){
-    //         htmx.config.defaultSwapDelay=500;
-    //     }
-    //     $("#mainContent").collapse('hide');
-    // }
+
     if(e.detail.target.id=="sidebarBody"){
         $("#mainContent").html("");
     }
 
     //Handles Modal hiding
     if (e.detail.target.id == "addForm" && !e.detail.xhr.response || e.detail.xhr.response==204){
+        modal.hide();
+        e.detail.shouldSwap = false;
+    }
+    if (e.detail.target.id == "modalBody" && !e.detail.xhr.response){
+        dataModal.hide();
+        e.detail.shouldSwap = false;
+    }else if (e.detail.target.id == "addForm" && !e.detail.xhr.response && activePage=="combing"){
         modal.hide();
         e.detail.shouldSwap = false;
     }
@@ -124,7 +139,7 @@ htmx.on('htmx:beforeSend', (e) => {
         $("#departmentSelect").text($(e.target).closest('.depDropDown').find('.depItem').text().split(" ").slice(0, -1).join(" ")+" " +$(e.target).text());
     }
     if($(e.target).hasClass('childButtons')){
-        if($(e.target).hasClass('moduleButtons')){
+        if($(e.target).hasClass('ClassButtons')){
             $("#displayChild").attr("hx-get", "/getModules/"+e.target.id.split('Button')[0]+"/"+currentTimetable);
 
         }else{
@@ -150,6 +165,10 @@ function cleanupCombing(){
     $(document).off("modUpdate");
     
     $(document).off("unassignSuccess");
+
+    $(document).on("click", ".removeMod");
+    
+    $(document).off("updateColor");
     
     delete dataModal;
     for(var k in cData){
@@ -371,8 +390,6 @@ $(document).on("successWithMessage", function(e) {
 });
 
 $(document).on("asyncResults", function(e) {
-    console.log(timetable);
-    console.log(activePage);
     if(activePage=="timetableLanding" && e.detail.timetableId==timetable){
         url='timetableLanding/'+ timetable
         htmx.ajax('GET', url, '#mainContent');
@@ -409,26 +426,18 @@ $(document).on("taskStarted", function(e) {
     htmx.process(htmx.find(`#taskId-${e.detail.value}`));
 });
 
-$(document).on("change", "input[type='checkbox']", function(){
-    // Enable all checkboxes first
-    $("input[type='checkbox']").prop('disabled', false);
-
-    // Check Class checkbox
+$(document).on("change", ".templateSelectorForm", function(){
+    //Enable all checkboxes first
+    $(".templateSelectorForm").prop('disabled', false);
     if ($('#classTemplateCheck').prop('checked')) {
         $("#scheduleTemplateCheck, #preferenceTemplateCheck, #assignTemplateCheck").prop('disabled', true);
     }
-    
-    // Check Teacher checkbox
     if ($('#teacherTemplateCheck').prop('checked')) {
         $("#preferenceTemplateCheck, #assignTemplateCheck").prop('disabled', true);
     }
-    
-    // Check Schedule checkbox
     if ($('#scheduleTemplateCheck').prop('checked')) {
         $("#classTemplateCheck").prop('disabled', true);
     }
-    
-    // Check Preference or Assign checkbox
     if ($('#preferenceTemplateCheck').prop('checked') || $('#assignTemplateCheck').prop('checked')) {
         $("#classTemplateCheck, #teacherTemplateCheck").prop('disabled', true);
     }

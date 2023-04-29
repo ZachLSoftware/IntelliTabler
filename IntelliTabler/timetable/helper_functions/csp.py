@@ -1,7 +1,7 @@
 from ..models import *
 
 def createNewGeneratedTimetable(year, name, timetableA):
-    t=Timetable.objects.create(name=name, tableYear=year, generated=True, generating=True)
+    t=Timetable.objects.create(name=name, tableYear=year, generating=True)
     mgA=ModuleGroup.objects.filter(parent__timetable=timetableA).order_by('name')
     mgB=ModuleGroup.objects.filter(parent__timetable=t).order_by('name')
     for i in range(len(mgB)):

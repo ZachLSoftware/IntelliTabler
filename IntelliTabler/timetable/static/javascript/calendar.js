@@ -127,21 +127,21 @@ $(cData.calendarDiv).on("click", ".event", function(e){
     e.stopPropagation();
 });
 
-htmx.on("htmx:afterSwap", (e) => {
-    if(e.detail.target.id == "modalBody") {
-        if (cData.teacher){
-            $(".editBtnCol").remove()
-        }
-        dataModal.show();
-    }
-})
+// htmx.on("htmx:afterSwap", (e) => {
+//     if(e.detail.target.id == "modalBody") {
+//         if (cData.teacher){
+//             $(".editBtnCol").remove()
+//         }
+//         dataModal.show();
+//     }
+// })
 
-htmx.on("htmx:beforeSwap", (e) => {
-    if (e.detail.target.id == "modalBody" && !e.detail.xhr.response){
-        dataModal.hide();
-        e.detail.shouldSwap = false;
-    }
-})
+// htmx.on("htmx:beforeSwap", (e) => {
+//     if (e.detail.target.id == "modalBody" && !e.detail.xhr.response){
+//         dataModal.hide();
+//         e.detail.shouldSwap = false;
+//     }
+// })
 
 
 $(document).on("addCalendarEvent", function(e){
@@ -150,13 +150,11 @@ $(document).on("addCalendarEvent", function(e){
 })
 
 $(document).on("periodUpdate", function(e){
-    console.log(e.detail)
     e.detail.modules.forEach((mod) => {
         $(`#${mod.id}`).remove()
         addCalEvent(mod);
     });
-
-    refreshListeners();
+    refreshListeners(); //Process new htmx elements
 })
 
 $(document).on("updateColor",function(e){

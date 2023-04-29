@@ -44,7 +44,6 @@ def createPeriods(sender, instance, created, **kwargs):
         i=1
         week=1
         for count in range(1, totalPeriods+1):
-
             Period.objects.create(name=days[count%5]+str(round(i/5+.4)), dayNum=count, department=instance.department, week=week)
             i+=1
             if(count%(instance.numPeriods*5)==0):
@@ -126,7 +125,6 @@ def defaultTimetable(sender, instance, created, **kwargs):
 class Timetable(RandomIDModel):
     name = models.CharField(max_length=40)
     tableYear = models.ForeignKey(Year, on_delete=models.CASCADE)
-    generated = models.BooleanField(default=False)
     generating = models.BooleanField(default=False)
     taskId = models.CharField(max_length=100, null=True)
     latestMsg=models.CharField(max_length=150, null=True)
