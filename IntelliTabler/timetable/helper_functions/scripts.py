@@ -3,11 +3,19 @@ import json
 from django.db.models import F
 from .serializers import *
 
+"""
+Update period for the calendar app. 
+Serializes and packages the update.
+"""
 def updatePeriod(group, pName, week, manual=False):
     weeks=group.parent.department.format.numWeeks
+    #If set to repeat get other periods necessary
     if group.parent.repeat or manual:
         weeks=group.parent.department.format.numWeeks
         sessions=group.parent.numPeriods
+
+        #Get module groups based on the modulo calculation of sessions/weeks
+        #Objects found based on if the modulos calculation is equal to the target.
         modu=sessions/weeks
         modu=int(modu)
         target=group.session%modu
@@ -18,8 +26,11 @@ def updatePeriod(group, pName, week, manual=False):
         w=int(week)
     update=[]
     for obj in objs:
+        #Update the object with the period assigned
         obj.period=Period.objects.get(department=group.parent.department, name=pName, week=w)
         obj.save()
+        
+        #Serialize the group and add to the update list
         module_ser=ModuleGroupSerializer(obj)
         module=module_ser.data
         module['groupid']=module_ser.data['id']

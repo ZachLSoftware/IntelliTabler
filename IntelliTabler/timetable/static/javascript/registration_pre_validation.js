@@ -1,3 +1,4 @@
+//Check if username contains invalid characters
 $('#id_username').keyup(function(){
     var re = /^[\w.@+-]+$/;
     var username = $('#id_username').val()
@@ -10,7 +11,7 @@ $('#id_username').keyup(function(){
     }
 });
 
-
+//Check password passes complexity
 $('#id_password1').keyup(function(){
     if($('#id_password1').val().length>=8){
         $('#charLength').addClass('text-success')

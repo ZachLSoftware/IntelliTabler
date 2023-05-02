@@ -16,6 +16,7 @@ import os
 from django.forms.renderers import TemplatesSetting
 from django.contrib.messages import constants as messages
 
+#Set message tags for bootstrap
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
     messages.INFO: 'alert-info',
@@ -24,8 +25,8 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
+#Get Environment Variable
 env = environ.Env()
-
 environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -40,7 +41,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+#Set Email settings for activation
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.privateemail.com'
 DEFAULT_FROM_EMAIL = 'noreply@intellitabler.co.uk'
@@ -158,10 +162,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#Custom form rendering
 class CustomFormRenderer(TemplatesSetting):
     form_template_name=os.path.join(BASE_DIR, 'timetable/templates/forms/form_snippet.html')
 
 FORM_RENDERER = "IntelliTabler.settings.CustomFormRenderer"
 
+#Specify broker and backend
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"

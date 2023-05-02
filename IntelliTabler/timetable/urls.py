@@ -43,6 +43,7 @@ urlpatterns = [
     path('changeColor/<int:parentId>', formViews.changeColor, name='changeColor'),
     path('dashboard', dataViews.dashboard, name="dashboard"),
     path('displayDashboardContent/<int:timetableId>', dataViews.displayDashboardContent, name='displayDashboardContent'),
+    path('getSidebarDepartments', dataViews.getSidebarDepartments, name='getSidebarDepartments'),
     path('getList/<str:type>/<int:timetableId>', dataViews.getList, name='getList'),
     path('getSidebar/<str:type>/<int:timetableId>', dataViews.getSidebar, name='getSidebar'),
     path('changeTheme/<str:theme>', formViews.changeTheme, name='changeTheme'),

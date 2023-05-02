@@ -483,24 +483,32 @@ def changeTheme(request, theme, timetableId=0):
     else:
         return HttpResponse(status=204)
 
-
+"""
+Adds a new timetable.
+"""
 def addTimetable(request, yearId, timetableId=0):
+    #Try to get a timetable object, else create a new one.
     try:
         table=Timetable.objects.get(id=timetableId)
     except:
         table=Timetable()
+    
+    #Post form processing
     if request.method=="POST":
         form = TimetableForm(request.POST, request.FILES, instance=table)
         if form.is_valid():
             table=form.save(commit=False)
             table.tableYear_id=yearId
             table.save()
+
+            #If set to be default, get year object and update
             if form.cleaned_data['default']:
-                y=Year.objects.get(id=yearId)
-                y.defaultTimetable=table
-                y.save()
+                Year.objects.filter(id=yearId).update(defaultTimetable=table)
+            
+            #Return timetable id in httpresponse
             events={'timetableAdded': str(table.id)}
             return HttpResponse(204, headers={"HX-Trigger":json.dumps(events)})
+    #GET request form
     else:
         form = TimetableForm(instance=table)
     return render(request, "forms/modalForm.html", {'Operation':'Add Timetable', 'form':form})

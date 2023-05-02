@@ -74,7 +74,6 @@
                 <li><hr class="dropdown-divider"></li>
               {% if user.is_authenticated %}
               {% for d,ys in departments.items %}
-                {% comment %} <li><a class="dropdown-item departmentDrop" hx-get="{% url 'dashboard2' d.id %}" hx-target="#yearSelectList">{{d.name}}</a></li> {% endcomment %}
                 <li class="depDropDown"><a id="{{d.id}}ddbtn" class="dropdown-item depItem">{{d.name}} &raquo;</a>
                 <ul class="dropdown-menu dropdown-submenu">
                   <li>

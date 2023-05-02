@@ -1,0 +1,32 @@
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="fa-regular fa-building"></i> <span id="departmentSelect" class="d-none d-sm-inline"> Department</span>
+    </a>
+    <ul id="departmentDropdown" class="dropdown-menu" aria-labelledby="departmentSelect">
+      <li>
+        <a class="dropdown-item" aria-current="page" hx-get="{% url 'addDepartment' %}" hx-target="#addForm"><i class="fa-regular fa-square-plus"></i> Add Department</a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+    {% if user.is_authenticated %}
+    {% for d,ys in departments.items %}
+      <li class="depDropDown"><a id="{{d.id}}ddbtn" class="dropdown-item depItem">{{d.name}} &raquo;</a>
+      <ul class="dropdown-menu dropdown-submenu">
+        <li>
+          <a class="dropdown-item" hx-get="{% url 'addYear' d.id %}" hx-target="#addForm" aria-current="page" ><i class="fa-regular fa-calendar-plus"></i>  Add Year</a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+      {% for y in ys %}
+        <li><a id="{{y.id}}" class="dropdown-item yearItem" hx-get="{% url 'displayDashboardContent' y.defaultTimetable.id %}" hx-target="#sidebarBody">{{y.year}}</a></li>
+        {%empty%}
+        <li>None</li>
+      {% endfor %}
+      </ul>
+    </li>
+    {% empty %}
+      
+    <li>No Departments</li>
+    {%endfor%}
+    {% endif %}
+
+    </ul>
+  </li>
