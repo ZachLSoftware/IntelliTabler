@@ -169,5 +169,5 @@ class CustomFormRenderer(TemplatesSetting):
 FORM_RENDERER = "IntelliTabler.settings.CustomFormRenderer"
 
 #Specify broker and backend
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = env('REDIS_HOST')
+CELERY_RESULT_BACKEND = env('REDIS_HOST')
