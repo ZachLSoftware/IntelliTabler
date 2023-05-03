@@ -17,16 +17,16 @@ The project also requires Redis to be installed:
 [Redis Installation](https://redis.io/docs/getting-started/installation/)
 
 Finally, in order to run the application, a .env file with the following variables should be included in the same folder as settings.py:
-**SECRET_KEY** - Django secret key used for cryptographic signing
-**DB_ENGINE** - Database engine to use (e.g. mysql, postgresql)
-**DB_NAME** - Name of the Database used
-**DB_USER** - Database username
-**DB_PASSWORD** - Username Password
-**DB_HOST** - Database hostname or IP
-**DB_PORT** - Database Port number
-**USER_MODEL** - Django user model to use for authentication
-**EMAIL_PASSWORD** - Password used to connect to the email server for sending emails
-**REDIS_HOST** - Redis server hostname and port, ie "redis://localhost:6379"
+* **SECRET_KEY** - Django secret key used for cryptographic signing
+* **DB_ENGINE** - Database engine to use (e.g. mysql, postgresql)
+* **DB_NAME** - Name of the Database used
+* **DB_USER** - Database username
+* **DB_PASSWORD** - Username Password
+* **DB_HOST** - Database hostname or IP
+* **DB_PORT** - Database Port number
+* **USER_MODEL** - Django user model to use for authentication
+* **EMAIL_PASSWORD** - Password used to connect to the email server for sending emails
+* **REDIS_HOST** - Redis server hostname and port, ie "redis://localhost:6379"
 
 Running the application several steps are required:
 1) Start MySQL and create the database and user
@@ -48,11 +48,11 @@ with automatic teacher to class assignments.
 
 ## Examples
 Here are a few examples of what you can do with Intellitabler:
-    - Add and manage teachers
-    - Add and manage classes
-    - Schedule classes
-    - Assign teachers to classes
-    - View the class schedule as a calendar
-    - View conflicts of teacher assignments in the combing chart
-    - Export data to excel
-    - Automatically Assign teachers to all classes
+* Add and manage teachers
+* Add and manage classes
+* Schedule classes
+* Assign teachers to classes
+* View the class schedule as a calendar
+* View conflicts of teacher assignments in the combing chart
+* Export data to excel
+* Automatically Assign teachers to all classes
