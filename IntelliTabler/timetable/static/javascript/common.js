@@ -405,6 +405,7 @@ Uses htmx to get the teacher sidebar, then the specific teacher.
 $(document).on("click", ".teacherLanding", function(){
     var timetableId=$(this).attr('timetableId');
     var teacherId=$(this).attr('teacherId');
+    if (dataModal){dataModal.hide()};
 
     //Get sidebar for teachers, when completed, get teacher info, then set active line.
     htmx.ajax('GET', `/getSidebar/teacher/${timetableId}`, "#mainContent").then(() => {
